@@ -11,8 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.trueddd.truetripletwitch.ui.theme.TrueTripleTwitchTheme
+import com.github.trueddd.twitch.TwitchClient
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
+
+    private val twitchClient by inject<TwitchClient>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -22,7 +27,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    Greeting(twitchClient.getMessage())
                 }
             }
         }

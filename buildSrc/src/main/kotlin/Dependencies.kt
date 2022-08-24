@@ -16,6 +16,10 @@ fun DependencyHandlerScope.androidTestImplementation(dependency: Dependency) {
     add("androidTestImplementation", create(dependency.notation))
 }
 
+fun DependencyHandlerScope.ksp(dependency: Dependency) {
+    add("ksp", create(dependency.notation))
+}
+
 sealed class Dependency(val notation: String) {
     sealed class Core(notation: String) : Dependency(notation) {
         object Ktx : Core("androidx.core:core-ktx:1.8.0")
@@ -33,4 +37,10 @@ sealed class Dependency(val notation: String) {
         object RuntimeKtx : Lifecycle("androidx.lifecycle:lifecycle-runtime-ktx:${Versions.Lifecycle}")
     }
     object Junit4 : Dependency("junit:junit:4.13.2")
+    sealed class Koin(notation: String) : Dependency(notation) {
+        object Core : Koin("io.insert-koin:koin-core:${Versions.Koin}")
+        object Android : Koin("io.insert-koin:koin-android:${Versions.Koin}")
+        object Annotations : Koin("io.insert-koin:koin-annotations:${Versions.KoinAnnotations}")
+        object Compiler : Koin("io.insert-koin:koin-ksp-compiler:${Versions.KoinAnnotations}")
+    }
 }

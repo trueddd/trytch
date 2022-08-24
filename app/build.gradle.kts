@@ -1,15 +1,16 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp") version Versions.Ksp
 }
 
 android {
-    compileSdk = 33
+    compileSdk = Config.Android.CompileSdk
 
     defaultConfig {
         applicationId = "com.github.trueddd.truetripletwitch"
-        minSdk = 21
-        targetSdk = 33
+        minSdk = Config.Android.MinSdk
+        targetSdk = Config.Android.TargetSdk
         versionCode = Config.VersionCode
         versionName = Config.Version
 
@@ -22,8 +23,10 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
-//            proguardFiles.add(getDefaultProguardFile("proguard-android-optimize.txt"))
-//            proguardFiles.add("proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -39,6 +42,9 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.3.0"
     }
+//    applicationVariants.all { variant ->
+//        variant.sourceSets.firstOrNull { it.name == "java" }
+//    }
     packagingOptions {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
@@ -47,6 +53,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":twitch"))
     implementation(Dependency.Core.Ktx)
     implementation(Dependency.Compose.Ui)
     implementation(Dependency.Compose.Material3)
@@ -58,5 +65,8 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
     androidTestImplementation(Dependency.Compose.UiTestJunit4)
     debugImplementation(Dependency.Compose.Tooling)
-//    debugImplementation(Dependency.Compose.TestManifest)
+
+    implementation(Dependency.Koin.Android)
+    implementation(Dependency.Koin.Annotations)
+    ksp(Dependency.Koin.Compiler)
 }
