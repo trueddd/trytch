@@ -30,7 +30,6 @@ sealed class Dependency(val notation: String) {
         object Tooling : Compose("androidx.compose.ui:ui-tooling:${Versions.Compose}")
         object ToolingPreview : Compose("androidx.compose.ui:ui-tooling-preview:${Versions.Compose}")
         object Activity : Compose("androidx.activity:activity-compose:${Versions.Activity}")
-        object TestManifest : Compose("androidx.compose.ui:ui-test-manifest:${Versions.Compose}")
         object Material3 : Compose("androidx.compose.material3:material3:1.0.0-alpha16")
     }
     sealed class Lifecycle(notation: String) : Dependency(notation) {
@@ -42,5 +41,18 @@ sealed class Dependency(val notation: String) {
         object Android : Koin("io.insert-koin:koin-android:${Versions.Koin}")
         object Annotations : Koin("io.insert-koin:koin-annotations:${Versions.KoinAnnotations}")
         object Compiler : Koin("io.insert-koin:koin-ksp-compiler:${Versions.KoinAnnotations}")
+    }
+    sealed class Ktor(notation: String) : Dependency(notation) {
+        object Core : Ktor("io.ktor:ktor-client-core:${Versions.Ktor}")
+        object OkHttp : Ktor("io.ktor:ktor-client-okhttp:${Versions.Ktor}")
+        object OkHttpLogging : Ktor("com.squareup.okhttp3:logging-interceptor:4.10.0")
+        object ContentNegotiation : Ktor("io.ktor:ktor-client-content-negotiation:${Versions.Ktor}")
+        object Gson : Ktor("io.ktor:ktor-serialization-gson:${Versions.Ktor}")
+        object Auth : Ktor("io.ktor:ktor-client-auth:${Versions.Ktor}")
+    }
+    sealed class Room(notation: String) : Dependency(notation) {
+        object Core : Room("androidx.room:room-runtime:${Versions.Room}")
+        object Ktx : Room("androidx.room:room-ktx:${Versions.Room}")
+        object Compiler : Room("androidx.room:room-compiler:${Versions.Room}")
     }
 }

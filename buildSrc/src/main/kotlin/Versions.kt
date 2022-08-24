@@ -6,4 +6,6 @@ object Versions {
     const val Ksp = "1.7.10-1.0.6"
     const val Koin = "3.2.0"
     const val KoinAnnotations = "1.0.1"
+    const val Ktor = "2.0.1"
+    const val Room = "2.4.3"
 }

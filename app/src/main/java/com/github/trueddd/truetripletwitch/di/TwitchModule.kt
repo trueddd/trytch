@@ -6,5 +6,5 @@ import org.koin.dsl.module
 
 val twitchModule = module {
 
-    single<TwitchClient> { TwitchClientImpl() }
+    single<TwitchClient> { TwitchClientImpl(context = get()) }
 }
