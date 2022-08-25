@@ -1,67 +1,27 @@
 package com.github.trueddd.twitch
 
-import android.content.Context
 import com.github.trueddd.mylibrary.BuildConfig
 import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.data.UserRequestType
 import com.github.trueddd.twitch.db.TwitchDao
-import com.github.trueddd.twitch.db.TwitchDatabase
 import com.github.trueddd.twitch.dto.TwitchResponse
 import com.github.trueddd.twitch.dto.TwitchTokens
 import com.github.trueddd.twitch.dto.TwitchUser
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.gson.*
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import okhttp3.logging.HttpLoggingInterceptor
+import kotlinx.coroutines.withContext
 
-class TwitchClientImpl(
-    context: Context,
+@OptIn(DelicateCoroutinesApi::class)
+internal class TwitchClientImpl(
+    private val twitchDao: TwitchDao,
+    private val httpClient: HttpClient,
 ) : TwitchClient {
-
-    private val database = TwitchDatabase.create(context)
-    private val twitchDao: TwitchDao
-        get() = database.twitchDao()
-
-    private val httpClient by lazy {
-        HttpClient(OkHttp) {
-            engine { 
-                addInterceptor(
-                    HttpLoggingInterceptor(HttpLoggingInterceptor.Logger.DEFAULT).apply {
-                        level = HttpLoggingInterceptor.Level.BODY
-                    }
-                )
-            }
-            install(ContentNegotiation) {
-                gson {
-                }
-            }
-            install(DefaultRequest) {
-                header(HttpHeaders.ContentType, ContentType.Application.Json)
-            }
-//            install(Auth) {
-//                bearer {
-//                    loadTokens { twitchDao.getUserToken()?.let { BearerTokens(it, "") } }
-//                    refreshTokens {
-//                        try {
-//                            client.post("https://id.twitch.tv/oauth2/token") {
-//                                contentType(ContentType.Application.FormUrlEncoded)
-//
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-        }
-    }
 
     override val userFlow: StateFlow<User?>
         get() = twitchDao.getUserFlow().stateIn(GlobalScope, SharingStarted.Lazily, null)
@@ -99,6 +59,7 @@ class TwitchClientImpl(
                         header(HttpHeaders.Authorization, "Bearer ${userRequestType.value}")
                     }
                 }
+                header(SKIP_AUTH_HEADER, true)
                 header("Client-Id", BuildConfig.twitchClientId)
             }.body<TwitchResponse<List<TwitchUser>>>().data.firstOrNull()
         } catch (e: Exception) {
@@ -110,6 +71,7 @@ class TwitchClientImpl(
     private suspend fun validateToken(accessToken: String): TwitchTokens? {
         return try {
             httpClient.get(Url("https://id.twitch.tv/oauth2/validate")) {
+                header(SKIP_AUTH_HEADER, true)
                 header(HttpHeaders.Authorization, "OAuth $accessToken")
             }.body<TwitchTokens>()
         } catch (e: Exception) {
@@ -118,16 +80,14 @@ class TwitchClientImpl(
         }
     }
 
-    override fun login(accessToken: String): Flow<Unit> {
-        return flow<Unit> {
-            val twitchTokens = validateToken(accessToken) ?: return@flow
-            val twitchUser = getTwitchUser(UserRequestType.Token(accessToken)) ?: return@flow
-            twitchDao.insertUserInfo(twitchUser.toUser(), twitchTokens.toTokens(accessToken))
-        }.flowOn(Dispatchers.IO)
-    }
+    override fun login(accessToken: String) = flow<Unit> {
+        val twitchTokens = validateToken(accessToken) ?: return@flow
+        val twitchUser = getTwitchUser(UserRequestType.Token(accessToken)) ?: return@flow
+        twitchDao.insertUserInfo(twitchUser.toUser(), twitchTokens.toTokens(accessToken))
+    }.flowOn(Dispatchers.IO)
 
-    override fun logout() {
-        GlobalScope.launch(Dispatchers.IO) {
+    override fun logout() = flow<Unit> {
+        withContext(Dispatchers.IO) {
             twitchDao.deleteUser()
         }
     }

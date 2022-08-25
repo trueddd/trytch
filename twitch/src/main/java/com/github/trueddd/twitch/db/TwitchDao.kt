@@ -35,13 +35,11 @@ interface TwitchDao {
     @Query("delete from tokens")
     suspend fun deleteTokens()
 
-    // fixme: Foreign key constraint fail
     @Transaction
     suspend fun insertUserInfo(user: User, tokens: Tokens) {
-        deleteTokens()
         deleteUser()
         insertUser(user)
-        upsertToken(tokens)
+        insertUserToken(tokens)
     }
 
     @Transaction
