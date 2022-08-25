@@ -69,4 +69,6 @@ dependencies {
     implementation(Dependency.Koin.Android)
     implementation(Dependency.Koin.Annotations)
     ksp(Dependency.Koin.Compiler)
+
+    implementation(Dependency.Coil)
 }

@@ -1,6 +1,7 @@
 package com.github.trueddd.twitch.db
 
 import androidx.room.*
+import com.github.trueddd.twitch.data.Stream
 import com.github.trueddd.twitch.data.Tokens
 import com.github.trueddd.twitch.data.User
 import kotlinx.coroutines.flow.Flow
@@ -48,5 +49,20 @@ interface TwitchDao {
             null -> insertUserToken(tokens)
             else -> updateUserToken(tokens)
         }
+    }
+
+    @Insert
+    suspend fun insertStreams(streams: List<Stream>)
+
+    @Query("delete from streams")
+    suspend fun deleteStreams()
+
+    @Query("select * from streams")
+    fun getStreamsFlow(): Flow<List<Stream>>
+
+    @Transaction
+    suspend fun upsertStreams(streams: List<Stream>) {
+        deleteStreams()
+        insertStreams(streams)
     }
 }

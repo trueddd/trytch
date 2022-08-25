@@ -2,6 +2,9 @@ package com.github.trueddd.truetripletwitch.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -9,12 +12,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.trueddd.truetripletwitch.ui.MainScreenState
+import com.github.trueddd.twitch.data.Stream
 
 @Composable
 fun Toolbar(
@@ -71,6 +76,54 @@ fun Toolbar(
     }
 }
 
+@Preview(
+    widthDp = 720,
+    heightDp = 260,
+)
+@Composable
+fun Stream(@PreviewParameter(StreamParameters::class) stream: Stream) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .clip(RoundedCornerShape(8.dp))
+            .fillMaxWidth()
+    ) {
+//        AsyncImage(
+//            model = stream.thumbnailUrl,
+//            contentDescription = "${stream.userName} stream thumbnail",
+//            contentScale = ContentScale.Crop,
+//            modifier = Modifier
+//                .fillMaxHeight()
+//                .background(MaterialTheme.colorScheme.primaryContainer)
+//                .aspectRatio(16f/9)
+//        )
+        Column() {
+            Text(
+                text = stream.title,
+                fontSize = 14.sp
+            )
+            Text(
+                text = stream.userName,
+                fontSize = 14.sp
+            )
+        }
+    }
+}
+
+// todo
+@Composable
+fun Streams(
+    streams: List<Stream>,
+) {
+    LazyColumn(
+    ) {
+        items(streams) { stream ->
+            Stream(stream = stream)
+        }
+    }
+}
+
 @Preview
 @Composable
 fun MainScreen(
@@ -85,10 +138,18 @@ fun MainScreen(
             .background(color = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Toolbar(state, onLoginButtonClicked, onLogoutButtonClicked)
+        if (state.user != null) {
+            Streams(streams = state.streams)
+        }
     }
 }
 
 class MainScreenStateParameters : PreviewParameterProvider<MainScreenState> {
     override val values: Sequence<MainScreenState>
         get() = sequenceOf(MainScreenState.test())
+}
+
+class StreamParameters : PreviewParameterProvider<Stream> {
+    override val values: Sequence<Stream>
+        get() = sequenceOf(Stream.test())
 }

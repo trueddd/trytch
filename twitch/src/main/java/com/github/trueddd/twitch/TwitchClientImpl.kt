@@ -1,21 +1,18 @@
 package com.github.trueddd.twitch
 
+import android.util.Log
 import com.github.trueddd.mylibrary.BuildConfig
 import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.data.UserRequestType
 import com.github.trueddd.twitch.db.TwitchDao
-import com.github.trueddd.twitch.dto.TwitchResponse
-import com.github.trueddd.twitch.dto.TwitchTokens
-import com.github.trueddd.twitch.dto.TwitchUser
+import com.github.trueddd.twitch.dto.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.withContext
 
 @OptIn(DelicateCoroutinesApi::class)
 internal class TwitchClientImpl(
@@ -91,4 +88,33 @@ internal class TwitchClientImpl(
             twitchDao.deleteUser()
         }
     }
+
+    private suspend fun loadFollowedStreams(userId: String): List<TwitchStream>? {
+        return try {
+            httpClient.get(Url("https://api.twitch.tv/helix/streams/followed")) {
+                parameter("user_id", userId)
+                // todo: move to default header
+                header("Client-Id", BuildConfig.twitchClientId)
+            }.body<PaginatedTwitchResponse<List<TwitchStream>>>().data
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    override fun getFollowedStreams() = channelFlow {
+        Log.d("TwitchClient", "Started streams loading")
+        val updateJob = GlobalScope.launch(Dispatchers.IO) {
+            userFlow.mapNotNull { it }.firstOrNull()?.id?.let { userId ->
+                Log.d("TwitchClient", "Fetching streams for $userId")
+                loadFollowedStreams(userId)
+                    ?.map { it.toStream(userId) }
+                    ?.let { twitchDao.upsertStreams(it) }
+            }
+        }
+        twitchDao.getStreamsFlow().collect { send(it) }
+        awaitClose {
+            updateJob.cancel()
+        }
+    }.flowOn(Dispatchers.IO)
 }

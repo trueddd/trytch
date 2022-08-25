@@ -37,7 +37,7 @@ internal fun createHttpClient(twitchDao: TwitchDao): HttpClient {
         install(Auth) {
             bearer {
                 loadTokens { twitchDao.getUserToken()?.let { BearerTokens(it, "") } }
-                sendWithoutRequest { it.headers.contains(SKIP_AUTH_HEADER) }
+                sendWithoutRequest { !it.headers.contains(SKIP_AUTH_HEADER) }
             }
         }
     }

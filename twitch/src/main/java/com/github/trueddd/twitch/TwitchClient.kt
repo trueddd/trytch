@@ -1,6 +1,7 @@
 package com.github.trueddd.twitch
 
 import android.content.Context
+import com.github.trueddd.twitch.data.Stream
 import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.db.TwitchDatabase
 import kotlinx.coroutines.flow.Flow
@@ -25,4 +26,6 @@ interface TwitchClient {
     fun login(accessToken: String): Flow<Unit>
 
     fun logout(): Flow<Unit>
+
+    fun getFollowedStreams(): Flow<List<Stream>>
 }

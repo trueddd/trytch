@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import com.github.trueddd.twitch.data.Stream
 import com.github.trueddd.twitch.data.Tokens
 import com.github.trueddd.twitch.data.User
 
@@ -11,8 +13,12 @@ import com.github.trueddd.twitch.data.User
     entities = [
         User::class,
         Tokens::class,
+        Stream::class,
     ],
-    version = 2,
+    version = 3,
+)
+@TypeConverters(
+    TwitchStreamTagsConverter::class,
 )
 abstract class TwitchDatabase : RoomDatabase() {
 

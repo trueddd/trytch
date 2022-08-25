@@ -55,4 +55,5 @@ sealed class Dependency(val notation: String) {
         object Ktx : Room("androidx.room:room-ktx:${Versions.Room}")
         object Compiler : Room("androidx.room:room-compiler:${Versions.Room}")
     }
+    object Coil : Dependency("io.coil-kt:coil-compose:2.2.0")
 }
