@@ -33,6 +33,19 @@ data class Stream(
     val followedByUserId: String,
 ) {
 
+    val shortenedViewerCount: String
+        get() = when (viewerCount) {
+            in 1_000_000 .. Int.MAX_VALUE -> String.format("%.1fM", viewerCount / 1_000_000f)
+            in 1_000 .. 999_999 -> String.format("%.1fK", viewerCount / 1_000f)
+            else -> "$viewerCount"
+        }
+
+    val viewerCountPlural: String
+        get() = when (viewerCount) {
+            1 -> "viewer"
+            else -> "viewers"
+        }
+
     companion object {
         fun test() = Stream(
             id = "123",

@@ -12,7 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.github.trueddd.truetripletwitch.ui.MainViewModel
-import com.github.trueddd.truetripletwitch.ui.screens.MainScreen
+import com.github.trueddd.truetripletwitch.ui.screens.main.MainScreen
 import com.github.trueddd.truetripletwitch.ui.theme.TrueTripleTwitchTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            TrueTripleTwitchTheme {
+            TrueTripleTwitchTheme(dynamicColor = false) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
