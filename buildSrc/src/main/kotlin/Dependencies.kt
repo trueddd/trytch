@@ -23,6 +23,7 @@ fun DependencyHandlerScope.ksp(dependency: Dependency) {
 sealed class Dependency(val notation: String) {
     sealed class Core(notation: String) : Dependency(notation) {
         object Ktx : Core("androidx.core:core-ktx:1.8.0")
+        object AppCompat : Core("androidx.appcompat:appcompat:1.5.0")
     }
     sealed class Compose(notation: String) : Dependency(notation) {
         object Ui : Compose("androidx.compose.ui:ui:${Versions.Compose}")
@@ -56,4 +57,7 @@ sealed class Dependency(val notation: String) {
         object Compiler : Room("androidx.room:room-compiler:${Versions.Room}")
     }
     object Coil : Dependency("io.coil-kt:coil-compose:2.2.0")
+    sealed class Navigation(notation: String) : Dependency(notation) {
+        object Appyx : Navigation("com.bumble.appyx:core:1.0-alpha06")
+    }
 }

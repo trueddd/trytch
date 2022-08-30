@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp") version Versions.Ksp
+    id("kotlin-parcelize")
 }
 
 android {
@@ -55,6 +56,7 @@ android {
 dependencies {
     implementation(project(":twitch"))
     implementation(Dependency.Core.Ktx)
+    implementation(Dependency.Core.AppCompat)
     implementation(Dependency.Compose.Ui)
     implementation(Dependency.Compose.Material3)
     implementation(Dependency.Compose.ToolingPreview)
@@ -71,4 +73,5 @@ dependencies {
     ksp(Dependency.Koin.Compiler)
 
     implementation(Dependency.Coil)
+    implementation(Dependency.Navigation.Appyx)
 }

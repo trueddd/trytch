@@ -1,46 +1,47 @@
 package com.github.trueddd.truetripletwitch
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import com.github.trueddd.truetripletwitch.ui.MainViewModel
-import com.github.trueddd.truetripletwitch.ui.screens.main.MainScreen
+import com.bumble.appyx.core.integration.NodeFactory
+import com.bumble.appyx.core.integration.NodeHost
+import com.bumble.appyx.core.integrationpoint.LocalIntegrationPoint
+import com.bumble.appyx.core.integrationpoint.NodeActivity
+import com.bumble.appyx.core.modality.BuildContext
+import com.github.trueddd.truetripletwitch.di.ViewModelFactory
+import com.github.trueddd.truetripletwitch.ui.navigation.RootNode
 import com.github.trueddd.truetripletwitch.ui.theme.TrueTripleTwitchTheme
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainActivity : ComponentActivity() {
+class MainActivity : NodeActivity() {
 
-    private val viewModel by viewModel<MainViewModel>()
+    private val rootNode = RootNode(
+        buildContext = BuildContext.root(null),
+        viewModelFactory = ViewModelFactory(this)
+    )
 
-    private fun login() {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(viewModel.getLinkForLogin())
-        }
-        startActivity(intent)
-    }
+    private val nodeFactory = NodeFactory { rootNode }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            TrueTripleTwitchTheme(dynamicColor = false) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val state by viewModel.stateFlow.collectAsState()
-                    MainScreen(
-                        state = state,
-                        onLoginButtonClicked = ::login,
-                        onLogoutButtonClicked = { viewModel.logout() },
-                    )
+            CompositionLocalProvider(
+                LocalIntegrationPoint provides integrationPoint
+            ) {
+                TrueTripleTwitchTheme(dynamicColor = false) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        NodeHost(
+                            integrationPoint = LocalIntegrationPoint.current,
+                            factory = nodeFactory,
+                        )
+                    }
                 }
             }
         }
@@ -48,13 +49,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        val twitchUri = intent?.data ?: return
-        val fragment = twitchUri.fragment ?: return
-        val response = fragment.split("&")
-            .associate { it.split("=").let { (name, value) -> name to value } }
-        if (response["state"] == viewModel.authState) {
-            val accessToken = response["access_token"] ?: return
-            viewModel.login(accessToken)
-        }
+        intent?.let { rootNode.onNewIntent(it) }
     }
 }
