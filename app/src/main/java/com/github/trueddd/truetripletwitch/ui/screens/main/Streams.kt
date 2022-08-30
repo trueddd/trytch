@@ -1,6 +1,7 @@
 package com.github.trueddd.truetripletwitch.ui.screens.main
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -71,7 +72,8 @@ fun StreamInfo(value: String) {
 @Composable
 fun Stream(
     @PreviewParameter(StreamParameters::class)
-    stream: Stream
+    stream: Stream,
+    onStreamClicked: (Stream) -> Unit = {},
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -79,6 +81,7 @@ fun Stream(
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.inversePrimary)
+            .clickable { onStreamClicked(stream) }
     ) {
         Box(
             modifier = Modifier
@@ -126,13 +129,17 @@ fun Stream(
 @Composable
 fun Streams(
     streams: List<Stream>,
+    onStreamClicked: (Stream) -> Unit,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(streams) { stream ->
-            Stream(stream = stream)
+            Stream(
+                stream = stream,
+                onStreamClicked = onStreamClicked,
+            )
         }
     }
 }

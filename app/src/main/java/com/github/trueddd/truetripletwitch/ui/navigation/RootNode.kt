@@ -11,19 +11,20 @@ import com.bumble.appyx.core.node.ParentNode
 import com.bumble.appyx.navmodel.backstack.BackStack
 import com.github.trueddd.truetripletwitch.di.ViewModelFactory
 import com.github.trueddd.truetripletwitch.ui.screens.main.MainScreen
+import com.github.trueddd.truetripletwitch.ui.screens.stream.StreamScreen
 
 class RootNode(
-    private val backStack: BackStack<Routing> = BackStack(
-        initialElement = Routing.Main,
-        savedStateMap = null
-    ),
     buildContext: BuildContext,
     private val viewModelFactory: ViewModelFactory,
-) : ParentNode<Routing>(navModel = backStack, buildContext), IntentHandler {
+    private val backStack: BackStack<Routing> = BackStack(
+        initialElement = Routing.Main,
+        savedStateMap = buildContext.savedStateMap,
+    ),
+) : ParentNode<Routing>(backStack, buildContext), IntentHandler {
 
     override fun resolve(routing: Routing, buildContext: BuildContext) = when (routing) {
-        is Routing.Main -> MainScreen(buildContext, viewModelFactory.create())
-        is Routing.Stream -> TODO()
+        is Routing.Main -> MainScreen(viewModelFactory.create(), backStack, buildContext)
+        is Routing.Stream -> StreamScreen(routing.streamId, buildContext)
     }
 
     @Composable

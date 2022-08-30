@@ -15,13 +15,18 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
+import com.bumble.appyx.navmodel.backstack.BackStack
+import com.bumble.appyx.navmodel.backstack.operation.push
 import com.github.trueddd.truetripletwitch.ui.MainScreenState
 import com.github.trueddd.truetripletwitch.ui.MainViewModel
 import com.github.trueddd.truetripletwitch.ui.navigation.IntentHandler
+import com.github.trueddd.truetripletwitch.ui.navigation.Routing
+import com.github.trueddd.twitch.data.Stream
 
 class MainScreen(
-    buildContext: BuildContext,
     private val mainViewModel: MainViewModel,
+    private val backStack: BackStack<Routing>,
+    buildContext: BuildContext,
 ) : Node(buildContext), IntentHandler {
 
     private fun login() {
@@ -43,6 +48,7 @@ class MainScreen(
             state = state,
             onLoginButtonClicked = ::login,
             onLogoutButtonClicked = { mainViewModel.logout() },
+            onStreamClicked = { backStack.push(Routing.Stream(it.id)) }
         )
     }
 }
@@ -54,6 +60,7 @@ private fun MainScreen(
     state: MainScreenState,
     onLoginButtonClicked: () -> Unit = {},
     onLogoutButtonClicked: () -> Unit = {},
+    onStreamClicked: (Stream) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -62,7 +69,10 @@ private fun MainScreen(
     ) {
         Toolbar(state, onLoginButtonClicked, onLogoutButtonClicked)
         if (state.user != null) {
-            Streams(streams = state.streams)
+            Streams(
+                streams = state.streams,
+                onStreamClicked = onStreamClicked,
+            )
         }
     }
 }
