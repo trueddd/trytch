@@ -8,4 +8,5 @@ object Versions {
     const val KoinAnnotations = "1.0.1"
     const val Ktor = "2.0.1"
     const val Room = "2.4.3"
+    const val ExoPlayer = "2.18.1"
 }

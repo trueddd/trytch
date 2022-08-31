@@ -12,7 +12,7 @@ import com.bumble.appyx.core.integration.NodeHost
 import com.bumble.appyx.core.integrationpoint.LocalIntegrationPoint
 import com.bumble.appyx.core.integrationpoint.NodeActivity
 import com.github.trueddd.truetripletwitch.di.ViewModelFactory
-import com.github.trueddd.truetripletwitch.ui.navigation.RootNode
+import com.github.trueddd.truetripletwitch.navigation.RootNode
 import com.github.trueddd.truetripletwitch.ui.theme.TrueTripleTwitchTheme
 
 class MainActivity : NodeActivity() {

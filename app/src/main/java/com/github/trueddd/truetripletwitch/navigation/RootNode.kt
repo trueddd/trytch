@@ -1,4 +1,4 @@
-package com.github.trueddd.truetripletwitch.ui.navigation
+package com.github.trueddd.truetripletwitch.navigation
 
 import android.content.Intent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +12,7 @@ import com.bumble.appyx.navmodel.backstack.BackStack
 import com.github.trueddd.truetripletwitch.di.ViewModelFactory
 import com.github.trueddd.truetripletwitch.ui.screens.main.MainScreen
 import com.github.trueddd.truetripletwitch.ui.screens.stream.StreamScreen
+import org.koin.core.parameter.parametersOf
 
 class RootNode(
     buildContext: BuildContext,
@@ -24,7 +25,7 @@ class RootNode(
 
     override fun resolve(routing: Routing, buildContext: BuildContext) = when (routing) {
         is Routing.Main -> MainScreen(viewModelFactory.create(), backStack, buildContext)
-        is Routing.Stream -> StreamScreen(routing.streamId, buildContext)
+        is Routing.Stream -> StreamScreen(viewModelFactory.create { parametersOf(routing.streamId) }, buildContext)
     }
 
     @Composable

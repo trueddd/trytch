@@ -1,4 +1,4 @@
-package com.github.trueddd.truetripletwitch.ui.navigation
+package com.github.trueddd.truetripletwitch.navigation
 
 import android.content.Intent
 

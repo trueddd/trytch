@@ -17,10 +17,8 @@ import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
 import com.bumble.appyx.navmodel.backstack.BackStack
 import com.bumble.appyx.navmodel.backstack.operation.push
-import com.github.trueddd.truetripletwitch.ui.MainScreenState
-import com.github.trueddd.truetripletwitch.ui.MainViewModel
-import com.github.trueddd.truetripletwitch.ui.navigation.IntentHandler
-import com.github.trueddd.truetripletwitch.ui.navigation.Routing
+import com.github.trueddd.truetripletwitch.navigation.IntentHandler
+import com.github.trueddd.truetripletwitch.navigation.Routing
 import com.github.trueddd.twitch.data.Stream
 
 class MainScreen(

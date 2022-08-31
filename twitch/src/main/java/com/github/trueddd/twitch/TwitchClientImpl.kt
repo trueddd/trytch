@@ -117,4 +117,19 @@ internal class TwitchClientImpl(
             updateJob.cancel()
         }
     }.flowOn(Dispatchers.IO)
+
+    override fun getStreamVideoInfo(streamId: String) = flow {
+        val stream = twitchDao.getStreamById(streamId) ?: run {
+            emit(emptyMap())
+            return@flow
+        }
+        try {
+            httpClient.get(Url("https://pwn.sh/tools/streamapi.py")) {
+                parameter("url", "twitch.tv/${stream.userName}")
+            }.body<TwitchStreamVideoInfo>().urls.let { emit(it) }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(emptyMap())
+        }
+    }.flowOn(Dispatchers.IO)
 }

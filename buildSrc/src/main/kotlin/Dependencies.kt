@@ -60,4 +60,8 @@ sealed class Dependency(val notation: String) {
     sealed class Navigation(notation: String) : Dependency(notation) {
         object Appyx : Navigation("com.bumble.appyx:core:1.0-alpha06")
     }
+    sealed class VideoPlayer(notation: String) : Dependency(notation) {
+        object Core : VideoPlayer("com.google.android.exoplayer:exoplayer:${Versions.ExoPlayer}")
+        object Hls : VideoPlayer("com.google.android.exoplayer:exoplayer-hls:${Versions.ExoPlayer}")
+    }
 }

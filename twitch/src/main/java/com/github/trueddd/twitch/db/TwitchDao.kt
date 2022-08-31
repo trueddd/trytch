@@ -60,6 +60,9 @@ interface TwitchDao {
     @Query("select * from streams")
     fun getStreamsFlow(): Flow<List<Stream>>
 
+    @Query("select * from streams where id = :id limit 1")
+    suspend fun getStreamById(id: String): Stream?
+
     @Transaction
     suspend fun upsertStreams(streams: List<Stream>) {
         deleteStreams()

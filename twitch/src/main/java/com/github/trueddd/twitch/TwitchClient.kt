@@ -28,4 +28,6 @@ interface TwitchClient {
     fun logout(): Flow<Unit>
 
     fun getFollowedStreams(): Flow<List<Stream>>
+
+    fun getStreamVideoInfo(streamId: String): Flow<Map<String, String>>
 }

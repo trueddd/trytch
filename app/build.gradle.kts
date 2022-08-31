@@ -74,4 +74,7 @@ dependencies {
 
     implementation(Dependency.Coil)
     implementation(Dependency.Navigation.Appyx)
+
+    implementation(Dependency.VideoPlayer.Core)
+    implementation(Dependency.VideoPlayer.Hls)
 }
