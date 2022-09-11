@@ -1,6 +1,5 @@
 package com.github.trueddd.twitch
 
-import android.content.Context
 import com.github.trueddd.twitch.data.Stream
 import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.db.TwitchDatabase
@@ -10,8 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface TwitchClient {
 
     companion object {
-        fun create(context: Context): TwitchClient {
-            val database = TwitchDatabase.create(context)
+        fun create(database: TwitchDatabase): TwitchClient {
             return TwitchClientImpl(
                 twitchDao = database.twitchDao(),
                 httpClient = createHttpClient(database.twitchDao()),
@@ -29,5 +27,5 @@ interface TwitchClient {
 
     fun getFollowedStreams(): Flow<List<Stream>>
 
-    fun getStreamVideoInfo(streamId: String): Flow<Map<String, String>>
+    fun getStreamVideoInfo(channel: String): Flow<Map<String, String>>
 }

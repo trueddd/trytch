@@ -10,7 +10,14 @@ val appModule = module {
 
     factory { MainViewModel(twitchClient = get()) }
 
-    factory { (streamId: String) -> StreamViewModel(streamId, twitchClient = get(), player = get()) }
+    factory { (channel: String) ->
+        StreamViewModel(
+            channel,
+            twitchClient = get(),
+            player = get(),
+            chatManager = get(),
+        )
+    }
 
     single {
         ExoPlayer.Builder(get())

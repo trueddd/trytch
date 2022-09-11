@@ -63,6 +63,9 @@ interface TwitchDao {
     @Query("select * from streams where id = :id limit 1")
     suspend fun getStreamById(id: String): Stream?
 
+    @Query("select * from streams where userName = :channel limit 1")
+    suspend fun getStreamByUserName(channel: String): Stream?
+
     @Transaction
     suspend fun upsertStreams(streams: List<Stream>) {
         deleteStreams()

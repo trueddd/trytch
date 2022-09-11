@@ -52,6 +52,7 @@ dependencies {
     implementation(Dependency.Ktor.ContentNegotiation)
     implementation(Dependency.Ktor.Gson)
     implementation(Dependency.Ktor.Auth)
+    implementation("com.github.twitch4j:twitch4j:1.11.0")
 
     implementation(Dependency.Room.Core)
     implementation(Dependency.Room.Ktx)

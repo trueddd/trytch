@@ -118,8 +118,8 @@ internal class TwitchClientImpl(
         }
     }.flowOn(Dispatchers.IO)
 
-    override fun getStreamVideoInfo(streamId: String) = flow {
-        val stream = twitchDao.getStreamById(streamId) ?: run {
+    override fun getStreamVideoInfo(channel: String) = flow {
+        val stream = twitchDao.getStreamById(channel) ?: run {
             emit(emptyMap())
             return@flow
         }

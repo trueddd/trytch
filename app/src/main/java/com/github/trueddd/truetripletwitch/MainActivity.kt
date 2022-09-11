@@ -2,7 +2,6 @@ package com.github.trueddd.truetripletwitch
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -13,10 +12,12 @@ import androidx.lifecycle.lifecycleScope
 import com.bumble.appyx.core.integration.NodeHost
 import com.bumble.appyx.core.integrationpoint.LocalIntegrationPoint
 import com.bumble.appyx.core.integrationpoint.NodeActivity
-import com.github.trueddd.truetripletwitch.di.NodeViewModelStore
 import com.github.trueddd.truetripletwitch.navigation.RootNode
+import com.github.trueddd.truetripletwitch.navigation.activeNodesFlow
+import com.github.trueddd.truetripletwitch.navigation.disposeViewModels
+import com.github.trueddd.truetripletwitch.navigation.handleWindowRotations
 import com.github.trueddd.truetripletwitch.ui.theme.TrueTripleTwitchTheme
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.launchIn
 import org.koin.android.ext.android.get
 
 class MainActivity : NodeActivity() {
@@ -28,24 +29,9 @@ class MainActivity : NodeActivity() {
         }
 
     private fun setupNavigationListener(rootNode: RootNode) {
-        val viewModelStore = get<NodeViewModelStore>()
-        var lastItem = rootNode.backStack.elements.value.map { it.key.routing.name }
-        rootNode.backStack.elements
-            .map { elements -> elements.map { it.key.routing.name } }
-            .distinctUntilChanged()
-            .onEach { nodes ->
-                Log.d("RootNode", "Nodes change: previous($lastItem), new($nodes)")
-                val left = lastItem - nodes.toSet()
-                lastItem = nodes
-                if (left.isEmpty()) {
-                    return@onEach
-                }
-                Log.d("RootNode", "VMs to clear: $left; Store keys: ${viewModelStore.keys}")
-                left.forEach {
-                    viewModelStore[it]?.release()
-                    viewModelStore.remove(it)
-                }
-            }
+        rootNode.activeNodesFlow()
+            .disposeViewModels(viewModelStore = get())
+            .handleWindowRotations(window)
             .launchIn(lifecycleScope)
     }
 

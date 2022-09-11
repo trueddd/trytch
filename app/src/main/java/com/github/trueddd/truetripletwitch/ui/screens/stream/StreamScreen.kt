@@ -1,7 +1,6 @@
 package com.github.trueddd.truetripletwitch.ui.screens.stream
 
 import android.content.res.Configuration
-import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +41,6 @@ fun Player(player: ExoPlayer) {
                 hideController()
                 useController = false
                 resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-                layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
                 this.player = player
             }
         },
@@ -77,11 +75,6 @@ fun StreamScreen(
             if (state.streamUri != null) {
                 Player(player)
             }
-            Text(
-                text = state.streamId,
-                modifier = Modifier
-                    .align(Alignment.Center)
-            )
         }
     }
 }

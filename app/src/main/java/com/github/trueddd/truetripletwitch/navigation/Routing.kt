@@ -16,5 +16,5 @@ sealed class Routing(val name: String) : Parcelable {
     object Main : Routing(Keys.MAIN)
 
     @Parcelize
-    class Stream(val streamId: String) : Routing(Keys.STREAM)
+    class Stream(val channel: String) : Routing(Keys.STREAM)
 }

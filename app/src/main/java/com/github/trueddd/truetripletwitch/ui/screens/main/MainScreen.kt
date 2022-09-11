@@ -46,7 +46,7 @@ class MainScreen(
             state = state,
             onLoginButtonClicked = ::login,
             onLogoutButtonClicked = { mainViewModel.logout() },
-            onStreamClicked = { backStack.push(Routing.Stream(it.id)) }
+            onStreamClicked = { backStack.push(Routing.Stream(it.userName)) }
         )
     }
 }

@@ -25,7 +25,7 @@ class RootNode(
 
     override fun resolve(routing: Routing, buildContext: BuildContext) = when (routing) {
         is Routing.Main -> MainScreen(viewModel(Routing.Companion.Keys.MAIN), backStack, buildContext)
-        is Routing.Stream -> StreamScreen(viewModel(Routing.Companion.Keys.STREAM) { parametersOf(routing.streamId) }, buildContext)
+        is Routing.Stream -> StreamScreen(viewModel(Routing.Companion.Keys.STREAM) { parametersOf(routing.channel) }, buildContext)
     }
 
     @Composable
