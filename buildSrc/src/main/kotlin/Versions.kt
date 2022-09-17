@@ -9,4 +9,5 @@ object Versions {
     const val Ktor = "2.0.1"
     const val Room = "2.4.3"
     const val ExoPlayer = "2.18.1"
+    const val Accompanist = "0.26.3-beta"
 }

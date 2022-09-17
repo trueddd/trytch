@@ -3,6 +3,9 @@ package com.github.trueddd.truetripletwitch.ui.screens.stream
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,10 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
 import com.github.trueddd.truetripletwitch.ui.modifyIf
+import com.github.trueddd.twitch.data.ChatStatus
+import com.google.accompanist.flowlayout.FlowRow
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.StyledPlayerView
@@ -74,6 +80,50 @@ fun StreamScreen(
         ) {
             if (state.streamUri != null) {
                 Player(player)
+            }
+        }
+        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Chat(state.chatStatus)
+        }
+    }
+}
+
+@Composable
+fun Chat(
+    chatStatus: ChatStatus,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        if (chatStatus is ChatStatus.Connecting) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(48.dp)
+            )
+        }
+        if (chatStatus is ChatStatus.Disconnected) {
+            Text(
+                text = chatStatus.error?.message ?: "QWE",
+                modifier = Modifier
+                    .align(Alignment.Center)
+            )
+        }
+        if (chatStatus is ChatStatus.Connected) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                items(chatStatus.messages) {
+                    FlowRow(mainAxisSpacing = 2.dp) {
+                        Text(text = it.author)
+                        // fixme: remove split logic from UI
+                        it.content.split(Regex("\\s+")).forEach { messageWord ->
+                            Text(text = messageWord)
+                        }
+                    }
+                }
             }
         }
     }

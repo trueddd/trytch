@@ -52,7 +52,7 @@ dependencies {
     implementation(Dependency.Ktor.ContentNegotiation)
     implementation(Dependency.Ktor.Gson)
     implementation(Dependency.Ktor.Auth)
-    implementation("com.github.twitch4j:twitch4j:1.11.0")
+    implementation(files(projectDir.resolve("libs").resolve("tmik-jvm-0.1.3.jar")))
 
     implementation(Dependency.Room.Core)
     implementation(Dependency.Room.Ktx)

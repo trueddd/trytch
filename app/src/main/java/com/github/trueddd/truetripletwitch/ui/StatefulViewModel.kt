@@ -1,6 +1,8 @@
 package com.github.trueddd.truetripletwitch.ui
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -17,5 +19,7 @@ abstract class StatefulViewModel<S> : ViewModel() {
         _stateFlow.update(modifyBlock)
     }
 
-    open fun release() {}
+    open fun release() {
+        viewModelScope.cancel()
+    }
 }

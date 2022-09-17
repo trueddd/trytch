@@ -1,4 +1,4 @@
-package com.github.trueddd.twitch
+package com.github.trueddd.twitch.chat
 
 import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.db.TwitchDatabase

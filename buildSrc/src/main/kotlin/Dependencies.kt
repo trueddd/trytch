@@ -32,6 +32,7 @@ sealed class Dependency(val notation: String) {
         object ToolingPreview : Compose("androidx.compose.ui:ui-tooling-preview:${Versions.Compose}")
         object Activity : Compose("androidx.activity:activity-compose:${Versions.Activity}")
         object Material3 : Compose("androidx.compose.material3:material3:1.0.0-alpha16")
+        object FlowLayout : Compose("com.google.accompanist:accompanist-flowlayout:${Versions.Accompanist}")
     }
     sealed class Lifecycle(notation: String) : Dependency(notation) {
         object RuntimeKtx : Lifecycle("androidx.lifecycle:lifecycle-runtime-ktx:${Versions.Lifecycle}")

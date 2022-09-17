@@ -65,6 +65,7 @@ dependencies {
     implementation(Dependency.Compose.ToolingPreview)
     implementation(Dependency.Lifecycle.RuntimeKtx)
     implementation(Dependency.Compose.Activity)
+    implementation(Dependency.Compose.FlowLayout)
     testImplementation(Dependency.Junit4)
     androidTestImplementation("androidx.test.ext:junit:1.1.3")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")

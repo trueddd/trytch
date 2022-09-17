@@ -1,6 +1,6 @@
 package com.github.trueddd.truetripletwitch.di
 
-import com.github.trueddd.twitch.ChatManager
+import com.github.trueddd.twitch.chat.ChatManager
 import com.github.trueddd.twitch.TwitchClient
 import com.github.trueddd.twitch.db.TwitchDatabase
 import org.koin.dsl.module

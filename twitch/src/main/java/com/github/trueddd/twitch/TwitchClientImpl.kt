@@ -20,6 +20,10 @@ internal class TwitchClientImpl(
     private val httpClient: HttpClient,
 ) : TwitchClient {
 
+    companion object {
+        const val TAG = "TwitchClient"
+    }
+
     override val userFlow: StateFlow<User?>
         get() = twitchDao.getUserFlow().stateIn(GlobalScope, SharingStarted.Lazily, null)
 
@@ -103,10 +107,10 @@ internal class TwitchClientImpl(
     }
 
     override fun getFollowedStreams() = channelFlow {
-        Log.d("TwitchClient", "Started streams loading")
+        Log.d(TAG, "Started streams loading")
         val updateJob = GlobalScope.launch(Dispatchers.IO) {
             userFlow.mapNotNull { it }.firstOrNull()?.id?.let { userId ->
-                Log.d("TwitchClient", "Fetching streams for $userId")
+                Log.d(TAG, "Fetching streams for $userId")
                 loadFollowedStreams(userId)
                     ?.map { it.toStream(userId) }
                     ?.let { twitchDao.upsertStreams(it) }
@@ -119,7 +123,8 @@ internal class TwitchClientImpl(
     }.flowOn(Dispatchers.IO)
 
     override fun getStreamVideoInfo(channel: String) = flow {
-        val stream = twitchDao.getStreamById(channel) ?: run {
+        val stream = twitchDao.getStreamByUserName(channel) ?: run {
+            Log.d(TAG, "No stream found for $channel")
             emit(emptyMap())
             return@flow
         }
