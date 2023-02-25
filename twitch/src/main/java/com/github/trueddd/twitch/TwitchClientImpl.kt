@@ -61,7 +61,6 @@ internal class TwitchClientImpl(
                     }
                 }
                 header(SKIP_AUTH_HEADER, true)
-                header("Client-Id", BuildConfig.twitchClientId)
             }.body<TwitchResponse<List<TwitchUser>>>().data.firstOrNull()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -97,8 +96,6 @@ internal class TwitchClientImpl(
         return try {
             httpClient.get(Url("https://api.twitch.tv/helix/streams/followed")) {
                 parameter("user_id", userId)
-                // todo: move to default header
-                header("Client-Id", BuildConfig.twitchClientId)
             }.body<PaginatedTwitchResponse<List<TwitchStream>>>().data
         } catch (e: Exception) {
             e.printStackTrace()

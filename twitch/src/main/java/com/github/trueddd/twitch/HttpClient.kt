@@ -1,5 +1,6 @@
 package com.github.trueddd.twitch
 
+import com.github.trueddd.mylibrary.BuildConfig
 import com.github.trueddd.twitch.db.TwitchDao
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -27,18 +28,28 @@ internal fun createHttpClient(twitchDao: TwitchDao): HttpClient {
             gson {
             }
         }
-        install(DefaultRequest) {
-            if (url.pathSegments.lastOrNull() == "revoke") {
-                header(HttpHeaders.ContentType, ContentType.Application.FormUrlEncoded)
-            } else {
-                header(HttpHeaders.ContentType, ContentType.Application.Json)
-            }
-        }
         install(Auth) {
             bearer {
                 loadTokens { twitchDao.getUserToken()?.let { BearerTokens(it, "") } }
                 sendWithoutRequest { !it.headers.contains(SKIP_AUTH_HEADER) }
+                refreshTokens {
+                    twitchDao.deleteUser()
+                    null
+                }
             }
+        }
+    }.apply {
+        plugin(HttpSend).intercept { request ->
+            request.apply {
+                if (url.pathSegments.lastOrNull() == "revoke") {
+                    header(HttpHeaders.ContentType, ContentType.Application.FormUrlEncoded)
+                } else {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json)
+                }
+                if (host == "api.twitch.tv") {
+                    header("Client-Id", BuildConfig.twitchClientId)
+                }
+            }.let { execute(it) }
         }
     }
 }
