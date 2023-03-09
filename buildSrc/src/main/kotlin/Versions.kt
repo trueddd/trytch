@@ -1,4 +1,5 @@
 object Versions {
+    const val AndroidGradlePlugin = "7.4.2"
     const val Kotlin = "1.7.10"
     const val Compose = "1.3.3"
     const val Activity = "1.5.1"

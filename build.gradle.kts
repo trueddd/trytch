@@ -1,5 +1,5 @@
 plugins {
-    id("com.android.application") version "7.3.0" apply false
-    id("com.android.library") version "7.3.0" apply false
+    id("com.android.application") version Versions.AndroidGradlePlugin apply false
+    id("com.android.library") version Versions.AndroidGradlePlugin apply false
     id("org.jetbrains.kotlin.android") version Versions.Kotlin apply false
 }

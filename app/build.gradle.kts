@@ -46,9 +46,6 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.3.0"
     }
-//    applicationVariants.all { variant ->
-//        variant.sourceSets.firstOrNull { it.name == "java" }
-//    }
     packagingOptions {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
