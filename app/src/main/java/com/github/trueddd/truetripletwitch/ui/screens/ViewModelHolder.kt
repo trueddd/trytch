@@ -2,12 +2,12 @@ package com.github.trueddd.truetripletwitch.ui.screens
 
 import android.util.Log
 import com.github.trueddd.truetripletwitch.di.NodeViewModelStore
-import com.github.trueddd.truetripletwitch.ui.StatefulViewModel
+import com.github.trueddd.truetripletwitch.ui.StatelessViewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.parameter.ParametersDefinition
 
-inline fun <reified T : StatefulViewModel<*>> KoinComponent.viewModel(key: String, noinline parametersDefinition: ParametersDefinition? = null): T {
+inline fun <reified T : StatelessViewModel> KoinComponent.viewModel(key: String, noinline parametersDefinition: ParametersDefinition? = null): T {
     val store = get<NodeViewModelStore>()
     return (store[key] as? T)?.also {
         Log.d("ViewModelStore", "Found instance in store: returning")

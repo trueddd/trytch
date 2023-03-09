@@ -3,12 +3,16 @@ package com.github.trueddd.truetripletwitch.ui.screens.main
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -42,6 +46,11 @@ class MainScreen(
     @Composable
     override fun View(modifier: Modifier) {
         val state by mainViewModel.stateFlow.collectAsState()
+        LaunchedEffect(state.user) {
+            if (state.user != null) {
+                mainViewModel.updateStreams()
+            }
+        }
         MainScreen(
             state = state,
             onLoginButtonClicked = ::login,
@@ -66,11 +75,20 @@ private fun MainScreen(
             .background(color = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Toolbar(state, onLoginButtonClicked, onLogoutButtonClicked)
-        if (state.user != null) {
-            Streams(
-                streams = state.streams,
-                onStreamClicked = onStreamClicked,
-            )
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (state.user != null) {
+                Streams(
+                    streams = state.streams,
+                    onStreamClicked = onStreamClicked,
+                )
+            }
+            if (state.streamsLoading) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                )
+            }
         }
     }
 }

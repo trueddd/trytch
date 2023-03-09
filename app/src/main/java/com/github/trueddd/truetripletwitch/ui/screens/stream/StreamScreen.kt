@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
 import com.github.trueddd.truetripletwitch.ui.modifyIf
+import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.android.exoplayer2.ExoPlayer
@@ -88,13 +90,16 @@ fun StreamScreen(
     }
 }
 
+@Preview
 @Composable
 fun Chat(
+    @PreviewParameter(provider = ChatStatusParameterProvider::class)
     chatStatus: ChatStatus,
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceTint)
     ) {
         if (chatStatus is ChatStatus.Connecting) {
             CircularProgressIndicator(
@@ -131,4 +136,14 @@ fun Chat(
 
 class StreamStateParameterProvider : PreviewParameterProvider<StreamScreenState> {
     override val values = sequenceOf(StreamScreenState.test())
+}
+
+class ChatStatusParameterProvider : PreviewParameterProvider<ChatStatus> {
+    override val values = sequenceOf(
+        ChatStatus.Connected(listOf(
+            ChatMessage("truetripled", "hello")
+        )),
+        ChatStatus.Disconnected(null),
+        ChatStatus.Connecting,
+    )
 }

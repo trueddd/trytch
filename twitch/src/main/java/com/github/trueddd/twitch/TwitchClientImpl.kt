@@ -2,6 +2,7 @@ package com.github.trueddd.twitch
 
 import android.util.Log
 import com.github.trueddd.mylibrary.BuildConfig
+import com.github.trueddd.twitch.data.Stream
 import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.data.UserRequestType
 import com.github.trueddd.twitch.db.TwitchDao
@@ -11,8 +12,8 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
+import kotlin.coroutines.coroutineContext
 
 @OptIn(DelicateCoroutinesApi::class)
 internal class TwitchClientImpl(
@@ -24,8 +25,9 @@ internal class TwitchClientImpl(
         const val TAG = "TwitchClient"
     }
 
-    override val userFlow: StateFlow<User?>
-        get() = twitchDao.getUserFlow().stateIn(GlobalScope, SharingStarted.Lazily, null)
+    override val userFlow: StateFlow<User?> by lazy {
+        twitchDao.getUserFlow().stateIn(GlobalScope, SharingStarted.Eagerly, null)
+    }
 
     override fun getAuthLink(state: String): String {
         val scopes = listOf(
@@ -103,21 +105,23 @@ internal class TwitchClientImpl(
         }
     }
 
-    override fun getFollowedStreams() = channelFlow {
+    override fun updateFollowedStreams(): Flow<Result<Unit>> {
         Log.d(TAG, "Started streams loading")
-        val updateJob = GlobalScope.launch(Dispatchers.IO) {
-            userFlow.mapNotNull { it }.firstOrNull()?.id?.let { userId ->
-                Log.d(TAG, "Fetching streams for $userId")
-                loadFollowedStreams(userId)
-                    ?.map { it.toStream(userId) }
-                    ?.let { twitchDao.upsertStreams(it) }
+        return flow {
+            val userId = userFlow.value?.id ?: run {
+                emit(Result.failure(IllegalStateException("User is null")))
+                return@flow
             }
+            loadFollowedStreams(userId)
+                ?.map { it.toStream(userId) }
+                ?.let { twitchDao.upsertStreams(it) }
+                ?.also { emit(Result.success(Unit)) }
+                ?: emit(Result.failure(IllegalStateException("Followed streams loading error")))
         }
-        twitchDao.getStreamsFlow().collect { send(it) }
-        awaitClose {
-            updateJob.cancel()
-        }
-    }.flowOn(Dispatchers.IO)
+    }
+
+    override val followedStreamsFlow: Flow<List<Stream>>
+        get() = twitchDao.getStreamsFlow().flowOn(Dispatchers.IO)
 
     override fun getStreamVideoInfo(channel: String) = flow {
         val stream = twitchDao.getStreamByUserName(channel) ?: run {
@@ -134,4 +138,10 @@ internal class TwitchClientImpl(
             emit(emptyMap())
         }
     }.flowOn(Dispatchers.IO)
+
+    override suspend fun clearStreams() {
+        withContext(coroutineContext) {
+            twitchDao.deleteStreams()
+        }
+    }
 }

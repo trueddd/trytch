@@ -25,7 +25,11 @@ interface TwitchClient {
 
     fun logout(): Flow<Unit>
 
-    fun getFollowedStreams(): Flow<List<Stream>>
+    val followedStreamsFlow: Flow<List<Stream>>
+
+    fun updateFollowedStreams(): Flow<Result<Unit>>
 
     fun getStreamVideoInfo(channel: String): Flow<Map<String, String>>
+
+    suspend fun clearStreams()
 }

@@ -1,20 +1,21 @@
 package com.github.trueddd.truetripletwitch.ui.screens.main
 
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.github.trueddd.truetripletwitch.ui.StatefulViewModel
 import com.github.trueddd.twitch.TwitchClient
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlin.random.Random
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(
     private val twitchClient: TwitchClient,
 ) : StatefulViewModel<MainScreenState>() {
 
-    var authState: String = ""
-        private set
+    private var authState: String = ""
 
     override fun initialState() = MainScreenState.default()
 
@@ -47,15 +48,16 @@ class MainViewModel(
         twitchClient.userFlow
             .onEach { user -> updateState { it.copy(user = user) } }
             .launchIn(viewModelScope)
-        twitchClient.userFlow
-            .flatMapLatest { user ->
-                if (user == null) {
-                    flowOf(emptyList())
-                } else {
-                    twitchClient.getFollowedStreams()
-                }
-            }
+        twitchClient.followedStreamsFlow
             .onEach { streams -> updateState { it.copy(streams = streams) } }
+            .launchIn(viewModelScope)
+    }
+
+    fun updateStreams() {
+        twitchClient.updateFollowedStreams()
+            .onStart { updateState { it.copy(streamsLoading = true) } }
+            .onEach { Log.d("Streams", it.toString()) }
+            .onCompletion { updateState { it.copy(streamsLoading = false) } }
             .launchIn(viewModelScope)
     }
 }

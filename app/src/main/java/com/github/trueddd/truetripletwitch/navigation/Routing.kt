@@ -9,8 +9,12 @@ sealed class Routing(val name: String) : Parcelable {
         object Keys {
             const val MAIN = "main"
             const val STREAM = "stream"
+            const val SPLASH = "splash"
         }
     }
+
+    @Parcelize
+    object Splash : Routing(Keys.SPLASH)
 
     @Parcelize
     object Main : Routing(Keys.MAIN)
