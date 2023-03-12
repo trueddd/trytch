@@ -50,8 +50,13 @@ internal class ChatManagerImpl(
                 }
 
                 onMessage {
-                    Log.d(TAG, "New message: ${message.username}=${message.message}")
-                    messages.add(0, ChatMessage(username ?: message.username, message.message))
+                    val newMessage = ChatMessage(
+                        author = message.displayName ?: message.username,
+                        message.message,
+                        userColor = message.color?.ifEmpty { null },
+                    )
+                    Log.d(TAG, "New message: $newMessage")
+                    messages.add(0, newMessage)
                     if (messages.size > 100) {
                         messages.removeLast()
                     }

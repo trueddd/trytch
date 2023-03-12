@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -22,9 +23,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
 import com.github.trueddd.truetripletwitch.ui.modifyIf
+import com.github.trueddd.truetripletwitch.ui.parseHexColor
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.ConnectionStatus
+import com.github.trueddd.twitch.data.MessageWord
+import com.google.accompanist.flowlayout.FlowRow
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.StyledPlayerView
@@ -90,19 +94,48 @@ fun StreamScreen(
 }
 
 @Composable
+fun MessageWord(word: MessageWord) {
+    when (word) {
+        is MessageWord.Default -> Text(
+            text = word.content,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+        is MessageWord.Mention -> Text(
+            text = word.content,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+    }
+}
+
+@Preview(widthDp = 360)
+@Composable
+fun Message(
+    message: ChatMessage = ChatMessage("elptripledo", "Hello, my name is very long!")
+) {
+    FlowRow(
+        mainAxisSpacing = 4.dp,
+    ) {
+        Text(
+            text = message.author,
+            color = message.userColor?.parseHexColor() ?: MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+        )
+        message.words.forEach { MessageWord(it) }
+    }
+}
+
+@Composable
 fun ChatMessages(messages: List<ChatMessage>) {
     LazyColumn(
+        reverseLayout = true,
+        contentPadding = PaddingValues(horizontal = 4.dp),
         modifier = Modifier
             .fillMaxSize()
     ) {
         items(messages) {
-            Row {
-                Text(text = it.author)
-                // fixme: remove split logic from UI
-                it.content.split(Regex("\\s+")).forEach { messageWord ->
-                    Text(text = messageWord)
-                }
-            }
+            Message(message = it)
         }
     }
 }
@@ -116,7 +149,7 @@ fun Chat(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceTint)
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         ChatMessages(messages = chatStatus.messages)
         if (chatStatus.connectionStatus is ConnectionStatus.Connecting) {
@@ -136,17 +169,13 @@ fun Chat(
     }
 }
 
-class StreamStateParameterProvider : PreviewParameterProvider<StreamScreenState> {
-    override val values = sequenceOf(StreamScreenState.test())
-}
-
 class ChatStatusParameterProvider : PreviewParameterProvider<ChatStatus> {
     override val values = sequenceOf(
         ChatStatus(listOf(
-            ChatMessage("truetripled", "hello"),
+            ChatMessage("truetripled", "hello", "#1E90FF"),
             ChatMessage("eltripledo", "hey, everyone!!"),
             ChatMessage("eltripledo", "mega supa dupa long message which for sure will not fit in this damn screen i bet it would not"),
-            ChatMessage("truetripled", ":)"),
+            ChatMessage("truetripled", ":)", "#1E90FF"),
         ), ConnectionStatus.Connected),
     )
 }
