@@ -27,6 +27,7 @@ sealed class Dependency(val notation: String) {
     }
     sealed class Compose(notation: String) : Dependency(notation) {
         object Ui : Compose("androidx.compose.ui:ui:${Versions.Compose}")
+        object Runtime : Compose("androidx.compose.runtime:runtime:${Versions.Compose}")
         object UiTestJunit4 : Compose("androidx.compose.ui:ui-test-junit4:${Versions.Compose}")
         object Tooling : Compose("androidx.compose.ui:ui-tooling:${Versions.Compose}")
         object ToolingPreview : Compose("androidx.compose.ui:ui-tooling-preview:${Versions.Compose}")

@@ -3,6 +3,7 @@ package com.github.trueddd.twitch.chat
 import android.util.Log
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
+import com.github.trueddd.twitch.data.ConnectionStatus
 import com.github.trueddd.twitch.db.TwitchDao
 import com.ktmi.tmi.commands.join
 import com.ktmi.tmi.dsl.builder.scopes.MainScope
@@ -29,12 +30,12 @@ internal class ChatManagerImpl(
 
     override fun connectChat(channel: String): Flow<ChatStatus> {
         return channelFlow<ChatStatus> {
-            send(ChatStatus.Connecting)
+            val messages = LinkedList<ChatMessage>()
+            send(ChatStatus(messages, ConnectionStatus.Connecting))
             val userToken = twitchDao.getUserToken() ?: run {
-                send(ChatStatus.Disconnected(IllegalStateException("Token is null")))
+                send(ChatStatus(messages, ConnectionStatus.Disconnected(IllegalStateException("Token is null"))))
                 return@channelFlow
             }
-            val messages = LinkedList<ChatMessage>()
             var chatClient: MainScope? = null
             tmi(
                 token = userToken,
@@ -54,7 +55,7 @@ internal class ChatManagerImpl(
                     if (messages.size > 100) {
                         messages.removeLast()
                     }
-                    trySend(ChatStatus.Connected(messages))
+                    trySend(ChatStatus(messages.toList(), ConnectionStatus.Connected))
                 }
 
                 onTwitchMessage<TwitchMessage> { message ->

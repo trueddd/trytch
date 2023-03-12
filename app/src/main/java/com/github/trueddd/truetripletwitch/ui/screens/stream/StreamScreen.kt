@@ -24,7 +24,7 @@ import com.bumble.appyx.core.node.Node
 import com.github.trueddd.truetripletwitch.ui.modifyIf
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
-import com.google.accompanist.flowlayout.FlowRow
+import com.github.trueddd.twitch.data.ConnectionStatus
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.StyledPlayerView
@@ -59,7 +59,6 @@ fun Player(player: ExoPlayer) {
 
 @Composable
 fun StreamScreen(
-    @PreviewParameter(StreamStateParameterProvider::class)
     state: StreamScreenState,
     player: ExoPlayer,
 ) {
@@ -90,6 +89,24 @@ fun StreamScreen(
     }
 }
 
+@Composable
+fun ChatMessages(messages: List<ChatMessage>) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        items(messages) {
+            Row {
+                Text(text = it.author)
+                // fixme: remove split logic from UI
+                it.content.split(Regex("\\s+")).forEach { messageWord ->
+                    Text(text = messageWord)
+                }
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 fun Chat(
@@ -101,35 +118,20 @@ fun Chat(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceTint)
     ) {
-        if (chatStatus is ChatStatus.Connecting) {
+        ChatMessages(messages = chatStatus.messages)
+        if (chatStatus.connectionStatus is ConnectionStatus.Connecting) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .size(48.dp)
             )
         }
-        if (chatStatus is ChatStatus.Disconnected) {
+        if (chatStatus.connectionStatus is ConnectionStatus.Disconnected) {
             Text(
-                text = chatStatus.error?.message ?: "QWE",
+                text = "Chat connection error",
                 modifier = Modifier
                     .align(Alignment.Center)
             )
-        }
-        if (chatStatus is ChatStatus.Connected) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                items(chatStatus.messages) {
-                    FlowRow(mainAxisSpacing = 2.dp) {
-                        Text(text = it.author)
-                        // fixme: remove split logic from UI
-                        it.content.split(Regex("\\s+")).forEach { messageWord ->
-                            Text(text = messageWord)
-                        }
-                    }
-                }
-            }
         }
     }
 }
@@ -140,10 +142,11 @@ class StreamStateParameterProvider : PreviewParameterProvider<StreamScreenState>
 
 class ChatStatusParameterProvider : PreviewParameterProvider<ChatStatus> {
     override val values = sequenceOf(
-        ChatStatus.Connected(listOf(
-            ChatMessage("truetripled", "hello")
-        )),
-        ChatStatus.Disconnected(null),
-        ChatStatus.Connecting,
+        ChatStatus(listOf(
+            ChatMessage("truetripled", "hello"),
+            ChatMessage("eltripledo", "hey, everyone!!"),
+            ChatMessage("eltripledo", "mega supa dupa long message which for sure will not fit in this damn screen i bet it would not"),
+            ChatMessage("truetripled", ":)"),
+        ), ConnectionStatus.Connected),
     )
 }

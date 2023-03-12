@@ -58,6 +58,7 @@ dependencies {
     implementation(Dependency.Core.Ktx)
     implementation(Dependency.Core.AppCompat)
     implementation(Dependency.Compose.Ui)
+    implementation(Dependency.Compose.Runtime)
     implementation(Dependency.Compose.Material3)
     implementation(Dependency.Compose.ToolingPreview)
     implementation(Dependency.Lifecycle.RuntimeKtx)

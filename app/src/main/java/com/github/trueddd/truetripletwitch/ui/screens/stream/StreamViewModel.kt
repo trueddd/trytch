@@ -4,9 +4,8 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.github.trueddd.truetripletwitch.ui.StatefulViewModel
-import com.github.trueddd.twitch.chat.ChatManager
 import com.github.trueddd.twitch.TwitchClient
-import com.github.trueddd.twitch.data.ChatStatus
+import com.github.trueddd.twitch.chat.ChatManager
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
@@ -20,7 +19,7 @@ class StreamViewModel(
     private val chatManager: ChatManager,
 ) : StatefulViewModel<StreamScreenState>() {
 
-    override fun initialState() = StreamScreenState(channel, null, emptyMap(), ChatStatus.Disconnected(null))
+    override fun initialState() = StreamScreenState.default(channel)
 
     init {
         twitchClient.getStreamVideoInfo(channel)
@@ -36,6 +35,7 @@ class StreamViewModel(
             .launchIn(viewModelScope)
         stateFlow
             .mapNotNull { it.streamUri }
+            .distinctUntilChanged()
             .onEach {
                 val source = HlsMediaSource.Factory(DefaultHttpDataSource.Factory())
                     .createMediaSource(MediaItem.fromUri(it))

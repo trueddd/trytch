@@ -3,6 +3,7 @@ package com.github.trueddd.truetripletwitch.ui.screens.stream
 import android.net.Uri
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
+import com.github.trueddd.twitch.data.ConnectionStatus
 
 data class StreamScreenState(
     val channel: String,
@@ -20,11 +21,22 @@ data class StreamScreenState(
                 "480p" to "qwerty",
                 "720p" to "qwerty",
             ),
-            chatStatus = ChatStatus.Connected(
+            chatStatus = ChatStatus(
                 messages = listOf(
                     ChatMessage("qwe1", "Hello"),
                     ChatMessage("qwe2", "Hi!"),
-                )
+                ),
+                connectionStatus = ConnectionStatus.Connected,
+            )
+        )
+
+        fun default(channel: String) = StreamScreenState(
+            channel,
+            streamUri = null,
+            availableStreamLinks = emptyMap(),
+            chatStatus = ChatStatus(
+                messages = emptyList(),
+                connectionStatus = ConnectionStatus.Disconnected(null),
             )
         )
     }
