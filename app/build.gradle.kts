@@ -9,7 +9,7 @@ android {
     compileSdk = Config.Android.CompileSdk
 
     defaultConfig {
-        applicationId = "com.github.trueddd.truetripletwitch"
+        applicationId = "${Config.PackageName}.${Config.AppName}"
         minSdk = Config.Android.MinSdk
         targetSdk = Config.Android.TargetSdk
         versionCode = Config.VersionCode
@@ -31,11 +31,10 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
         freeCompilerArgs = listOf(
             "-Xcontext-receivers"
         )
@@ -44,7 +43,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.0"
+        kotlinCompilerExtensionVersion = Versions.ComposeCompiler
     }
     packagingOptions {
         resources {
