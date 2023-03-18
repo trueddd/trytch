@@ -1,6 +1,7 @@
 package com.github.trueddd.twitch.chat
 
 import android.util.Log
+import com.github.trueddd.twitch.TwitchBadgesManager
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.ConnectionStatus
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.flowOn
 import java.util.*
 
 internal class ChatManagerImpl(
+    private val badgesManager: TwitchBadgesManager,
     private val twitchDao: TwitchDao,
 ) : ChatManager {
 
@@ -54,6 +56,7 @@ internal class ChatManagerImpl(
                         author = message.displayName ?: message.username,
                         message.message,
                         userColor = message.color?.ifEmpty { null },
+                        badges = message.badges?.mapNotNull { (name, tier) -> badgesManager.getBadgeUrl(name, tier) } ?: emptyList(),
                     )
                     Log.d(TAG, "New message: $newMessage")
                     messages.add(0, newMessage)

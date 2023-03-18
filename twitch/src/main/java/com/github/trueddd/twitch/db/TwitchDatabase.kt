@@ -1,21 +1,23 @@
 package com.github.trueddd.twitch.db
 
 import android.content.Context
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
+import androidx.room.*
 import com.github.trueddd.twitch.data.Stream
 import com.github.trueddd.twitch.data.Tokens
 import com.github.trueddd.twitch.data.User
+import com.github.trueddd.twitch.data.BadgeVersion
 
 @Database(
     entities = [
         User::class,
         Tokens::class,
         Stream::class,
+        BadgeVersion::class,
     ],
-    version = 3,
+    version = 4,
+    autoMigrations = [
+        AutoMigration(from = 3, to = 4),
+    ],
 )
 @TypeConverters(
     TwitchStreamTagsConverter::class,
@@ -23,12 +25,12 @@ import com.github.trueddd.twitch.data.User
 abstract class TwitchDatabase : RoomDatabase() {
 
     abstract fun twitchDao(): TwitchDao
+    abstract fun badgeDao(): BadgeDao
 
     companion object {
 
         fun create(context: Context): TwitchDatabase {
             return Room.databaseBuilder(context, TwitchDatabase::class.java, "twitch_database")
-                .fallbackToDestructiveMigration()
                 .build()
         }
     }

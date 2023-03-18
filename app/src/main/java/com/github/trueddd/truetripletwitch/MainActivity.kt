@@ -38,7 +38,7 @@ class MainActivity : NodeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            TrueTripleTwitchTheme(dynamicColor = false) {
+            TrueTripleTwitchTheme {
                 CompositionLocalProvider(LocalIntegrationPoint provides integrationPoint) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),

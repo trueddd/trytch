@@ -1,35 +1,17 @@
 package com.github.trueddd.twitch
 
-import com.github.trueddd.twitch.data.Stream
-import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.db.TwitchDatabase
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 
-interface TwitchClient {
+interface TwitchClient : TwitchUserManager, TwitchStreamsManager, TwitchBadgesManager {
 
     companion object {
         fun create(database: TwitchDatabase): TwitchClient {
+            val httpClient = createHttpClient(database.twitchDao())
             return TwitchClientImpl(
                 twitchDao = database.twitchDao(),
-                httpClient = createHttpClient(database.twitchDao()),
+                httpClient = httpClient,
+                badgesManager = TwitchBadgesManagerImpl(httpClient, database.badgeDao()),
             )
         }
     }
-
-    val userFlow: StateFlow<User?>
-
-    fun getAuthLink(state: String): String
-
-    fun login(accessToken: String): Flow<Unit>
-
-    fun logout(): Flow<Unit>
-
-    val followedStreamsFlow: Flow<List<Stream>>
-
-    fun updateFollowedStreams(): Flow<Result<Unit>>
-
-    fun getStreamVideoInfo(channel: String): Flow<Map<String, String>>
-
-    suspend fun clearStreams()
 }

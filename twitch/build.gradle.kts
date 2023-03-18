@@ -38,6 +38,10 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     implementation(Dependency.Koin.Core)
     implementation(Dependency.Koin.Annotations)

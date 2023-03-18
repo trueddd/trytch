@@ -33,6 +33,7 @@ class SplashScreen(
     override fun View(modifier: Modifier) {
         LaunchedEffect(Unit) {
             coroutineScope {
+                viewModel.updateChatBadges()
                 launch { delay(1500) }
                 launch { viewModel.clearStreams() }
             }

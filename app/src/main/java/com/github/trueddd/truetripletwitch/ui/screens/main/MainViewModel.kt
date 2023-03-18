@@ -4,7 +4,8 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.github.trueddd.truetripletwitch.ui.StatefulViewModel
-import com.github.trueddd.twitch.TwitchClient
+import com.github.trueddd.twitch.TwitchStreamsManager
+import com.github.trueddd.twitch.TwitchUserManager
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -12,7 +13,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlin.random.Random
 
 class MainViewModel(
-    private val twitchClient: TwitchClient,
+    private val twitchUserManager: TwitchUserManager,
+    private val twitchStreamsManager: TwitchStreamsManager,
 ) : StatefulViewModel<MainScreenState>() {
 
     private var authState: String = ""
@@ -21,7 +23,7 @@ class MainViewModel(
 
     fun getLinkForLogin(): String {
         authState = Random.Default.nextLong().toString()
-        return twitchClient.getAuthLink(authState)
+        return twitchUserManager.getAuthLink(authState)
     }
 
     fun login(intent: Intent) {
@@ -30,7 +32,7 @@ class MainViewModel(
             .associate { it.split("=").let { (name, value) -> name to value } }
         if (response["state"] == authState) {
             val accessToken = response["access_token"] ?: return
-            twitchClient.login(accessToken)
+            twitchUserManager.login(accessToken)
                 .onStart { updateState { it.copy(userLoading = true) } }
                 .onCompletion { updateState { it.copy(userLoading = false) } }
                 .launchIn(viewModelScope)
@@ -38,23 +40,23 @@ class MainViewModel(
     }
 
     fun logout() {
-        twitchClient.logout()
+        twitchUserManager.logout()
             .onStart { updateState { it.copy(userLoading = true) } }
             .onCompletion { updateState { it.copy(userLoading = false) } }
             .launchIn(viewModelScope)
     }
 
     init {
-        twitchClient.userFlow
+        twitchUserManager.userFlow
             .onEach { user -> updateState { it.copy(user = user) } }
             .launchIn(viewModelScope)
-        twitchClient.followedStreamsFlow
+        twitchStreamsManager.followedStreamsFlow
             .onEach { streams -> updateState { it.copy(streams = streams) } }
             .launchIn(viewModelScope)
     }
 
     fun updateStreams() {
-        twitchClient.updateFollowedStreams()
+        twitchStreamsManager.updateFollowedStreams()
             .onStart { updateState { it.copy(streamsLoading = true) } }
             .onEach { Log.d("Streams", it.toString()) }
             .onCompletion { updateState { it.copy(streamsLoading = false) } }

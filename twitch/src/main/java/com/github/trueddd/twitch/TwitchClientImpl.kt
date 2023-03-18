@@ -19,7 +19,8 @@ import kotlin.coroutines.coroutineContext
 internal class TwitchClientImpl(
     private val twitchDao: TwitchDao,
     private val httpClient: HttpClient,
-) : TwitchClient {
+    badgesManager: TwitchBadgesManager,
+) : TwitchClient, TwitchBadgesManager by badgesManager {
 
     companion object {
         const val TAG = "TwitchClient"

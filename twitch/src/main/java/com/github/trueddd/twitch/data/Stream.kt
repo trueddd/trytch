@@ -2,6 +2,7 @@ package com.github.trueddd.twitch.data
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 
 @Entity(
     tableName = "streams",
@@ -14,7 +15,8 @@ import androidx.room.ForeignKey
             onDelete = ForeignKey.CASCADE,
             onUpdate = ForeignKey.CASCADE,
         )
-    ]
+    ],
+    indices = [Index("followedByUserId")]
 )
 data class Stream(
     val id: String,

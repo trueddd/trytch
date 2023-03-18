@@ -4,6 +4,7 @@ data class ChatMessage(
     val author: String,
     val content: String,
     val userColor: String? = null,
+    val badges: List<String> = emptyList(),
 ) {
 
     companion object {
