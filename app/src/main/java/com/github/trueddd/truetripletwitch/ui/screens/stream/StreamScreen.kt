@@ -38,6 +38,8 @@ class StreamScreen(
 
 @Composable
 fun Player(player: ExoPlayer) {
+    // todo: implement player controls
+    // todo: respond to lifecycle events (stop player, disconnect from chat)
     AndroidView(
         factory = {
             StyledPlayerView(it).apply {

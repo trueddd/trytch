@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -12,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -79,6 +81,7 @@ fun Stream(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
+            .height(IntrinsicSize.Min)
             .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.inversePrimary)
             .clickable { onStreamClicked(stream) }
@@ -86,7 +89,7 @@ fun Stream(
         Box(
             modifier = Modifier
                 .weight(2f)
-                .fillMaxHeight()
+                .aspectRatio(16/9f)
                 .background(MaterialTheme.colorScheme.inversePrimary)
         ) {
             AsyncImage(
@@ -105,10 +108,33 @@ fun Stream(
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.primaryContainer)
             )
+            Box(modifier = Modifier
+                .padding(4.dp)
+                .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(4.dp))
+                .align(Alignment.BottomEnd)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .background(Color.Red, CircleShape)
+                    )
+                    Text(
+                        text = stream.shortenedViewerCount,
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        fontSize = 12.sp,
+                    )
+                }
+            }
         }
         Box(
             modifier = Modifier
-                .heightIn()
+                .fillMaxHeight()
                 .weight(3f)
         ) {
             Column(
@@ -120,7 +146,6 @@ fun Stream(
                 StreamerName(stream.userName)
                 StreamTitle(stream.title)
                 StreamInfo(stream.gameName)
-                StreamInfo("${stream.shortenedViewerCount} ${stream.viewerCountPlural}")
             }
         }
     }
