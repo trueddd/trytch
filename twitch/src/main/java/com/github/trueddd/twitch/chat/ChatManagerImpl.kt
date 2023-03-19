@@ -31,7 +31,7 @@ internal class ChatManagerImpl(
     }
 
     override fun connectChat(channel: String): Flow<ChatStatus> {
-        return channelFlow<ChatStatus> {
+        return channelFlow {
             val messages = LinkedList<ChatMessage>()
             send(ChatStatus(messages, ConnectionStatus.Connecting))
             val userToken = twitchDao.getUserToken() ?: run {
@@ -52,11 +52,14 @@ internal class ChatManagerImpl(
                 }
 
                 onMessage {
+                    val badges = message.badges
+                        ?.mapNotNull { (name, tier) -> badgesManager.getBadgeUrl(channel, name, tier) }
+                        ?: emptyList()
                     val newMessage = ChatMessage(
                         author = message.displayName ?: message.username,
                         message.message,
                         userColor = message.color?.ifEmpty { null },
-                        badges = message.badges?.mapNotNull { (name, tier) -> badgesManager.getBadgeUrl(name, tier) } ?: emptyList(),
+                        badges = badges,
                     )
                     Log.d(TAG, "New message: $newMessage")
                     messages.add(0, newMessage)

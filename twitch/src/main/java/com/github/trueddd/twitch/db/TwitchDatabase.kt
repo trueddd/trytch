@@ -14,9 +14,10 @@ import com.github.trueddd.twitch.data.BadgeVersion
         Stream::class,
         BadgeVersion::class,
     ],
-    version = 4,
+    version = 5,
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
+        AutoMigration(from = 4, to = 5),
     ],
 )
 @TypeConverters(

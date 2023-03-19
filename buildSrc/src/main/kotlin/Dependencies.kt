@@ -66,4 +66,5 @@ sealed class Dependency(val notation: String) {
         object Core : VideoPlayer("com.google.android.exoplayer:exoplayer:${Versions.ExoPlayer}")
         object Hls : VideoPlayer("com.google.android.exoplayer:exoplayer-hls:${Versions.ExoPlayer}")
     }
+    object DataStore : Dependency("androidx.datastore:datastore-preferences:${Versions.DataStore}")
 }

@@ -10,7 +10,7 @@ data class TwitchBadgeSet(
     val versions: List<TwitchBadgeVersion>,
 ) {
 
-    fun toBadgeVersions() = versions.map {
-        BadgeVersion(setId, it.id, it.imageUrl1x, it.imageUrl2x, it.imageUrl4x)
+    fun toBadgeVersions(channel: String? = null) = versions.map {
+        BadgeVersion(setId, it.id, channel ?: "", it.imageUrl1x, it.imageUrl2x, it.imageUrl4x)
     }
 }

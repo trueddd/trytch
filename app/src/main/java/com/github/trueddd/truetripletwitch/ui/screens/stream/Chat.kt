@@ -34,10 +34,10 @@ import com.google.accompanist.flowlayout.FlowRow
 class ChatStatusParameterProvider : PreviewParameterProvider<ChatStatus> {
     override val values = sequenceOf(
         ChatStatus(listOf(
-            ChatMessage("truetripled", "hello", "#1E90FF"),
+            ChatMessage("truetripled", "hello", "#1E90FF", listOf("https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/2")),
             ChatMessage("eltripledo", "hey, everyone!!"),
             ChatMessage("eltripledo", "mega supa dupa long message which for sure will not fit in this damn screen i bet it would not"),
-            ChatMessage("truetripled", ":)", "#1E90FF"),
+            ChatMessage("truetripled", ":)", "#1E90FF", listOf("https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/2")),
         ), ConnectionStatus.Connected),
     )
 }

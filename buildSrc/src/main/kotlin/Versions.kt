@@ -13,4 +13,5 @@ object Versions {
     const val Room = "2.5.0"
     const val ExoPlayer = "2.18.1"
     const val Accompanist = "0.27.1"
+    const val DataStore = "1.0.0"
 }

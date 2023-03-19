@@ -58,4 +58,6 @@ dependencies {
     implementation(Dependency.Room.Core)
     implementation(Dependency.Room.Ktx)
     ksp(Dependency.Room.Compiler)
+
+    implementation(Dependency.DataStore)
 }

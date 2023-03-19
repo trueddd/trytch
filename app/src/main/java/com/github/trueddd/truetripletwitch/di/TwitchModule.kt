@@ -13,7 +13,7 @@ val twitchModule = module {
 
     single { TwitchDatabase.create(context = get()) }
 
-    single { TwitchClient.create(database = get()) } binds arrayOf(
+    single { TwitchClient.create(database = get(), context = get()) } binds arrayOf(
         TwitchBadgesManager::class,
         TwitchUserManager::class,
         TwitchStreamsManager::class,

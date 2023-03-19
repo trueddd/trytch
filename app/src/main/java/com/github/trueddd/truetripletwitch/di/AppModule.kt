@@ -17,6 +17,7 @@ val appModule = module {
             twitchStreamsManager = get(),
             player = get(),
             chatManager = get(),
+            twitchBadgesManager = get(),
         )
     }
 

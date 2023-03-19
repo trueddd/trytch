@@ -14,13 +14,13 @@ interface BadgeDao {
 
     @Transaction
     suspend fun updateGlobalBadges(badgeVersions: List<BadgeVersion>) {
-        clearBadges()
+        clearGlobalBadges()
         upsertBadgeVersions(badgeVersions)
     }
 
-    @Query("delete from badge_versions")
-    suspend fun clearBadges()
+    @Query("delete from badge_versions where channel = null")
+    suspend fun clearGlobalBadges()
 
-    @Query("select * from badge_versions where badgeId = :setId")
-    suspend fun getBadgeVersionsForSetId(setId: String): List<BadgeVersion>
+    @Query("select * from badge_versions where badgeId = :setId and (channel = :channel or channel = '')")
+    suspend fun getBadgeVersionsForSetId(channel: String, setId: String): List<BadgeVersion>
 }

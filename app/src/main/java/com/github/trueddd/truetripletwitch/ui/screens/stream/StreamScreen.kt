@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -27,6 +28,9 @@ class StreamScreen(
 
     @Composable
     override fun View(modifier: Modifier) {
+        LaunchedEffect(Unit) {
+            streamViewModel.initStreamScreen()
+        }
         val state by streamViewModel.stateFlow.collectAsState()
         StreamScreen(state, streamViewModel.player)
     }
