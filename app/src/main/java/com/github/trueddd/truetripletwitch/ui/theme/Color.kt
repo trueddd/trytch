@@ -1,5 +1,6 @@
 package com.github.trueddd.truetripletwitch.ui.theme
 
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 
 val md_theme_light_surfaceTint = Color(0xFF6750A4)
@@ -61,3 +62,6 @@ val md_theme_dark_primaryContainer = Color(0xFF4F378B)
 val md_theme_dark_primary = Color(0xFFD0BCFF)
 
 val seed = Color(0xFF6750A4)
+
+@Stable
+val HalfTransparentBlack = Color.Black.copy(alpha = 0.5f)

@@ -24,10 +24,10 @@ class RootNode(
     ),
 ) : ParentNode<Routing>(backStack, buildContext), IntentHandler, KoinComponent {
 
-    override fun resolve(routing: Routing, buildContext: BuildContext) = when (routing) {
+    override fun resolve(navTarget: Routing, buildContext: BuildContext) = when (navTarget) {
         is Routing.Splash -> SplashScreen(viewModel(Routing.Companion.Keys.SPLASH), backStack, buildContext)
         is Routing.Main -> MainScreen(viewModel(Routing.Companion.Keys.MAIN), backStack, buildContext)
-        is Routing.Stream -> StreamScreen(viewModel(Routing.Companion.Keys.STREAM) { parametersOf(routing.channel) }, buildContext)
+        is Routing.Stream -> StreamScreen(viewModel(Routing.Companion.Keys.STREAM) { parametersOf(navTarget.channel) }, buildContext)
     }
 
     @Composable

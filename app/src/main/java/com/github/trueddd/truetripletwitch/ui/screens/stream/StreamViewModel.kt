@@ -3,6 +3,7 @@ package com.github.trueddd.truetripletwitch.ui.screens.stream
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.viewModelScope
+import com.github.trueddd.truetripletwitch.player.playbackStateFlow
 import com.github.trueddd.truetripletwitch.ui.StatefulViewModel
 import com.github.trueddd.twitch.TwitchBadgesManager
 import com.github.trueddd.twitch.TwitchStreamsManager
@@ -21,9 +22,13 @@ class StreamViewModel(
     private val chatManager: ChatManager,
 ) : StatefulViewModel<StreamScreenState>() {
 
+    init {
+        initStreamScreen()
+    }
+
     override fun initialState() = StreamScreenState.default(channel)
 
-    fun initStreamScreen() {
+    private fun initStreamScreen() {
         loadStreamVideoInfo()
         setupStreamPlayer()
         setupChat()
@@ -32,13 +37,21 @@ class StreamViewModel(
 
     private fun setupStreamPlayer() {
         stateFlow
-            .mapNotNull { it.streamUri }
+            .mapNotNull { it.playerStatus.streamUri }
             .distinctUntilChanged()
             .onEach {
                 val source = HlsMediaSource.Factory(DefaultHttpDataSource.Factory())
                     .createMediaSource(MediaItem.fromUri(it))
                 player.setMediaSource(source)
                 player.prepare()
+            }
+            .launchIn(viewModelScope)
+        player.playbackStateFlow()
+            .onEach { isPlaying ->
+                updateState {
+                    val playerStatus = it.playerStatus.copy(isPlaying = isPlaying)
+                    it.copy(playerStatus = playerStatus)
+                }
             }
             .launchIn(viewModelScope)
     }
@@ -48,10 +61,11 @@ class StreamViewModel(
             .onEach { Log.d(TAG, "Stream links: $it") }
             .onEach { links ->
                 updateState { state ->
-                    state.copy(
+                    val playerStatus = state.playerStatus.copy(
                         streamUri = links.values.lastOrNull()?.let { Uri.parse(it) },
-                        availableStreamLinks = links,
+                        streamLinks = links,
                     )
+                    state.copy(playerStatus = playerStatus)
                 }
             }
             .launchIn(viewModelScope)

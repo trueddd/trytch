@@ -13,13 +13,16 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import com.bumble.appyx.core.lifecycle.asFlow
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
 import com.github.trueddd.truetripletwitch.ui.modifyIf
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
-import com.google.android.exoplayer2.ui.StyledPlayerView
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class StreamScreen(
     private val streamViewModel: StreamViewModel,
@@ -29,29 +32,15 @@ class StreamScreen(
     @Composable
     override fun View(modifier: Modifier) {
         LaunchedEffect(Unit) {
-            streamViewModel.initStreamScreen()
+            lifecycle.asFlow()
+                .filter { it != Lifecycle.State.RESUMED }
+                .distinctUntilChanged()
+                .onEach { streamViewModel.player.pause() }
+                .launchIn(this)
         }
         val state by streamViewModel.stateFlow.collectAsState()
         StreamScreen(state, streamViewModel.player)
     }
-}
-
-@Composable
-fun Player(player: ExoPlayer) {
-    // todo: implement player controls
-    // todo: respond to lifecycle events (stop player, disconnect from chat)
-    AndroidView(
-        factory = {
-            StyledPlayerView(it).apply {
-                hideController()
-                useController = false
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-                this.player = player
-            }
-        },
-        modifier = Modifier
-            .fillMaxSize(),
-    )
 }
 
 @Preview
@@ -78,9 +67,7 @@ fun StreamScreen(
                 }
                 .background(MaterialTheme.colorScheme.error)
         ) {
-            if (state.streamUri != null && player != null) {
-                Player(player)
-            }
+            PlayerContainer(player, state.playerStatus)
         }
         if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
             Chat(state.chatStatus)

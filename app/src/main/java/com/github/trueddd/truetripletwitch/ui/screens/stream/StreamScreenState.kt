@@ -7,37 +7,38 @@ import com.github.trueddd.twitch.data.ConnectionStatus
 
 data class StreamScreenState(
     val channel: String,
-    val streamUri: Uri?,
-    val availableStreamLinks: Map<String, String>,
     val chatStatus: ChatStatus,
+    val playerStatus: PlayerStatus,
 ) {
 
     companion object {
         fun test() = StreamScreenState(
             channel = "qwe1",
-            streamUri = Uri.EMPTY,
-            availableStreamLinks = mapOf(
-                "360p" to "qwerty",
-                "480p" to "qwerty",
-                "720p" to "qwerty",
-            ),
             chatStatus = ChatStatus(
                 messages = listOf(
                     ChatMessage("qwe1", "Hello"),
                     ChatMessage("qwe2", "Hi!"),
                 ),
                 connectionStatus = ConnectionStatus.Connected,
-            )
+            ),
+            playerStatus = PlayerStatus(
+                isPlaying = false,
+                streamUri = Uri.EMPTY,
+                streamLinks = mapOf(
+                    "360p" to "qwerty",
+                    "480p" to "qwerty",
+                    "720p" to "qwerty",
+                ),
+            ),
         )
 
         fun default(channel: String) = StreamScreenState(
             channel,
-            streamUri = null,
-            availableStreamLinks = emptyMap(),
             chatStatus = ChatStatus(
                 messages = emptyList(),
                 connectionStatus = ConnectionStatus.Disconnected(null),
-            )
+            ),
+            playerStatus = PlayerStatus.default(),
         )
     }
 }

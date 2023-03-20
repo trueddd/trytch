@@ -14,9 +14,9 @@ typealias ActiveNodes = List<String>
 
 fun RootNode.activeNodesFlow(): StateFlow<ActiveNodes> {
     return backStack.elements
-        .map { elements -> elements.map { it.key.routing.name } }
+        .map { elements -> elements.map { it.key.navTarget.name } }
         .distinctUntilChanged()
-        .stateIn(lifecycleScope, SharingStarted.Lazily, backStack.elements.value.map { it.key.routing.name })
+        .stateIn(lifecycleScope, SharingStarted.Lazily, backStack.elements.value.map { it.key.navTarget.name })
 }
 
 fun StateFlow<ActiveNodes>.disposeViewModels(viewModelStore: NodeViewModelStore): Flow<ActiveNodes> {

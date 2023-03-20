@@ -60,7 +60,7 @@ sealed class Dependency(val notation: String) {
     }
     object Coil : Dependency("io.coil-kt:coil-compose:2.2.0")
     sealed class Navigation(notation: String) : Dependency(notation) {
-        object Appyx : Navigation("com.bumble.appyx:core:1.0-alpha06")
+        object Appyx : Navigation("com.bumble.appyx:core:1.0.5")
     }
     sealed class VideoPlayer(notation: String) : Dependency(notation) {
         object Core : VideoPlayer("com.google.android.exoplayer:exoplayer:${Versions.ExoPlayer}")
