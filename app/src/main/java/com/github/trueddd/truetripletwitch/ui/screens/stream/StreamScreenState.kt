@@ -1,6 +1,5 @@
 package com.github.trueddd.truetripletwitch.ui.screens.stream
 
-import android.net.Uri
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.ConnectionStatus
@@ -21,15 +20,7 @@ data class StreamScreenState(
                 ),
                 connectionStatus = ConnectionStatus.Connected,
             ),
-            playerStatus = PlayerStatus(
-                isPlaying = false,
-                streamUri = Uri.EMPTY,
-                streamLinks = mapOf(
-                    "360p" to "qwerty",
-                    "480p" to "qwerty",
-                    "720p" to "qwerty",
-                ),
-            ),
+            playerStatus = PlayerStatus.test(),
         )
 
         fun default(channel: String) = StreamScreenState(

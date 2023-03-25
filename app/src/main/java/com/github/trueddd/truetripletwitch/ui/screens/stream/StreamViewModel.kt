@@ -43,6 +43,7 @@ class StreamViewModel(
                 val source = HlsMediaSource.Factory(DefaultHttpDataSource.Factory())
                     .createMediaSource(MediaItem.fromUri(it))
                 player.setMediaSource(source)
+                player.playWhenReady = true
                 player.prepare()
             }
             .launchIn(viewModelScope)

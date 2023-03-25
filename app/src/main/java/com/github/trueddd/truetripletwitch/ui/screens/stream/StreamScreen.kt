@@ -19,15 +19,14 @@ import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
 import com.github.trueddd.truetripletwitch.ui.modifyIf
 import com.google.android.exoplayer2.ExoPlayer
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 
 class StreamScreen(
     private val streamViewModel: StreamViewModel,
     buildContext: BuildContext,
 ) : Node(buildContext) {
+
+    private val playerEventsFlow = MutableSharedFlow<PlayerEvent>(extraBufferCapacity = 1)
 
     @Composable
     override fun View(modifier: Modifier) {
@@ -37,9 +36,12 @@ class StreamScreen(
                 .distinctUntilChanged()
                 .onEach { streamViewModel.player.pause() }
                 .launchIn(this)
+            playerEventsFlow
+                .onEach { event -> streamViewModel.updateState { event.applyTo(it) } }
+                .launchIn(this)
         }
         val state by streamViewModel.stateFlow.collectAsState()
-        StreamScreen(state, streamViewModel.player)
+        StreamScreen(state, streamViewModel.player, playerEventsFlow)
     }
 }
 
@@ -49,6 +51,7 @@ fun StreamScreen(
     @PreviewParameter(provider = StreamScreenStateProvider::class)
     state: StreamScreenState,
     player: ExoPlayer? = null,
+    playerEventsFlow: MutableSharedFlow<PlayerEvent> = MutableSharedFlow(),
 ) {
     Column(
         modifier = Modifier
@@ -67,7 +70,7 @@ fun StreamScreen(
                 }
                 .background(MaterialTheme.colorScheme.error)
         ) {
-            PlayerContainer(player, state.playerStatus)
+            PlayerContainer(player, state.playerStatus, defaultControlsVisibility = false, playerEventsFlow)
         }
         if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
             Chat(state.chatStatus)
