@@ -56,6 +56,7 @@ class TwitchBadgesManagerImpl(
         }
     }
 
+    // todo: call only if user is present
     override fun updateBadges() {
         launch {
             if (!badgesNeedUpdate(channel = null)) {

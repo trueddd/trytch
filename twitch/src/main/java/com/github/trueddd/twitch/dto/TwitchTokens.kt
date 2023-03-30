@@ -1,15 +1,17 @@
 package com.github.trueddd.twitch.dto
 
 import com.github.trueddd.twitch.data.Tokens
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class TwitchTokens(
-    @SerializedName("client_id")
+    @SerialName("client_id")
     val clientId: String,
-    @SerializedName("user_id")
+    @SerialName("user_id")
     val userId: String,
     val login: String,
-    @SerializedName("expires_in")
+    @SerialName("expires_in")
     val expiresIn: Long,
 ) {
 

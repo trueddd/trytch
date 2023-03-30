@@ -63,7 +63,6 @@ internal class TwitchClientImpl(
                         header(HttpHeaders.Authorization, "Bearer ${userRequestType.value}")
                     }
                 }
-                header(SKIP_AUTH_HEADER, true)
             }.body<TwitchResponse<List<TwitchUser>>>().data.firstOrNull()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -74,7 +73,6 @@ internal class TwitchClientImpl(
     private suspend fun validateToken(accessToken: String): TwitchTokens? {
         return try {
             httpClient.get(Url("https://id.twitch.tv/oauth2/validate")) {
-                header(SKIP_AUTH_HEADER, true)
                 header(HttpHeaders.Authorization, "OAuth $accessToken")
             }.body<TwitchTokens>()
         } catch (e: Exception) {

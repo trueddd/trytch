@@ -116,6 +116,7 @@ fun Player(
                 useController = false
                 resizeMode = aspectRatio.value
                 this.player = player
+                keepScreenOn = true
             }
         },
         update = {

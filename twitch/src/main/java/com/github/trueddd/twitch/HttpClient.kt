@@ -5,16 +5,15 @@ import com.github.trueddd.twitch.db.TwitchDao
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
-import io.ktor.client.plugins.auth.*
-import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.gson.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
 import okhttp3.logging.HttpLoggingInterceptor
 
-internal const val SKIP_AUTH_HEADER = "SKIP_AUTH"
-
+@OptIn(ExperimentalSerializationApi::class)
 internal fun createHttpClient(twitchDao: TwitchDao): HttpClient {
     return HttpClient(OkHttp) {
         engine {
@@ -25,18 +24,11 @@ internal fun createHttpClient(twitchDao: TwitchDao): HttpClient {
             )
         }
         install(ContentNegotiation) {
-            gson {
-            }
-        }
-        install(Auth) {
-            bearer {
-                loadTokens { twitchDao.getUserToken()?.let { BearerTokens(it, "") } }
-                sendWithoutRequest { !it.headers.contains(SKIP_AUTH_HEADER) }
-                refreshTokens {
-                    twitchDao.deleteUser()
-                    null
-                }
-            }
+            json(Json {
+                prettyPrint = true
+                ignoreUnknownKeys = true
+                explicitNulls = false
+            })
         }
     }.apply {
         plugin(HttpSend).intercept { request ->
@@ -48,6 +40,9 @@ internal fun createHttpClient(twitchDao: TwitchDao): HttpClient {
                 }
                 if (host == "api.twitch.tv") {
                     header("Client-Id", BuildConfig.twitchClientId)
+                    twitchDao.getUserToken()?.let {
+                        header(HttpHeaders.Authorization, "Bearer $it")
+                    }
                 }
             }.let { execute(it) }
         }

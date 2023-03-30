@@ -1,14 +1,16 @@
 package com.github.trueddd.twitch.dto
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class TwitchBadgeVersion(
-    @SerializedName("id")
+    @SerialName("id")
     val id: String,
-    @SerializedName("image_url_1x")
+    @SerialName("image_url_1x")
     val imageUrl1x: String,
-    @SerializedName("image_url_2x")
+    @SerialName("image_url_2x")
     val imageUrl2x: String,
-    @SerializedName("image_url_4x")
+    @SerialName("image_url_4x")
     val imageUrl4x: String,
 )

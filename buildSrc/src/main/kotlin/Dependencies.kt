@@ -51,6 +51,7 @@ sealed class Dependency(val notation: String) {
         object OkHttpLogging : Ktor("com.squareup.okhttp3:logging-interceptor:4.10.0")
         object ContentNegotiation : Ktor("io.ktor:ktor-client-content-negotiation:${Versions.Ktor}")
         object Gson : Ktor("io.ktor:ktor-serialization-gson:${Versions.Ktor}")
+        object KotlinX : Ktor("io.ktor:ktor-serialization-kotlinx-json:${Versions.Ktor}")
         object Auth : Ktor("io.ktor:ktor-client-auth:${Versions.Ktor}")
     }
     sealed class Room(notation: String) : Dependency(notation) {

@@ -42,11 +42,11 @@ data class Stream(
             else -> "$viewerCount"
         }
 
-    val viewerCountPlural: String
-        get() = when (viewerCount) {
-            1 -> "viewer"
-            else -> "viewers"
-        }
+    fun getThumbnailUrl(width: Int, height: Int): String {
+        return thumbnailUrl
+            .replace("{width}", width.toString())
+            .replace("{height}", height.toString())
+    }
 
     companion object {
         fun test() = Stream(

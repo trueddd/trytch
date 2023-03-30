@@ -5,6 +5,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp") version Versions.Ksp
+    kotlin("plugin.serialization") version Versions.Kotlin
 }
 
 android {
@@ -51,7 +52,7 @@ dependencies {
     implementation(Dependency.Ktor.OkHttp)
     implementation(Dependency.Ktor.OkHttpLogging)
     implementation(Dependency.Ktor.ContentNegotiation)
-    implementation(Dependency.Ktor.Gson)
+    implementation(Dependency.Ktor.KotlinX)
     implementation(Dependency.Ktor.Auth)
     implementation(files(projectDir.resolve("libs").resolve("tmik-jvm-0.1.3.jar")))
 

@@ -1,12 +1,14 @@
 package com.github.trueddd.twitch.dto
 
 import com.github.trueddd.twitch.data.BadgeVersion
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class TwitchBadgeSet(
-    @SerializedName("set_id")
+    @SerialName("set_id")
     val setId: String,
-    @SerializedName("versions")
+    @SerialName("versions")
     val versions: List<TwitchBadgeVersion>,
 ) {
 

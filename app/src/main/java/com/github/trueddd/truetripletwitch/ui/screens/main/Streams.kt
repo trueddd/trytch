@@ -9,7 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,10 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.github.trueddd.truetripletwitch.ui.modifyIf
+import com.github.trueddd.truetripletwitch.ui.shimmerBackground
 import com.github.trueddd.twitch.data.Stream
 
 @Composable
-fun StreamerName(name: String) {
+private fun StreamerName(name: String) {
     Text(
         text = name,
         fontSize = 16.sp,
@@ -42,7 +44,7 @@ fun StreamerName(name: String) {
 }
 
 @Composable
-fun StreamTitle(title: String) {
+private fun StreamTitle(title: String) {
     Text(
         text = title,
         fontSize = 14.sp,
@@ -55,7 +57,7 @@ fun StreamTitle(title: String) {
 }
 
 @Composable
-fun StreamInfo(value: String) {
+private fun StreamInfo(value: String) {
     Text(
         text = value,
         fontSize = 14.sp,
@@ -86,27 +88,31 @@ fun Stream(
             .background(MaterialTheme.colorScheme.inversePrimary)
             .clickable { onStreamClicked(stream) }
     ) {
+        var previewLoading by remember { mutableStateOf(true) }
         Box(
             modifier = Modifier
                 .weight(2f)
-                .aspectRatio(16/9f)
+                .aspectRatio(16 / 9f)
                 .background(MaterialTheme.colorScheme.inversePrimary)
         ) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(
-                        stream.thumbnailUrl
-                            .replace("{width}", "160")
-                            .replace("{height}", "90")
-                    )
+                    .data(stream.getThumbnailUrl(width = 320, height = 180))
                     .crossfade(true)
+                    .listener(
+                        onStart = { previewLoading = true },
+                        onSuccess = { _, _ -> previewLoading = false },
+                        onError = { _, _ -> previewLoading = false },
+                    )
                     .build(),
                 contentDescription = "${stream.userName} stream thumbnail",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .modifyIf(previewLoading) {
+                        shimmerBackground(RoundedCornerShape(4.dp))
+                    }
             )
             Box(modifier = Modifier
                 .padding(4.dp)
