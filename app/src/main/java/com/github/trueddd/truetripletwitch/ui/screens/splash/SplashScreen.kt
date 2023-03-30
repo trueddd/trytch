@@ -19,9 +19,6 @@ import com.bumble.appyx.navmodel.backstack.BackStack
 import com.bumble.appyx.navmodel.backstack.operation.replace
 import com.github.trueddd.truetripletwitch.R
 import com.github.trueddd.truetripletwitch.navigation.Routing
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class SplashScreen(
     private val viewModel: SplashViewModel,
@@ -32,11 +29,7 @@ class SplashScreen(
     @Composable
     override fun View(modifier: Modifier) {
         LaunchedEffect(Unit) {
-            coroutineScope {
-                viewModel.updateChatBadges()
-                launch { delay(1500) }
-                launch { viewModel.clearStreams() }
-            }
+            viewModel.initialize()
             backStack.replace(Routing.Main)
         }
         SplashContent()

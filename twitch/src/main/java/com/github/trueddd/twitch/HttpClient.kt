@@ -16,6 +16,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 @OptIn(ExperimentalSerializationApi::class)
 internal fun createHttpClient(twitchDao: TwitchDao): HttpClient {
     return HttpClient(OkHttp) {
+        expectSuccess = true
         engine {
             addInterceptor(
                 HttpLoggingInterceptor(HttpLoggingInterceptor.Logger.DEFAULT).apply {
@@ -29,6 +30,18 @@ internal fun createHttpClient(twitchDao: TwitchDao): HttpClient {
                 ignoreUnknownKeys = true
                 explicitNulls = false
             })
+        }
+        HttpResponseValidator {
+            handleResponseExceptionWithRequest { exception, _ ->
+                val clientException = exception as? ClientRequestException ?: return@handleResponseExceptionWithRequest
+                val response = clientException.response
+                when (response.status) {
+                    HttpStatusCode.Unauthorized -> {
+                        twitchDao.deleteUser()
+                        throw exception
+                    }
+                }
+            }
         }
     }.apply {
         plugin(HttpSend).intercept { request ->

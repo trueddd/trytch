@@ -8,6 +8,8 @@ interface TwitchUserManager {
 
     val userFlow: StateFlow<User?>
 
+    suspend fun checkIfLoggedIn(): Boolean
+
     fun getAuthLink(state: String): String
 
     fun login(accessToken: String): Flow<Unit>

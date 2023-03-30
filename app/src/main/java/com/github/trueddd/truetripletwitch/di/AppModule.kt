@@ -9,19 +9,24 @@ import org.koin.dsl.module
 
 val appModule = module {
 
-    factory { MainViewModel(twitchUserManager = get(), twitchStreamsManager = get()) }
+    factory { MainViewModel(
+        twitchUserManager = get(),
+        twitchStreamsManager = get(),
+    ) }
 
-    factory { (channel: String) ->
-        StreamViewModel(
-            channel,
-            twitchStreamsManager = get(),
-            player = get(),
-            chatManager = get(),
-            twitchBadgesManager = get(),
-        )
-    }
+    factory { (channel: String) -> StreamViewModel(
+        channel,
+        twitchStreamsManager = get(),
+        player = get(),
+        chatManager = get(),
+        twitchBadgesManager = get(),
+    ) }
 
-    factory { SplashViewModel(twitchStreamsManager = get(), twitchBadgesManager = get()) }
+    factory { SplashViewModel(
+        twitchStreamsManager = get(),
+        twitchBadgesManager = get(),
+        twitchUserManager = get(),
+    ) }
 
     single {
         ExoPlayer.Builder(get())

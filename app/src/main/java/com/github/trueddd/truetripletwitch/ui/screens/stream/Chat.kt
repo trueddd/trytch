@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -51,7 +52,7 @@ fun Chat(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         ChatMessages(messages = chatStatus.messages)
         if (chatStatus.connectionStatus is ConnectionStatus.Connecting) {
@@ -76,12 +77,17 @@ fun MessageWord(word: MessageWord) {
     when (word) {
         is MessageWord.Default -> Text(
             text = word.content,
-            color = MaterialTheme.colorScheme.secondary,
+            color = MaterialTheme.colorScheme.onBackground,
         )
         is MessageWord.Mention -> Text(
             text = word.content,
             fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        is MessageWord.Link -> Text(
+            text = word.content,
             color = MaterialTheme.colorScheme.secondary,
+            textDecoration = TextDecoration.Underline,
         )
     }
 }

@@ -30,6 +30,12 @@ internal class TwitchClientImpl(
         twitchDao.getUserFlow().stateIn(GlobalScope, SharingStarted.Eagerly, null)
     }
 
+    override suspend fun checkIfLoggedIn(): Boolean {
+        return withContext(coroutineContext) {
+            twitchDao.getUser() != null
+        }
+    }
+
     override fun getAuthLink(state: String): String {
         val scopes = listOf(
             "user:read:email",

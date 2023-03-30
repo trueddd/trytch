@@ -1,5 +1,7 @@
 package com.github.trueddd.twitch.data
 
+import com.github.trueddd.twitch.chat.ChatMessageWordsParser
+
 data class ChatMessage(
     val author: String,
     val content: String,
@@ -7,15 +9,5 @@ data class ChatMessage(
     val badges: List<String> = emptyList(),
 ) {
 
-    companion object {
-        private val wordSplitter = Regex("\\s+")
-    }
-
-    val words = content.split(wordSplitter)
-        .map { word ->
-            when {
-                word.startsWith("@") -> MessageWord.Mention(word)
-                else -> MessageWord.Default(word)
-            }
-        }
+    val words = ChatMessageWordsParser.split(content)
 }
