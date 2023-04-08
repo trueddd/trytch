@@ -26,8 +26,7 @@ data class TwitchStream(
     val language: String,
     @SerialName("thumbnail_url")
     val thumbnailUrl: String,
-    @SerialName("tag_ids")
-    val tagIds: List<String>,
+    val tags: List<String>,
 ) {
 
     fun toStream(userId: String) = Stream(
@@ -43,7 +42,7 @@ data class TwitchStream(
         startedAt,
         language,
         thumbnailUrl,
-        tagIds,
+        tags,
         userId,
     )
 }

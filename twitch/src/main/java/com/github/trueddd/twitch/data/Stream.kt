@@ -3,6 +3,8 @@ package com.github.trueddd.twitch.data
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
+import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 
 @Entity(
     tableName = "streams",
@@ -31,7 +33,7 @@ data class Stream(
     val startedAt: String,
     val language: String,
     val thumbnailUrl: String,
-    val tagIds: List<String>,
+    val tags: List<String>,
     val followedByUserId: String,
 ) {
 
@@ -42,10 +44,11 @@ data class Stream(
             else -> "$viewerCount"
         }
 
-    fun getThumbnailUrl(width: Int, height: Int): String {
+    fun getThumbnailUrl(width: Int, height: Int): HttpUrl {
         return thumbnailUrl
             .replace("{width}", width.toString())
             .replace("{height}", height.toString())
+            .toHttpUrl()
     }
 
     companion object {
@@ -62,7 +65,7 @@ data class Stream(
             startedAt = "2021-03-31T20:57:26Z",
             language = "ru",
             thumbnailUrl = "https://static-cdn.jtvnw.net/previews-ttv/live_user_aws-{width}x{height}.jpg",
-            tagIds = listOf("6ea6bca4-4712-4ab9-a906-e3336a9d8039"),
+            tags = listOf("English", "Cozy", "StreamForEveryone", "Cartoons", "Discuss", "NoPolitics"),
             followedByUserId = "123",
         )
     }

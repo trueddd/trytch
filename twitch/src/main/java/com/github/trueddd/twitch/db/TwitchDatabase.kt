@@ -2,6 +2,7 @@ package com.github.trueddd.twitch.db
 
 import android.content.Context
 import androidx.room.*
+import androidx.room.migration.AutoMigrationSpec
 import com.github.trueddd.twitch.data.Stream
 import com.github.trueddd.twitch.data.Tokens
 import com.github.trueddd.twitch.data.User
@@ -14,10 +15,11 @@ import com.github.trueddd.twitch.data.BadgeVersion
         Stream::class,
         BadgeVersion::class,
     ],
-    version = 5,
+    version = 6,
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
+        AutoMigration(from = 5, to = 6, spec = TwitchDatabase.TwitchStreamTagsMigration::class),
     ],
 )
 @TypeConverters(
@@ -35,4 +37,7 @@ abstract class TwitchDatabase : RoomDatabase() {
                 .build()
         }
     }
+
+    @RenameColumn(tableName = "streams", fromColumnName = "tagIds", toColumnName = "tags")
+    class TwitchStreamTagsMigration : AutoMigrationSpec
 }
