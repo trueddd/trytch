@@ -12,13 +12,19 @@ interface TwitchClient : TwitchUserManager, TwitchStreamsManager, TwitchBadgesMa
         fun create(context: Context, database: TwitchDatabase): TwitchClient {
             val httpClient = createHttpClient(database.twitchDao())
             return TwitchClientImpl(
-                twitchDao = database.twitchDao(),
-                httpClient = httpClient,
                 badgesManager = TwitchBadgesManagerImpl(
                     httpClient,
                     database.twitchDao(),
                     database.badgeDao(),
                     context.dataStore,
+                ),
+                streamsManager = TwitchStreamsManagerImpl(
+                    httpClient,
+                    database.twitchDao(),
+                ),
+                userManager = TwitchUserManagerImpl(
+                    database.twitchDao(),
+                    httpClient,
                 ),
             )
         }

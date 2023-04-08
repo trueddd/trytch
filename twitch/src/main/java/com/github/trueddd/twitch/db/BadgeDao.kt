@@ -7,7 +7,7 @@ import androidx.room.Upsert
 import com.github.trueddd.twitch.data.BadgeVersion
 
 @Dao
-interface BadgeDao {
+internal interface BadgeDao {
 
     @Upsert
     suspend fun upsertBadgeVersions(badgeVersions: List<BadgeVersion>)

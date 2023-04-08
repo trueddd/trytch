@@ -33,6 +33,13 @@ class StreamViewModel(
         setupStreamPlayer()
         setupChat()
         loadChannelBadges()
+        loadStreamInfo()
+    }
+
+    private fun loadStreamInfo() {
+        twitchStreamsManager.getStreamFlow(channel)
+            .onEach { stream -> updateState { it.copy(stream = stream) } }
+            .launchIn(viewModelScope)
     }
 
     private fun setupStreamPlayer() {

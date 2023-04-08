@@ -27,8 +27,8 @@ import com.github.trueddd.twitch.data.BadgeVersion
 )
 abstract class TwitchDatabase : RoomDatabase() {
 
-    abstract fun twitchDao(): TwitchDao
-    abstract fun badgeDao(): BadgeDao
+    internal abstract fun twitchDao(): TwitchDao
+    internal abstract fun badgeDao(): BadgeDao
 
     companion object {
 

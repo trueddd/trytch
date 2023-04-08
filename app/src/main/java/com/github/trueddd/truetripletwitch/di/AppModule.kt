@@ -12,6 +12,7 @@ val appModule = module {
     factory { MainViewModel(
         twitchUserManager = get(),
         twitchStreamsManager = get(),
+        twitchBadgesManager = get(),
     ) }
 
     factory { (channel: String) -> StreamViewModel(

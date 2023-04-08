@@ -7,7 +7,7 @@ import com.github.trueddd.twitch.data.User
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface TwitchDao {
+internal interface TwitchDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUser(user: User)
@@ -23,6 +23,9 @@ interface TwitchDao {
 
     @Query("select * from users limit 1")
     suspend fun getUser(): User?
+
+    @Query("select * from users where id = :id limit 1")
+    fun getUserFlowById(id: String): Flow<User?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUserToken(tokens: Tokens)
@@ -62,6 +65,9 @@ interface TwitchDao {
 
     @Query("select * from streams where id = :id limit 1")
     suspend fun getStreamById(id: String): Stream?
+
+    @Query("select * from streams where userName = :channel limit 1")
+    fun getStreamFlowByChannel(channel: String): Flow<Stream?>
 
     @Query("select * from streams where userName = :channel limit 1")
     suspend fun getStreamByUserName(channel: String): Stream?

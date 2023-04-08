@@ -1,13 +1,13 @@
 package com.github.trueddd.truetripletwitch.ui.screens.stream
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,9 +15,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.github.trueddd.truetripletwitch.R
 import com.github.trueddd.truetripletwitch.ui.theme.HalfTransparentBlack
+import com.github.trueddd.twitch.data.Stream
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import kotlinx.coroutines.delay
@@ -27,6 +29,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 @Composable
 fun PlayerContainerPreview() {
     PlayerContainer(
+        stream = Stream.test(),
         defaultControlsVisibility = true,
         playerEventsFlow = MutableSharedFlow(),
     )
@@ -36,11 +39,12 @@ fun PlayerContainerPreview() {
 @Composable
 fun PlayerContainer(
     player: ExoPlayer? = null,
+    stream: Stream? = null,
     playerStatus: PlayerStatus = PlayerStatus.test(),
     defaultControlsVisibility: Boolean = false,
     playerEventsFlow: MutableSharedFlow<PlayerEvent>,
 ) {
-    var controlsVisible by rememberSaveable { mutableStateOf(defaultControlsVisibility) }
+    var controlsVisible by remember { mutableStateOf(defaultControlsVisibility) }
     var playerZoom by remember { mutableStateOf(1f) }
     LaunchedEffect(controlsVisible) {
         if (controlsVisible) {
@@ -53,7 +57,7 @@ fun PlayerContainer(
             .fillMaxSize()
             .background(Color.Black)
             .pointerInput(Unit) {
-                val zoomRange = 0.9f .. 1.1f
+                val zoomRange = 0.9f..1.1f
                 detectTransformGestures(
                     onGesture = { _, _, zoom, _ ->
                         if (playerZoom == zoomRange.start && zoom < 1.0f) {
@@ -73,6 +77,8 @@ fun PlayerContainer(
                 )
             }
             .combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
                 onClick = { controlsVisible = !controlsVisible },
                 onDoubleClick = { playerEventsFlow.tryEmit(PlayerEvent.AspectRatioChange(!playerStatus.aspectRatio)) },
             )
@@ -85,7 +91,9 @@ fun PlayerContainer(
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .fillMaxHeight(0.75f)
+                .align(Alignment.TopCenter)
         ) {
             PlayerControls(
                 playerStatus,
@@ -97,6 +105,44 @@ fun PlayerContainer(
                         player?.play()
                     }
                 },
+            )
+        }
+        AnimatedVisibility(
+            visible = controlsVisible && stream != null,
+            enter = slideInVertically { it },
+            exit = slideOutVertically { it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.25f)
+                .align(Alignment.BottomCenter)
+        ) {
+            stream?.let { StreamInfo(stream = it) }
+        }
+    }
+}
+
+// todo: add streamer avatar, viewer count, tags, etc.
+@Composable
+private fun StreamInfo(
+    stream: Stream
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primaryContainer)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(8.dp)
+        ) {
+            Text(
+                text = stream.title,
+                fontSize = 16.sp,
+            )
+            Text(
+                text = stream.userName,
+                fontSize = 12.sp,
             )
         }
     }

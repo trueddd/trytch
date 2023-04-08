@@ -7,6 +7,8 @@ interface TwitchStreamsManager {
 
     val followedStreamsFlow: Flow<List<Stream>>
 
+    fun getStreamFlow(channel: String): Flow<Stream?>
+
     fun updateFollowedStreams(): Flow<Result<Unit>>
 
     fun getStreamVideoInfo(channel: String): Flow<Map<String, String>>

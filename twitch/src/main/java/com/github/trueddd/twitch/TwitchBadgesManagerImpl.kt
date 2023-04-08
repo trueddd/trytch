@@ -1,5 +1,6 @@
 package com.github.trueddd.twitch
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -14,19 +15,21 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
+import java.util.*
 import kotlin.time.Duration.Companion.days
 
-class TwitchBadgesManagerImpl(
+internal class TwitchBadgesManagerImpl(
     private val httpClient: HttpClient,
     private val twitchDao: TwitchDao,
     private val badgeDao: BadgeDao,
     private val twitchDataStore: DataStore<Preferences>,
 ) : TwitchBadgesManager, CoroutineScope {
 
-    companion object {
-        internal val GlobalBadgesUpdateInterval = 3.days.inWholeMilliseconds
-        internal val ChannelBadgesUpdateInterval = 1.days.inWholeMilliseconds
-        private val GlobalBadgesLastUpdatedKey = longPreferencesKey("global_badges_last_updated")
+    private companion object {
+        const val TAG = "TwitchBadgesManager"
+        val GlobalBadgesUpdateInterval = 3.days.inWholeMilliseconds
+        val ChannelBadgesUpdateInterval = 1.days.inWholeMilliseconds
+        val GlobalBadgesLastUpdatedKey = longPreferencesKey("global_badges_last_updated")
     }
 
     private val String.channelBadgesLastUpdatedKey: Preferences.Key<Long>
@@ -39,6 +42,7 @@ class TwitchBadgesManagerImpl(
     private suspend fun badgesNeedUpdate(channel: String?): Boolean {
         val key = channel?.channelBadgesLastUpdatedKey ?: GlobalBadgesLastUpdatedKey
         val lastUpdated = twitchDataStore.data.first()[key]
+        Log.d(TAG, "Badges of $channel was updated at ${lastUpdated?.let { Date(it) } ?: "never"}")
         val updateInterval = if (channel == null) GlobalBadgesUpdateInterval else ChannelBadgesUpdateInterval
         val currentDate = System.currentTimeMillis()
         return when {
@@ -56,7 +60,6 @@ class TwitchBadgesManagerImpl(
         }
     }
 
-    // todo: call only if user is present
     override fun updateBadges() {
         launch {
             if (!badgesNeedUpdate(channel = null)) {
@@ -77,7 +80,9 @@ class TwitchBadgesManagerImpl(
 
     override fun updateChannelBadges(channel: String) {
         launch {
+            Log.d(TAG, "Updating badges for $channel")
             if (!badgesNeedUpdate(channel)) {
+                Log.d(TAG, "Updating badges for $channel is skipped")
                 return@launch
             }
             val broadcasterId = twitchDao.getStreamByUserName(channel)?.userId ?: return@launch
@@ -89,6 +94,7 @@ class TwitchBadgesManagerImpl(
                 e.printStackTrace()
                 return@launch
             }
+            Log.d(TAG, "Loaded badges for $channel: $badgesData")
             val badges = badgesData.flatMap { it.toBadgeVersions(channel) }
             badgeDao.upsertBadgeVersions(badges)
             saveBadgesUpdateDate(channel)
@@ -99,7 +105,8 @@ class TwitchBadgesManagerImpl(
         return withContext(coroutineContext) {
             val badgeVersion = badgeTier ?: "0"
             badgeDao.getBadgeVersionsForSetId(channel, badgeName)
-                .firstOrNull { it.id == badgeVersion }
+                .filter { it.id == badgeVersion }
+                .maxByOrNull { it.channel.length }
                 ?.imageUrl2x
         }
     }

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.github.trueddd.truetripletwitch.ui.StatefulViewModel
+import com.github.trueddd.twitch.TwitchBadgesManager
 import com.github.trueddd.twitch.TwitchStreamsManager
 import com.github.trueddd.twitch.TwitchUserManager
 import kotlinx.coroutines.flow.launchIn
@@ -15,6 +16,7 @@ import kotlin.random.Random
 class MainViewModel(
     private val twitchUserManager: TwitchUserManager,
     private val twitchStreamsManager: TwitchStreamsManager,
+    private val twitchBadgesManager: TwitchBadgesManager,
 ) : StatefulViewModel<MainScreenState>() {
 
     private var authState: String = ""
@@ -34,7 +36,10 @@ class MainViewModel(
             val accessToken = response["access_token"] ?: return
             twitchUserManager.login(accessToken)
                 .onStart { updateState { it.copy(userLoading = true) } }
-                .onCompletion { updateState { it.copy(userLoading = false) } }
+                .onCompletion {
+                    updateState { it.copy(userLoading = false) }
+                    twitchBadgesManager.updateBadges()
+                }
                 .launchIn(viewModelScope)
         }
     }
