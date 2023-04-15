@@ -1,6 +1,5 @@
 package com.github.trueddd.twitch
 
-import com.github.trueddd.mylibrary.BuildConfig
 import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.data.UserRequestType
 import com.github.trueddd.twitch.db.TwitchDao
@@ -35,7 +34,6 @@ internal class TwitchUserManagerImpl(
 
     override fun getAuthLink(state: String): String {
         val scopes = listOf(
-            "user:read:email",
             "user:read:follows",
             "chat:read",
             "chat:edit",
@@ -87,12 +85,12 @@ internal class TwitchUserManagerImpl(
     override fun login(accessToken: String) = flow<Unit> {
         val twitchTokens = validateToken(accessToken) ?: return@flow
         val twitchUser = getTwitchUser(UserRequestType.Token(accessToken)) ?: return@flow
-        twitchDao.insertUserInfo(twitchUser.toUser(), twitchTokens.toTokens(accessToken))
+        twitchDao.insertUserInfo(twitchUser.toUser().copy(current = true), twitchTokens.toTokens(accessToken))
     }.flowOn(Dispatchers.IO)
 
     override fun logout() = flow<Unit> {
         withContext(Dispatchers.IO) {
-            twitchDao.deleteUser()
+            twitchDao.clearCurrentUser()
         }
     }
 }

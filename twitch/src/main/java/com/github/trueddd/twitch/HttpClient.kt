@@ -1,6 +1,5 @@
 package com.github.trueddd.twitch
 
-import com.github.trueddd.mylibrary.BuildConfig
 import com.github.trueddd.twitch.db.TwitchDao
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -37,7 +36,7 @@ internal fun createHttpClient(twitchDao: TwitchDao): HttpClient {
                 val response = clientException.response
                 when (response.status) {
                     HttpStatusCode.Unauthorized -> {
-                        twitchDao.deleteUser()
+                        twitchDao.clearCurrentUser()
                         throw exception
                     }
                 }

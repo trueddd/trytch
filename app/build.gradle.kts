@@ -1,11 +1,12 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp") version Versions.Ksp
+    id("com.google.devtools.ksp")
     id("kotlin-parcelize")
 }
 
 android {
+    namespace = "com.github.trueddd.truetripletwitch"
     compileSdk = Config.Android.CompileSdk
 
     defaultConfig {
@@ -34,8 +35,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = Versions.Java
+        targetCompatibility = Versions.Java
     }
     kotlinOptions {
         freeCompilerArgs = listOf(
@@ -48,7 +49,7 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = Versions.ComposeCompiler
     }
-    packagingOptions {
+    packaging {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
         }
@@ -67,8 +68,8 @@ dependencies {
     implementation(Dependency.Compose.Activity)
     implementation(Dependency.Compose.FlowLayout)
     testImplementation(Dependency.Junit4)
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation(Dependency.Compose.UiTestJunit4)
     debugImplementation(Dependency.Compose.Tooling)
 

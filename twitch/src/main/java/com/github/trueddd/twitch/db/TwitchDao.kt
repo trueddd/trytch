@@ -12,20 +12,17 @@ internal interface TwitchDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUser(user: User)
 
-    @Update
-    suspend fun updateUser(user: User)
+    @Query("update users set current = 0 where current = 1")
+    suspend fun clearCurrentUser()
 
-    @Query("delete from users")
-    suspend fun deleteUser()
-
-    @Query("select * from users limit 1")
+    @Query("select * from users where current = 1 limit 1")
     fun getUserFlow(): Flow<User?>
 
-    @Query("select * from users limit 1")
+    @Query("select * from users where current = 1 limit 1")
     suspend fun getUser(): User?
 
-    @Query("select * from users where id = :id limit 1")
-    fun getUserFlowById(id: String): Flow<User?>
+    @Query("select * from users where login = :login limit 1")
+    suspend fun getUser(login: String): User?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUserToken(tokens: Tokens)
@@ -41,7 +38,7 @@ internal interface TwitchDao {
 
     @Transaction
     suspend fun insertUserInfo(user: User, tokens: Tokens) {
-        deleteUser()
+        clearCurrentUser()
         insertUser(user)
         insertUserToken(tokens)
     }

@@ -1,5 +1,6 @@
 package com.github.trueddd.twitch.dto
 
+import com.github.trueddd.twitch.data.BroadcasterType
 import com.github.trueddd.twitch.data.User
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -16,14 +17,14 @@ data class TwitchUser(
     val description: String,
     @SerialName("profile_image_url")
     val profileImageUrl: String,
-    val email: String,
 ) {
 
     fun toUser() = User(
         id,
         login,
         displayName,
-        email,
         profileImageUrl,
+        BroadcasterType.from(broadcasterType),
+        description,
     )
 }

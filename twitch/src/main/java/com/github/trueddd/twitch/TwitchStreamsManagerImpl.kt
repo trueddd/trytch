@@ -43,6 +43,7 @@ internal class TwitchStreamsManagerImpl(
         }
     }
 
+    // todo: load followed users
     override fun updateFollowedStreams(): Flow<Result<Unit>> {
         Log.d(TAG, "Started streams loading")
         return flow {

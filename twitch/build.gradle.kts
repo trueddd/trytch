@@ -4,16 +4,16 @@ import java.io.FileInputStream
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp") version Versions.Ksp
-    kotlin("plugin.serialization") version Versions.Kotlin
+    id("com.google.devtools.ksp")
+    kotlin("plugin.serialization")
 }
 
 android {
+    namespace = "com.github.trueddd.twitch"
     compileSdk = Config.Android.CompileSdk
 
     defaultConfig {
         minSdk = Config.Android.MinSdk
-        targetSdk = Config.Android.TargetSdk
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -34,8 +34,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = Versions.Java
+        targetCompatibility = Versions.Java
     }
 }
 
@@ -60,5 +60,5 @@ dependencies {
     implementation(Dependency.Room.Ktx)
     ksp(Dependency.Room.Compiler)
 
-    implementation(Dependency.DataStore)
+    api(Dependency.DataStore)
 }

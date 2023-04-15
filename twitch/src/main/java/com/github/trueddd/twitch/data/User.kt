@@ -10,6 +10,8 @@ data class User(
     val id: String,
     val login: String,
     val displayName: String,
-    val email: String,
     val profileImageUrl: String,
+    val broadcasterType: BroadcasterType,
+    val description: String,
+    val current: Boolean = false,
 )

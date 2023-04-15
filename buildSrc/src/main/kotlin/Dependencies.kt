@@ -4,6 +4,10 @@ fun DependencyHandlerScope.implementation(dependency: Dependency) {
     add("implementation", create(dependency.notation))
 }
 
+fun DependencyHandlerScope.api(dependency: Dependency) {
+    add("api", create(dependency.notation))
+}
+
 fun DependencyHandlerScope.debugImplementation(dependency: Dependency) {
     add("debugImplementation", create(dependency.notation))
 }

@@ -1,5 +1,7 @@
+import org.gradle.api.JavaVersion
+
 object Versions {
-    const val AndroidGradlePlugin = "7.4.2"
+    const val AndroidGradlePlugin = "8.0.0"
     const val Kotlin = "1.8.10"
     const val Compose = "1.3.3"
     const val ComposeMaterial3 = "1.0.1"
@@ -14,4 +16,5 @@ object Versions {
     const val ExoPlayer = "2.18.1"
     const val Accompanist = "0.27.1"
     const val DataStore = "1.0.0"
+    val Java = JavaVersion.VERSION_17
 }
