@@ -16,5 +16,6 @@ object Versions {
     const val ExoPlayer = "2.18.1"
     const val Accompanist = "0.27.1"
     const val DataStore = "1.0.0"
+    const val Coil = "2.2.0"
     val Java = JavaVersion.VERSION_17
 }

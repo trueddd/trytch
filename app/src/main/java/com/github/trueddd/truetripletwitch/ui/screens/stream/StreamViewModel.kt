@@ -8,6 +8,8 @@ import com.github.trueddd.truetripletwitch.ui.StatefulViewModel
 import com.github.trueddd.twitch.TwitchBadgesManager
 import com.github.trueddd.twitch.TwitchStreamsManager
 import com.github.trueddd.twitch.chat.ChatManager
+import com.github.trueddd.twitch.emotes.EmoteUpdateOption
+import com.github.trueddd.twitch.emotes.EmotesProvider
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
@@ -20,6 +22,7 @@ class StreamViewModel(
     private val twitchBadgesManager: TwitchBadgesManager,
     val player: ExoPlayer,
     private val chatManager: ChatManager,
+    private val emotesProvider: EmotesProvider,
 ) : StatefulViewModel<StreamScreenState>() {
 
     init {
@@ -33,6 +36,7 @@ class StreamViewModel(
         setupStreamPlayer()
         setupChat()
         loadChannelBadges()
+        updateEmotes()
         loadStreamInfo()
     }
 
@@ -89,6 +93,10 @@ class StreamViewModel(
 
     private fun loadChannelBadges() {
         twitchBadgesManager.updateChannelBadges(channel)
+    }
+
+    private fun updateEmotes() {
+        emotesProvider.update(EmoteUpdateOption.Channel(channel))
     }
 
     override fun release() {

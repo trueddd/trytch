@@ -39,7 +39,10 @@ class MainActivity : NodeActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             TrueTripleTwitchTheme {
-                CompositionLocalProvider(LocalIntegrationPoint provides appyxIntegrationPoint) {
+                CompositionLocalProvider(
+                    LocalIntegrationPoint provides appyxIntegrationPoint,
+                    LocalImageLoader provides createImageLoader(),
+                ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background

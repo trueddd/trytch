@@ -6,7 +6,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.github.trueddd.truetripletwitch.LocalImageLoader
 import com.github.trueddd.truetripletwitch.ui.parseHexColor
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
@@ -39,10 +42,10 @@ import com.google.accompanist.flowlayout.FlowRow
 class ChatStatusParameterProvider : PreviewParameterProvider<ChatStatus> {
     override val values = sequenceOf(
         ChatStatus(listOf(
-            ChatMessage("truetripled", "hello", "#1E90FF", listOf("https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/2")),
-            ChatMessage("eltripledo", "hey, everyone!!"),
-            ChatMessage("eltripledo", "mega supa dupa long message which for sure will not fit in this damn screen i bet it would not"),
-            ChatMessage("truetripled", ":)", "#1E90FF", listOf("https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/2")),
+            ChatMessage("truetripled", "#1E90FF", listOf("https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/2"), listOf(MessageWord.Default("hello"))),
+            ChatMessage("eltripledo", words = listOf(MessageWord.Default("hey,"), MessageWord.Default("everyone!!"))),
+            ChatMessage("eltripledo", words = listOf(MessageWord.Default("mega supa dupa long message which for sure will not fit in this damn screen i bet it would not"))),
+            ChatMessage("truetripled", "#1E90FF", listOf("https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/2"), listOf(MessageWord.Default(":)"))),
         ), ConnectionStatus.Connected),
     )
 }
@@ -88,6 +91,17 @@ fun MessageWord(word: MessageWord) {
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
         )
+        is MessageWord.Emote -> {
+            val emoteVersion = word.emote.versions.last()
+            AsyncImage(
+                model = emoteVersion.url,
+                imageLoader = LocalImageLoader.current,
+                contentDescription = word.content,
+                modifier = Modifier
+                    .height(16.sp.value.dp)
+                    .width((16.sp.value * (emoteVersion.width.toFloat() / emoteVersion.height)).dp),
+            )
+        }
         is MessageWord.Link -> {
             val uriHandler = LocalUriHandler.current
             Text(
@@ -109,7 +123,7 @@ fun MessageWord(word: MessageWord) {
 @Preview(widthDp = 360)
 @Composable
 fun Message(
-    message: ChatMessage = ChatMessage("elptripledo", "Hello, my name is very long!")
+    message: ChatMessage = ChatMessage("elptripledo", words = listOf(MessageWord.Default("Hello, my name is very long!")))
 ) {
     FlowRow(
         mainAxisSpacing = 4.dp,

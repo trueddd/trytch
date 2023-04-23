@@ -3,9 +3,7 @@ package com.github.trueddd.twitch
 import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.data.UserRequestType
 import com.github.trueddd.twitch.db.TwitchDao
-import com.github.trueddd.twitch.dto.TwitchResponse
 import com.github.trueddd.twitch.dto.TwitchTokens
-import com.github.trueddd.twitch.dto.TwitchUser
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -20,6 +18,10 @@ internal class TwitchUserManagerImpl(
     private val twitchDao: TwitchDao,
     private val httpClient: HttpClient,
 ) : TwitchUserManager {
+
+    private val twitchApiWrapper by lazy {
+        TwitchApiWrapper(httpClient)
+    }
 
     @OptIn(DelicateCoroutinesApi::class)
     override val userFlow: StateFlow<User?> by lazy {
@@ -52,25 +54,6 @@ internal class TwitchUserManagerImpl(
         ).buildString()
     }
 
-    private suspend fun getTwitchUser(userRequestType: UserRequestType): TwitchUser? {
-        return try {
-            httpClient.get(Url("https://api.twitch.tv/helix/users")) {
-                when (userRequestType) {
-                    is UserRequestType.Id -> {
-                        header(HttpHeaders.Authorization, "Bearer ${twitchDao.getUserToken()!!}")
-                        parameter("id", userRequestType.value)
-                    }
-                    is UserRequestType.Token -> {
-                        header(HttpHeaders.Authorization, "Bearer ${userRequestType.value}")
-                    }
-                }
-            }.body<TwitchResponse<List<TwitchUser>>>().data.firstOrNull()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
-
     private suspend fun validateToken(accessToken: String): TwitchTokens? {
         return try {
             httpClient.get(Url("https://id.twitch.tv/oauth2/validate")) {
@@ -84,8 +67,12 @@ internal class TwitchUserManagerImpl(
 
     override fun login(accessToken: String) = flow<Unit> {
         val twitchTokens = validateToken(accessToken) ?: return@flow
-        val twitchUser = getTwitchUser(UserRequestType.Token(accessToken)) ?: return@flow
-        twitchDao.insertUserInfo(twitchUser.toUser().copy(current = true), twitchTokens.toTokens(accessToken))
+        val twitchUser = twitchApiWrapper.getTwitchUsers(UserRequestType.Token(accessToken))
+            ?.firstOrNull() ?: return@flow
+        twitchDao.insertUserInfo(
+            twitchUser.toUser().copy(current = true),
+            twitchTokens.toTokens(accessToken),
+        )
     }.flowOn(Dispatchers.IO)
 
     override fun logout() = flow<Unit> {

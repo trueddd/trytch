@@ -63,7 +63,10 @@ sealed class Dependency(val notation: String) {
         object Ktx : Room("androidx.room:room-ktx:${Versions.Room}")
         object Compiler : Room("androidx.room:room-compiler:${Versions.Room}")
     }
-    object Coil : Dependency("io.coil-kt:coil-compose:2.2.0")
+    sealed class Coil(notation: String) : Dependency(notation) {
+        object Compose : Dependency("io.coil-kt:coil-compose:${Versions.Coil}")
+        object Gif : Dependency("io.coil-kt:coil-gif:${Versions.Coil}")
+    }
     sealed class Navigation(notation: String) : Dependency(notation) {
         object Appyx : Navigation("com.bumble.appyx:core:1.0.5")
     }

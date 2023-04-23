@@ -53,7 +53,9 @@ internal fun createHttpClient(twitchDao: TwitchDao): HttpClient {
                 if (host == "api.twitch.tv") {
                     header("Client-Id", BuildConfig.twitchClientId)
                     twitchDao.getUserToken()?.let {
-                        header(HttpHeaders.Authorization, "Bearer $it")
+                        if (headers[HttpHeaders.Authorization] == null) {
+                            bearerAuth(it)
+                        }
                     }
                 }
             }.let { execute(it) }

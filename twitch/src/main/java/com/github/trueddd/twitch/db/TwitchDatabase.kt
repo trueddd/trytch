@@ -11,6 +11,8 @@ import com.github.trueddd.twitch.data.Stream
 import com.github.trueddd.twitch.data.Tokens
 import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.data.BadgeVersion
+import com.github.trueddd.twitch.data.EmoteInfo
+import com.github.trueddd.twitch.data.EmoteVersion
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -21,8 +23,10 @@ import kotlinx.coroutines.launch
         Tokens::class,
         Stream::class,
         BadgeVersion::class,
+        EmoteInfo::class,
+        EmoteVersion::class,
     ],
-    version = 7,
+    version = 8,
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),

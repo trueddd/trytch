@@ -21,12 +21,14 @@ val appModule = module {
         player = get(),
         chatManager = get(),
         twitchBadgesManager = get(),
+        emotesProvider = get(),
     ) }
 
     factory { SplashViewModel(
         twitchStreamsManager = get(),
         twitchBadgesManager = get(),
         twitchUserManager = get(),
+        emotesProvider = get(),
     ) }
 
     single {

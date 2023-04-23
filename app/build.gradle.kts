@@ -77,7 +77,8 @@ dependencies {
     implementation(Dependency.Koin.Annotations)
     ksp(Dependency.Koin.Compiler)
 
-    implementation(Dependency.Coil)
+    implementation(Dependency.Coil.Compose)
+    implementation(Dependency.Coil.Gif)
     implementation(Dependency.Navigation.Appyx)
 
     implementation(Dependency.VideoPlayer.Core)

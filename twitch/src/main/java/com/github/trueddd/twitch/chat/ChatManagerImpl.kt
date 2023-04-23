@@ -6,6 +6,7 @@ import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.ConnectionStatus
 import com.github.trueddd.twitch.db.TwitchDao
+import com.github.trueddd.twitch.emotes.EmotesProvider
 import com.ktmi.tmi.commands.join
 import com.ktmi.tmi.dsl.builder.scopes.MainScope
 import com.ktmi.tmi.dsl.builder.scopes.tmi
@@ -24,10 +25,15 @@ import java.util.*
 internal class ChatManagerImpl(
     private val badgesManager: TwitchBadgesManager,
     private val twitchDao: TwitchDao,
+    emotesProvider: EmotesProvider,
 ) : ChatManager {
 
     companion object {
         const val TAG = "ChatManager"
+    }
+
+    private val chatMessageWordsParser by lazy {
+        ChatMessageWordsParser(emotesProvider)
     }
 
     override fun connectChat(channel: String): Flow<ChatStatus> {
@@ -57,9 +63,9 @@ internal class ChatManagerImpl(
                         ?: emptyList()
                     val newMessage = ChatMessage(
                         author = message.displayName ?: message.username,
-                        message.message,
                         userColor = message.color?.ifEmpty { null },
                         badges = badges,
+                        words = chatMessageWordsParser.split(message.message),
                     )
                     Log.d(TAG, "New message: $newMessage")
                     messages.add(0, newMessage)

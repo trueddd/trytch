@@ -8,6 +8,7 @@ import com.github.trueddd.twitch.TwitchUserManager
 import com.github.trueddd.twitch.chat.ChatManager
 import com.github.trueddd.twitch.dataStore
 import com.github.trueddd.twitch.db.TwitchDatabase
+import com.github.trueddd.twitch.emotes.EmotesProvider
 import org.koin.dsl.binds
 import org.koin.dsl.module
 
@@ -21,7 +22,8 @@ val twitchModule = module {
         TwitchBadgesManager::class,
         TwitchUserManager::class,
         TwitchStreamsManager::class,
+        EmotesProvider::class,
     )
 
-    single { ChatManager.create(twitchBadgesManager = get(), database = get()) }
+    single { ChatManager.create(twitchBadgesManager = get(), database = get(), emotesProvider = get()) }
 }

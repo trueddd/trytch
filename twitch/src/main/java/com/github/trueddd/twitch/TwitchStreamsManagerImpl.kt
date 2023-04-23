@@ -2,6 +2,7 @@ package com.github.trueddd.twitch
 
 import android.util.Log
 import com.github.trueddd.twitch.data.Stream
+import com.github.trueddd.twitch.data.UserRequestType
 import com.github.trueddd.twitch.db.TwitchDao
 import com.github.trueddd.twitch.dto.PaginatedTwitchResponse
 import com.github.trueddd.twitch.dto.TwitchStream
@@ -25,6 +26,10 @@ internal class TwitchStreamsManagerImpl(
         private const val TAG = "TwitchStreamsManager"
     }
 
+    private val twitchApiWrapper by lazy {
+        TwitchApiWrapper(httpClient)
+    }
+
     override val followedStreamsFlow: Flow<List<Stream>>
         get() = twitchDao.getStreamsFlow().flowOn(Dispatchers.IO)
 
@@ -43,7 +48,6 @@ internal class TwitchStreamsManagerImpl(
         }
     }
 
-    // todo: load followed users
     override fun updateFollowedStreams(): Flow<Result<Unit>> {
         Log.d(TAG, "Started streams loading")
         return flow {
@@ -51,11 +55,19 @@ internal class TwitchStreamsManagerImpl(
                 emit(Result.failure(IllegalStateException("User is null")))
                 return@flow
             }
-            loadFollowedStreams(userId)
-                ?.map { it.toStream(userId) }
-                ?.let { twitchDao.upsertStreams(it) }
-                ?.also { emit(Result.success(Unit)) }
-                ?: emit(Result.failure(IllegalStateException("Followed streams loading error")))
+            val streams = loadFollowedStreams(userId)?.map { it.toStream(userId) }
+            if (streams == null) {
+                emit(Result.failure(IllegalStateException("Followed streams loading error")))
+            } else {
+                twitchDao.upsertStreams(streams)
+                emit(Result.success(Unit))
+                val userIds = streams.map { it.userId }
+                val users = twitchApiWrapper.getTwitchUsers(UserRequestType.Id(userIds))
+                    ?.map { it.toUser() }
+                    ?: return@flow
+                Log.d(TAG, "Loaded ${users.size} users from followed streams")
+                twitchDao.insertUsers(users)
+            }
         }.flowOn(Dispatchers.IO)
     }
 

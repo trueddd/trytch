@@ -1,9 +1,7 @@
 package com.github.trueddd.twitch.data
 
-import androidx.room.Entity
-
-@Entity
 data class Emote(
+    val id: String,
     val name: String,
     val provider: Provider,
     val versions: List<Version>,

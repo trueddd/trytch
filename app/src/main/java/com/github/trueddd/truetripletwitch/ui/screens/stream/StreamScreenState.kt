@@ -4,6 +4,7 @@ import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.ConnectionStatus
 import com.github.trueddd.twitch.data.Stream
+import com.github.trueddd.twitch.data.MessageWord
 
 data class StreamScreenState(
     val channel: String,
@@ -18,8 +19,8 @@ data class StreamScreenState(
             stream = Stream.test(),
             chatStatus = ChatStatus(
                 messages = listOf(
-                    ChatMessage("qwe1", "Hello"),
-                    ChatMessage("qwe2", "Hi!"),
+                    ChatMessage("qwe1", words = listOf(MessageWord.Default("Hello"))),
+                    ChatMessage("qwe2", words = listOf(MessageWord.Default("Hi!"))),
                 ),
                 connectionStatus = ConnectionStatus.Connected,
             ),

@@ -63,8 +63,10 @@ class MainViewModel(
     fun updateStreams() {
         twitchStreamsManager.updateFollowedStreams()
             .onStart { updateState { it.copy(streamsLoading = true) } }
-            .onEach { Log.d("Streams", it.toString()) }
-            .onCompletion { updateState { it.copy(streamsLoading = false) } }
+            .onEach { result ->
+                Log.d("Streams", result.toString())
+                updateState { it.copy(streamsLoading = false) }
+            }
             .launchIn(viewModelScope)
     }
 }
