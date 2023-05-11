@@ -69,9 +69,9 @@ fun Chat(
                     .size(48.dp)
             )
         }
-        if (chatStatus.connectionStatus is ConnectionStatus.Disconnected) {
+        (chatStatus.connectionStatus as? ConnectionStatus.Disconnected)?.error?.let { error ->
             Text(
-                text = "Chat connection error",
+                text = "Chat connection error\n${error.message}",
                 modifier = Modifier
                     .align(Alignment.Center)
             )

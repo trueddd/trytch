@@ -91,6 +91,15 @@ fun PlayerContainer(
             enter = fadeIn(),
             exit = fadeOut(),
             modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Box(modifier = Modifier.background(HalfTransparentBlack))
+        }
+        AnimatedVisibility(
+            visible = controlsVisible,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.75f)
                 .align(Alignment.TopCenter)
@@ -181,7 +190,7 @@ fun PlayerControls(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(HalfTransparentBlack)
+//            .background(HalfTransparentBlack)
     ) {
         val playButtonResource = remember(playerStatus.isPlaying) {
             when (playerStatus.isPlaying) {
