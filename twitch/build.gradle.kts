@@ -18,10 +18,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
 
-        val twitchProperties = rootProject.file("twitch.properties")
-            .let { Properties().apply { load(FileInputStream(it)) } }
-        buildConfigField("String", "twitchClientId", "\"${twitchProperties["client_id"]}\"")
-        buildConfigField("String", "twitchClientSecret", "\"${twitchProperties["client_secret"]}\"")
+        val twitchKeys = getTwitchKeys()
+        buildConfigField("String", "twitchClientId", "\"${twitchKeys.clientId}\"")
+        buildConfigField("String", "twitchClientSecret", "\"${twitchKeys.clientSecret}\"")
     }
 
     buildTypes {
@@ -61,4 +60,20 @@ dependencies {
     ksp(Dependency.Room.Compiler)
 
     api(Dependency.DataStore)
+}
+
+fun getTwitchKeys(): TwitchKeys {
+    val propertiesFile = rootProject.file("twitch.properties")
+    return if (propertiesFile.exists()) {
+        val properties = Properties().apply { load(FileInputStream(propertiesFile)) }
+        TwitchKeys(
+            properties["client_id"].toString(),
+            properties["client_secret"].toString(),
+        )
+    } else {
+        TwitchKeys(
+            System.getenv("twitch_client_id").toString(),
+            System.getenv("twitch_client_secret").toString(),
+        )
+    }
 }
