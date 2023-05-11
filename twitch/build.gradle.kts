@@ -64,16 +64,9 @@ dependencies {
 
 fun getTwitchKeys(): TwitchKeys {
     val propertiesFile = rootProject.file("twitch.properties")
-    return if (propertiesFile.exists()) {
-        val properties = Properties().apply { load(FileInputStream(propertiesFile)) }
-        TwitchKeys(
-            properties["client_id"].toString(),
-            properties["client_secret"].toString(),
-        )
-    } else {
-        TwitchKeys(
-            System.getenv("twitch_client_id").toString(),
-            System.getenv("twitch_client_secret").toString(),
-        )
-    }
+    val properties = Properties().apply { load(FileInputStream(propertiesFile)) }
+    return TwitchKeys(
+        properties["client_id"].toString(),
+        properties["client_secret"].toString(),
+    )
 }

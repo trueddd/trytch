@@ -22,11 +22,14 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew assembleRelease
+      - name: Load Twitch secrets
+        uses: ozaytsev86/create-env-file@v1
+        file-name: 'twitch.properties'
+        with:
+          ENV_client_id: ${{ secrets.CLIENT_ID }}
+          ENV_client_secret: ${{ secrets.CLIENT_SECRET }}
       - name: Upload a build artifact
         uses: actions/upload-artifact@v3.1.2
-        env:
-          twitch_client_id: ${{ secrets.CLIENT_ID }}
-          twitch_client_secret: ${{ secrets.CLIENT_SECRET }}
         with:
           name: 'releaseApk'
           path: './app/build/outputs/apk/release/*.apk'
