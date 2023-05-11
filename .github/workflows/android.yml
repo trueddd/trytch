@@ -24,8 +24,8 @@ jobs:
         run: ./gradlew assembleRelease
       - name: Load Twitch secrets
         uses: ozaytsev86/create-env-file@v1
-        file-name: 'twitch.properties'
         with:
+          file-name: 'twitch.properties'
           ENV_client_id: ${{ secrets.CLIENT_ID }}
           ENV_client_secret: ${{ secrets.CLIENT_SECRET }}
       - name: Upload a build artifact
