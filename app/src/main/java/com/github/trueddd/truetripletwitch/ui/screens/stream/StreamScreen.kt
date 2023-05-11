@@ -70,7 +70,7 @@ fun StreamScreen(
                 }
                 .background(MaterialTheme.colorScheme.error)
         ) {
-            PlayerContainer(player, state.stream, state.playerStatus, defaultControlsVisibility = false, playerEventsFlow)
+            PlayerContainer(player, state.stream, state.playerStatus, playerEventsFlow)
         }
         if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
             Chat(state.chatStatus)

@@ -65,6 +65,8 @@ dependencies {
     implementation(Dependency.Compose.Material3)
     implementation(Dependency.Compose.ToolingPreview)
     implementation(Dependency.Lifecycle.RuntimeKtx)
+    implementation(Dependency.Lifecycle.ViewModelKtx)
+    implementation(Dependency.Lifecycle.ViewModelCompose)
     implementation(Dependency.Compose.Activity)
     implementation(Dependency.Compose.FlowLayout)
     testImplementation(Dependency.Junit4)

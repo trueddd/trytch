@@ -5,11 +5,14 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
-fun Player.playbackStateFlow(): Flow<Boolean> {
+fun Player.playbackStateFlow(): Flow<PlaybackState> {
     return callbackFlow {
         val listener = object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                trySend(PlaybackState(isBuffering = playbackState == Player.STATE_BUFFERING, isPlaying = isPlaying))
+            }
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                trySend(isPlaying)
+                trySend(PlaybackState(isBuffering = playbackState == Player.STATE_BUFFERING, isPlaying = isPlaying))
             }
         }
         addListener(listener)
@@ -18,3 +21,8 @@ fun Player.playbackStateFlow(): Flow<Boolean> {
         }
     }
 }
+
+data class PlaybackState(
+    val isBuffering: Boolean,
+    val isPlaying: Boolean,
+)

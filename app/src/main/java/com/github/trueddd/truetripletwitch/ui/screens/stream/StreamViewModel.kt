@@ -59,9 +59,12 @@ class StreamViewModel(
             }
             .launchIn(viewModelScope)
         player.playbackStateFlow()
-            .onEach { isPlaying ->
+            .onEach { (isBuffering, isPlaying) ->
                 updateState {
-                    val playerStatus = it.playerStatus.copy(isPlaying = isPlaying)
+                    val playerStatus = it.playerStatus.copy(
+                        isPlaying = isPlaying,
+                        isBuffering = isBuffering,
+                    )
                     it.copy(playerStatus = playerStatus)
                 }
             }
@@ -71,11 +74,13 @@ class StreamViewModel(
     private fun loadStreamVideoInfo() {
         twitchStreamsManager.getStreamVideoInfo(channel)
             .onEach { Log.d(TAG, "Stream links: $it") }
-            .onEach { links ->
+            .onEach { streamInfoList ->
                 updateState { state ->
+                    val stream = streamInfoList.lastOrNull()
                     val playerStatus = state.playerStatus.copy(
-                        streamUri = links.values.lastOrNull()?.let { Uri.parse(it) },
-                        streamLinks = links,
+                        streamUri = stream?.url?.let { Uri.parse(it) },
+                        streamLinks = streamInfoList,
+                        selectedStream = stream?.quality,
                     )
                     state.copy(playerStatus = playerStatus)
                 }

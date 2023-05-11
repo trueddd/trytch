@@ -1,13 +1,16 @@
 package com.github.trueddd.truetripletwitch.ui.screens.stream
 
 import android.net.Uri
+import com.github.trueddd.twitch.data.StreamInfo
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 
 data class PlayerStatus(
     val isPlaying: Boolean,
-    val streamLinks: Map<String, String>,
+    val isBuffering: Boolean,
+    val streamLinks: List<StreamInfo>,
     val streamUri: Uri?,
     val aspectRatio: AspectRatio,
+    val selectedStream: String?,
 ) {
 
     sealed class AspectRatio(val value: Int) {
@@ -20,21 +23,25 @@ data class PlayerStatus(
     companion object {
         fun default() = PlayerStatus(
             isPlaying = false,
-            streamLinks = emptyMap(),
+            isBuffering = false,
+            streamLinks = emptyList(),
             streamUri = null,
             aspectRatio = AspectRatio.Zoom,
+            selectedStream = null,
         )
         fun test() = PlayerStatus(
             isPlaying = true,
-            streamLinks = mapOf(
-                "144p" to "link",
-                "360p" to "link",
-                "480p" to "link",
-                "720p" to "link",
-                "1080p" to "link",
+            isBuffering = false,
+            streamLinks = listOf(
+                StreamInfo("1080p", "link"),
+                StreamInfo("720p", "link"),
+                StreamInfo("480p", "link"),
+                StreamInfo("360p", "link"),
+                StreamInfo("144p","link"),
             ),
             streamUri = Uri.EMPTY,
             aspectRatio = AspectRatio.Fit,
+            selectedStream = "1080p",
         )
     }
 }

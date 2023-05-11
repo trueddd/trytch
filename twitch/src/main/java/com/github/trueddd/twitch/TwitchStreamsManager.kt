@@ -1,6 +1,7 @@
 package com.github.trueddd.twitch
 
 import com.github.trueddd.twitch.data.Stream
+import com.github.trueddd.twitch.data.StreamInfo
 import kotlinx.coroutines.flow.Flow
 
 interface TwitchStreamsManager {
@@ -11,7 +12,7 @@ interface TwitchStreamsManager {
 
     fun updateFollowedStreams(): Flow<Result<Unit>>
 
-    fun getStreamVideoInfo(channel: String): Flow<Map<String, String>>
+    fun getStreamVideoInfo(channel: String): Flow<List<StreamInfo>>
 
     suspend fun clearStreams()
 }

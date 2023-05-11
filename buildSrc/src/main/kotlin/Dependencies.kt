@@ -26,8 +26,8 @@ fun DependencyHandlerScope.ksp(dependency: Dependency) {
 
 sealed class Dependency(val notation: String) {
     sealed class Core(notation: String) : Dependency(notation) {
-        object Ktx : Core("androidx.core:core-ktx:1.8.0")
-        object AppCompat : Core("androidx.appcompat:appcompat:1.5.0")
+        object Ktx : Core("androidx.core:core-ktx:1.10.1")
+        object AppCompat : Core("androidx.appcompat:appcompat:1.6.1")
     }
     sealed class Compose(notation: String) : Dependency(notation) {
         object Ui : Compose("androidx.compose.ui:ui:${Versions.Compose}")
@@ -41,6 +41,8 @@ sealed class Dependency(val notation: String) {
     }
     sealed class Lifecycle(notation: String) : Dependency(notation) {
         object RuntimeKtx : Lifecycle("androidx.lifecycle:lifecycle-runtime-ktx:${Versions.Lifecycle}")
+        object ViewModelKtx : Lifecycle("androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.Lifecycle}")
+        object ViewModelCompose : Lifecycle("androidx.lifecycle:lifecycle-viewmodel-compose:${Versions.Lifecycle}")
     }
     object Junit4 : Dependency("junit:junit:4.13.2")
     sealed class Koin(notation: String) : Dependency(notation) {
@@ -68,7 +70,7 @@ sealed class Dependency(val notation: String) {
         object Gif : Dependency("io.coil-kt:coil-gif:${Versions.Coil}")
     }
     sealed class Navigation(notation: String) : Dependency(notation) {
-        object Appyx : Navigation("com.bumble.appyx:core:1.0.5")
+        object Appyx : Navigation("com.bumble.appyx:core:1.2.0")
     }
     sealed class VideoPlayer(notation: String) : Dependency(notation) {
         object Core : VideoPlayer("com.google.android.exoplayer:exoplayer:${Versions.ExoPlayer}")

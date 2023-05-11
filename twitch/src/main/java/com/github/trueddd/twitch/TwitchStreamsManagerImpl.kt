@@ -2,6 +2,7 @@ package com.github.trueddd.twitch
 
 import android.util.Log
 import com.github.trueddd.twitch.data.Stream
+import com.github.trueddd.twitch.data.StreamInfo
 import com.github.trueddd.twitch.data.UserRequestType
 import com.github.trueddd.twitch.db.TwitchDao
 import com.github.trueddd.twitch.dto.PaginatedTwitchResponse
@@ -74,16 +75,20 @@ internal class TwitchStreamsManagerImpl(
     override fun getStreamVideoInfo(channel: String) = flow {
         val stream = twitchDao.getStreamByUserName(channel) ?: run {
             Log.d(TAG, "No stream found for $channel")
-            emit(emptyMap())
+            emit(emptyList())
             return@flow
         }
         try {
             httpClient.get(Url("https://pwn.sh/tools/streamapi.py")) {
                 parameter("url", "twitch.tv/${stream.userName}")
-            }.body<TwitchStreamVideoInfo>().urls.let { emit(it) }
+            }.body<TwitchStreamVideoInfo>().urls
+                .filterKeys { it != "audio_only" }
+                .map { StreamInfo(it.key, it.value) }
+                .sortedByDescending { it.resolution }
+                .let { emit(it) }
         } catch (e: Exception) {
             e.printStackTrace()
-            emit(emptyMap())
+            emit(emptyList())
         }
     }.flowOn(Dispatchers.IO)
 

@@ -1,37 +1,54 @@
 package com.github.trueddd.truetripletwitch.ui.screens.stream
 
+import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.github.trueddd.truetripletwitch.R
+import com.github.trueddd.truetripletwitch.ui.detectPlayerZoom
 import com.github.trueddd.truetripletwitch.ui.theme.HalfTransparentBlack
 import com.github.trueddd.twitch.data.Stream
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlin.time.Duration.Companion.seconds
 
 @Preview(widthDp = 400, heightDp = 250)
 @Composable
 fun PlayerContainerPreview() {
     PlayerContainer(
         stream = Stream.test(),
-        defaultControlsVisibility = true,
         playerEventsFlow = MutableSharedFlow(),
+        defaultControlsVisibility = true,
+        defaultSettingsVisibility = false,
+    )
+}
+
+@Preview(widthDp = 400, heightDp = 250)
+@Composable
+fun PlayerContainerPreviewWithSettings() {
+    PlayerContainer(
+        stream = Stream.test(),
+        playerEventsFlow = MutableSharedFlow(),
+        defaultControlsVisibility = true,
+        defaultSettingsVisibility = true,
     )
 }
 
@@ -41,14 +58,21 @@ fun PlayerContainer(
     player: ExoPlayer? = null,
     stream: Stream? = null,
     playerStatus: PlayerStatus = PlayerStatus.test(),
-    defaultControlsVisibility: Boolean = false,
     playerEventsFlow: MutableSharedFlow<PlayerEvent>,
+    defaultControlsVisibility: Boolean = false,
+    defaultSettingsVisibility: Boolean = false,
 ) {
     var controlsVisible by remember { mutableStateOf(defaultControlsVisibility) }
-    var playerZoom by remember { mutableStateOf(1f) }
+    var settingsVisible by remember { mutableStateOf(defaultSettingsVisibility) }
+    LaunchedEffect(settingsVisible) {
+        if (settingsVisible) {
+            delay(5.seconds)
+            settingsVisible = false
+        }
+    }
     LaunchedEffect(controlsVisible) {
         if (controlsVisible) {
-            delay(3_000L)
+            delay(3.seconds)
             controlsVisible = false
         }
     }
@@ -56,26 +80,7 @@ fun PlayerContainer(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-            .pointerInput(Unit) {
-                val zoomRange = 0.9f..1.1f
-                detectTransformGestures(
-                    onGesture = { _, _, zoom, _ ->
-                        if (playerZoom == zoomRange.start && zoom < 1.0f) {
-                            return@detectTransformGestures
-                        }
-                        if (playerZoom == zoomRange.endInclusive && zoom > 1.0f) {
-                            return@detectTransformGestures
-                        }
-                        val newZoom = playerZoom * zoom
-                        playerZoom = newZoom.coerceIn(zoomRange)
-                        when (newZoom) {
-                            zoomRange.endInclusive -> PlayerStatus.AspectRatio.Zoom
-                            zoomRange.start -> PlayerStatus.AspectRatio.Fit
-                            else -> null
-                        }?.let { playerEventsFlow.tryEmit(PlayerEvent.AspectRatioChange(it)) }
-                    },
-                )
-            }
+            .detectPlayerZoom(playerEventsFlow)
             .combinedClickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -114,6 +119,14 @@ fun PlayerContainer(
                         player?.play()
                     }
                 },
+                settingsClicked = { settingsVisible = !settingsVisible },
+            )
+        }
+        if (playerStatus.isBuffering) {
+            CircularProgressIndicator(
+                color = Color.White,
+                modifier = Modifier
+                    .align(Alignment.Center)
             )
         }
         AnimatedVisibility(
@@ -126,6 +139,67 @@ fun PlayerContainer(
                 .align(Alignment.BottomCenter)
         ) {
             stream?.let { StreamInfo(stream = it) }
+        }
+        AnimatedVisibility(
+            visible = settingsVisible,
+            enter = slideInHorizontally { it },
+            exit = slideOutHorizontally { it },
+            modifier = Modifier
+                .fillMaxHeight()
+                .align(Alignment.CenterEnd)
+        ) {
+            SettingsPanel(playerStatus) {
+                settingsVisible = false
+                Log.d("Quality", "Changed to $it")
+                playerEventsFlow.tryEmit(PlayerEvent.StreamQualityChange(it))
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsPanel(
+    playerStatus: PlayerStatus,
+    onQualityClicked: (String) -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Column(
+            modifier = Modifier
+                .width(IntrinsicSize.Max)
+        ) {
+            Text(
+                text = "Stream quality",
+                fontSize = 16.sp,
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp, top = 8.dp)
+            )
+            Divider(
+                thickness = Dp.Hairline,
+                modifier = Modifier.padding(bottom = 2.dp)
+            )
+            playerStatus.streamLinks.forEach { (quality, _) ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onQualityClicked(quality) }
+                ) {
+                    RadioButton(
+                        selected = quality == playerStatus.selectedStream,
+                        onClick = null,
+                        modifier = Modifier
+                            .padding(start = 8.dp, top = 2.dp, bottom = 2.dp)
+                    )
+                    Text(
+                        text = quality,
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -186,11 +260,11 @@ fun Player(
 fun PlayerControls(
     playerStatus: PlayerStatus,
     playPauseClicked: () -> Unit,
+    settingsClicked: () -> Unit,
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-//            .background(HalfTransparentBlack)
     ) {
         val playButtonResource = remember(playerStatus.isPlaying) {
             when (playerStatus.isPlaying) {
@@ -198,14 +272,16 @@ fun PlayerControls(
                 false -> R.drawable.ic_play_arrow_48
             }
         }
-        Image(
-            painter = painterResource(playButtonResource),
-            contentDescription = if (playerStatus.isPlaying) "Pause" else "Play",
-            modifier = Modifier
-                .align(Alignment.Center)
-                .size(48.dp)
-                .clickable { playPauseClicked() }
-        )
+        if (!playerStatus.isBuffering) {
+            Image(
+                painter = painterResource(playButtonResource),
+                contentDescription = if (playerStatus.isPlaying) "Pause" else "Play",
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(48.dp)
+                    .clickable { playPauseClicked() }
+            )
+        }
         Image(
             painter = painterResource(R.drawable.ic_settings_48),
             contentDescription = "Settings",
@@ -213,6 +289,7 @@ fun PlayerControls(
                 .padding(12.dp)
                 .align(Alignment.BottomEnd)
                 .size(24.dp)
+                .clickable { settingsClicked() }
         )
     }
 }
