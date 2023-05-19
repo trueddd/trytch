@@ -26,11 +26,12 @@ import kotlinx.coroutines.launch
         EmoteInfo::class,
         EmoteVersion::class,
     ],
-    version = 8,
+    version = 9,
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
         AutoMigration(from = 5, to = 6, spec = TwitchDatabase.TwitchStreamTagsMigration::class),
+        AutoMigration(from = 8, to = 9),
     ],
 )
 @TypeConverters(

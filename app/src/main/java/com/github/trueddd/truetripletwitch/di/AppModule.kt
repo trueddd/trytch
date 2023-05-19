@@ -1,7 +1,10 @@
 package com.github.trueddd.truetripletwitch.di
 
+import com.bumble.appyx.navmodel.backstack.BackStack
+import com.github.trueddd.truetripletwitch.navigation.Routing
 import com.github.trueddd.truetripletwitch.ui.StatelessViewModel
 import com.github.trueddd.truetripletwitch.ui.screens.main.MainViewModel
+import com.github.trueddd.truetripletwitch.ui.screens.profile.ProfileViewModel
 import com.github.trueddd.truetripletwitch.ui.screens.splash.SplashViewModel
 import com.github.trueddd.truetripletwitch.ui.screens.stream.StreamViewModel
 import com.google.android.exoplayer2.ExoPlayer
@@ -29,6 +32,11 @@ val appModule = module {
         twitchBadgesManager = get(),
         twitchUserManager = get(),
         emotesProvider = get(),
+    ) }
+
+    factory { (backStack: BackStack<Routing>) -> ProfileViewModel(
+        twitchUserManager = get(),
+        backStack = backStack,
     ) }
 
     single {

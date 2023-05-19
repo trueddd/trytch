@@ -10,6 +10,7 @@ sealed class Routing(val name: String) : Parcelable {
             const val MAIN = "main"
             const val STREAM = "stream"
             const val SPLASH = "splash"
+            const val PROFILE = "profile"
         }
     }
 
@@ -21,4 +22,7 @@ sealed class Routing(val name: String) : Parcelable {
 
     @Parcelize
     class Stream(val channel: String) : Routing(Keys.STREAM)
+
+    @Parcelize
+    object Profile : Routing(Keys.PROFILE)
 }

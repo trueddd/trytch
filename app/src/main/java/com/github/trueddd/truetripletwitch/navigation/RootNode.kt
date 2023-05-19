@@ -10,6 +10,7 @@ import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.ParentNode
 import com.bumble.appyx.navmodel.backstack.BackStack
 import com.github.trueddd.truetripletwitch.ui.screens.main.MainScreen
+import com.github.trueddd.truetripletwitch.ui.screens.profile.ProfileScreen
 import com.github.trueddd.truetripletwitch.ui.screens.splash.SplashScreen
 import com.github.trueddd.truetripletwitch.ui.screens.stream.StreamScreen
 import com.github.trueddd.truetripletwitch.ui.screens.viewModel
@@ -28,6 +29,7 @@ class RootNode(
         is Routing.Splash -> SplashScreen(viewModel(Routing.Companion.Keys.SPLASH), backStack, buildContext)
         is Routing.Main -> MainScreen(viewModel(Routing.Companion.Keys.MAIN), backStack, buildContext)
         is Routing.Stream -> StreamScreen(viewModel(Routing.Companion.Keys.STREAM) { parametersOf(navTarget.channel) }, buildContext)
+        is Routing.Profile -> ProfileScreen(viewModel(Routing.Companion.Keys.PROFILE) { parametersOf(backStack) }, buildContext)
     }
 
     @Composable

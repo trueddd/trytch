@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,14 +18,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.github.trueddd.truetripletwitch.ui.TiltedRectangle
 
 @Preview
 @Composable
 private fun ToolbarPreview() {
     Toolbar(state = MainScreenState.test())
+}
+
+@Preview
+@Composable
+private fun NoUserToolbarPreview() {
+    Toolbar(state = MainScreenState.default())
 }
 
 @Composable
@@ -55,18 +65,17 @@ fun Toolbar(
                     )
                 }
             } else {
+                // todo: finish toolbar user view
                 Text(text = state.user.displayName)
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(
-                    onClick = onLogoutButtonClicked,
-                    enabled = !state.userLoading,
+                AsyncImage(
+                    model = state.user.profileImageUrl,
+                    contentDescription = state.user.displayName,
                     modifier = Modifier
-                ) {
-                    Text(
-                        text = "Logout",
-                        fontSize = 16.sp,
-                    )
-                }
+                        .fillMaxHeight()
+                        .aspectRatio(2f)
+                        .background(Color.Gray, TiltedRectangle(30f))
+                )
             }
         }
         if (state.userLoading) {
