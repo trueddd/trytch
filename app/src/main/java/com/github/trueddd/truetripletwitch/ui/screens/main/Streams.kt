@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.github.trueddd.twitch.data.Stream
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 private val StreamFieldHorizontalPadding = 4.dp
 
@@ -74,7 +76,7 @@ private fun StreamInfo(value: String) {
 }
 
 @Composable
-private fun StreamTags(tags: List<String>) {
+private fun StreamTags(tags: ImmutableList<String>) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(StreamFieldHorizontalPadding),
         contentPadding = PaddingValues(horizontal = StreamFieldHorizontalPadding),
@@ -146,7 +148,7 @@ private fun StreamPreview(stream: Stream) {
     heightDp = 100,
 )
 @Composable
-fun Stream(
+private fun Stream(
     @PreviewParameter(StreamParameters::class)
     stream: Stream,
     onStreamClicked: (Stream) -> Unit = {},
@@ -182,7 +184,7 @@ fun Stream(
                 StreamerName(stream.userName)
                 StreamTitle(stream.title)
                 StreamInfo(stream.gameName)
-                StreamTags(stream.tags)
+                StreamTags(stream.tags.toImmutableList())
             }
         }
     }
@@ -190,12 +192,14 @@ fun Stream(
 
 @Composable
 fun Streams(
-    streams: List<Stream>,
+    streams: ImmutableList<Stream>,
+    modifier: Modifier = Modifier,
     onStreamClicked: (Stream) -> Unit,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier,
     ) {
         items(streams) { stream ->
             Stream(

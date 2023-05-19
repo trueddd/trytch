@@ -85,4 +85,7 @@ dependencies {
 
     implementation(Dependency.VideoPlayer.Core)
     implementation(Dependency.VideoPlayer.Hls)
+
+    implementation(Dependency.Core.KotlinImmutable)
+    lintChecks("com.slack.lint.compose:compose-lint-checks:1.2.0")
 }

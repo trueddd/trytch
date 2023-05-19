@@ -5,7 +5,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import com.github.trueddd.truetripletwitch.ui.screens.stream.PlayerEvent
 import com.github.trueddd.truetripletwitch.ui.screens.stream.PlayerStatus
-import kotlinx.coroutines.flow.MutableSharedFlow
 
 fun Modifier.modifyIf(condition: Boolean, modifierBlock: Modifier.() -> Modifier): Modifier {
     return if (condition) {
@@ -15,7 +14,7 @@ fun Modifier.modifyIf(condition: Boolean, modifierBlock: Modifier.() -> Modifier
     }
 }
 
-fun Modifier.detectPlayerZoom(playerEventsFlow: MutableSharedFlow<PlayerEvent>): Modifier {
+fun Modifier.detectPlayerZoom(playerEvents: (PlayerEvent) -> Unit): Modifier {
     return this.pointerInput(Unit) {
         val zoomRange = 0.9f..1.1f
         var playerZoom = 1f
@@ -33,7 +32,7 @@ fun Modifier.detectPlayerZoom(playerEventsFlow: MutableSharedFlow<PlayerEvent>):
                     zoomRange.endInclusive -> PlayerStatus.AspectRatio.Zoom
                     zoomRange.start -> PlayerStatus.AspectRatio.Fit
                     else -> null
-                }?.let { playerEventsFlow.tryEmit(PlayerEvent.AspectRatioChange(it)) }
+                }?.let { playerEvents(PlayerEvent.AspectRatioChange(it)) }
             },
         )
     }

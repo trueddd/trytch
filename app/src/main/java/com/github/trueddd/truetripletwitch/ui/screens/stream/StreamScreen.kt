@@ -26,8 +26,6 @@ class StreamScreen(
     buildContext: BuildContext,
 ) : Node(buildContext) {
 
-    private val playerEventsFlow = MutableSharedFlow<PlayerEvent>(extraBufferCapacity = 1)
-
     @Composable
     override fun View(modifier: Modifier) {
         LaunchedEffect(Unit) {
@@ -36,26 +34,37 @@ class StreamScreen(
                 .distinctUntilChanged()
                 .onEach { streamViewModel.player.pause() }
                 .launchIn(this)
-            playerEventsFlow
-                .onEach { event -> streamViewModel.updateState { event.applyTo(it) } }
-                .launchIn(this)
         }
         val state by streamViewModel.stateFlow.collectAsState()
-        StreamScreen(state, streamViewModel.player, playerEventsFlow)
+        StreamScreen(
+            state,
+            streamViewModel.player,
+            Modifier.fillMaxSize()
+        ) { event ->
+            streamViewModel.updateState { event.applyTo(it) }
+        }
     }
 }
 
 @Preview
 @Composable
+private fun StreamScreenPreview() {
+    StreamScreen(
+        state = StreamScreenState.test(),
+        player = null,
+    )
+}
+
+@Composable
 fun StreamScreen(
     @PreviewParameter(provider = StreamScreenStateProvider::class)
     state: StreamScreenState,
-    player: ExoPlayer? = null,
-    playerEventsFlow: MutableSharedFlow<PlayerEvent> = MutableSharedFlow(),
+    player: ExoPlayer?,
+    modifier: Modifier = Modifier,
+    playerEvents: (PlayerEvent) -> Unit = {},
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier
             .background(MaterialTheme.colorScheme.inversePrimary)
     ) {
         Box(
@@ -70,10 +79,21 @@ fun StreamScreen(
                 }
                 .background(MaterialTheme.colorScheme.error)
         ) {
-            PlayerContainer(player, state.stream, state.playerStatus, playerEventsFlow)
+            PlayerContainer(
+                player = player,
+                stream = state.stream,
+                playerStatus = state.playerStatus,
+                playerEvents = playerEvents,
+                modifier = Modifier
+                    .fillMaxSize()
+            )
         }
         if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Chat(state.chatStatus)
+            Chat(
+                chatStatus = state.chatStatus,
+                modifier = Modifier
+                    .fillMaxSize()
+            )
         }
     }
 }

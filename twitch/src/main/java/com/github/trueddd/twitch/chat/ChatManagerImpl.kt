@@ -15,12 +15,13 @@ import com.ktmi.tmi.events.onConnected
 import com.ktmi.tmi.events.onMessage
 import com.ktmi.tmi.events.onTwitchMessage
 import com.ktmi.tmi.messages.TwitchMessage
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
-import java.util.*
+import java.util.LinkedList
 
 internal class ChatManagerImpl(
     private val badgesManager: TwitchBadgesManager,
@@ -39,9 +40,9 @@ internal class ChatManagerImpl(
     override fun connectChat(channel: String): Flow<ChatStatus> {
         return channelFlow {
             val messages = LinkedList<ChatMessage>()
-            send(ChatStatus(messages, ConnectionStatus.Connecting))
+            send(ChatStatus(messages.toImmutableList(), ConnectionStatus.Connecting))
             val userToken = twitchDao.getUserToken() ?: run {
-                send(ChatStatus(messages, ConnectionStatus.Disconnected(IllegalStateException("Token is null"))))
+                send(ChatStatus(messages.toImmutableList(), ConnectionStatus.Disconnected(IllegalStateException("Token is null"))))
                 return@channelFlow
             }
             var chatClient: MainScope? = null
@@ -72,7 +73,7 @@ internal class ChatManagerImpl(
                     if (messages.size > 100) {
                         messages.removeLast()
                     }
-                    trySend(ChatStatus(messages.toList(), ConnectionStatus.Connected))
+                    trySend(ChatStatus(messages.toImmutableList(), ConnectionStatus.Connected))
                 }
 
                 onTwitchMessage<TwitchMessage> { message ->

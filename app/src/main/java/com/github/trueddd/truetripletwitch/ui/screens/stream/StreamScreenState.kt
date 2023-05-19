@@ -5,6 +5,7 @@ import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.ConnectionStatus
 import com.github.trueddd.twitch.data.Stream
 import com.github.trueddd.twitch.data.MessageWord
+import kotlinx.collections.immutable.persistentListOf
 
 data class StreamScreenState(
     val channel: String,
@@ -18,7 +19,7 @@ data class StreamScreenState(
             channel = "qwe1",
             stream = Stream.test(),
             chatStatus = ChatStatus(
-                messages = listOf(
+                messages = persistentListOf(
                     ChatMessage("qwe1", words = listOf(MessageWord.Default("Hello"))),
                     ChatMessage("qwe2", words = listOf(MessageWord.Default("Hi!"))),
                 ),
@@ -31,7 +32,7 @@ data class StreamScreenState(
             channel,
             stream = null,
             chatStatus = ChatStatus(
-                messages = emptyList(),
+                messages = persistentListOf(),
                 connectionStatus = ConnectionStatus.Disconnected(null),
             ),
             playerStatus = PlayerStatus.default(),

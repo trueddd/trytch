@@ -43,6 +43,7 @@ ksp {
 }
 
 dependencies {
+    implementation(Dependency.Core.KotlinImmutable)
     implementation(Dependency.Koin.Core)
     implementation(Dependency.Koin.Annotations)
     ksp(Dependency.Koin.Compiler)

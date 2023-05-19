@@ -28,6 +28,7 @@ sealed class Dependency(val notation: String) {
     sealed class Core(notation: String) : Dependency(notation) {
         object Ktx : Core("androidx.core:core-ktx:1.10.1")
         object AppCompat : Core("androidx.appcompat:appcompat:1.6.1")
+        object KotlinImmutable : Core("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.5")
     }
     sealed class Compose(notation: String) : Dependency(notation) {
         object Ui : Compose("androidx.compose.ui:ui:${Versions.Compose}")

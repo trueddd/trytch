@@ -27,7 +27,6 @@ import com.github.trueddd.twitch.data.Stream
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlin.time.Duration.Companion.seconds
 
 @Preview(widthDp = 400, heightDp = 250)
@@ -35,7 +34,7 @@ import kotlin.time.Duration.Companion.seconds
 fun PlayerContainerPreview() {
     PlayerContainer(
         stream = Stream.test(),
-        playerEventsFlow = MutableSharedFlow(),
+        player = null,
         defaultControlsVisibility = true,
         defaultSettingsVisibility = false,
     )
@@ -46,7 +45,7 @@ fun PlayerContainerPreview() {
 fun PlayerContainerPreviewWithSettings() {
     PlayerContainer(
         stream = Stream.test(),
-        playerEventsFlow = MutableSharedFlow(),
+        player = null,
         defaultControlsVisibility = true,
         defaultSettingsVisibility = true,
     )
@@ -55,10 +54,11 @@ fun PlayerContainerPreviewWithSettings() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PlayerContainer(
-    player: ExoPlayer? = null,
-    stream: Stream? = null,
+    stream: Stream?,
+    player: ExoPlayer?,
+    modifier: Modifier = Modifier,
     playerStatus: PlayerStatus = PlayerStatus.test(),
-    playerEventsFlow: MutableSharedFlow<PlayerEvent>,
+    playerEvents: (PlayerEvent) -> Unit = {},
     defaultControlsVisibility: Boolean = false,
     defaultSettingsVisibility: Boolean = false,
 ) {
@@ -77,19 +77,22 @@ fun PlayerContainer(
         }
     }
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier
             .background(Color.Black)
-            .detectPlayerZoom(playerEventsFlow)
+            .detectPlayerZoom(playerEvents)
             .combinedClickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = { controlsVisible = !controlsVisible },
-                onDoubleClick = { playerEventsFlow.tryEmit(PlayerEvent.AspectRatioChange(!playerStatus.aspectRatio)) },
+                onDoubleClick = { playerEvents(PlayerEvent.AspectRatioChange(!playerStatus.aspectRatio)) },
             )
     ) {
         if (player != null && playerStatus.streamUri != null) {
-            Player(player, playerStatus.aspectRatio)
+            Player(
+                player,
+                playerStatus.aspectRatio,
+                Modifier.fillMaxSize(),
+            )
         }
         AnimatedVisibility(
             visible = controlsVisible,
@@ -120,6 +123,8 @@ fun PlayerContainer(
                     }
                 },
                 settingsClicked = { settingsVisible = !settingsVisible },
+                modifier = Modifier
+                    .fillMaxSize()
             )
         }
         if (playerStatus.isBuffering) {
@@ -151,7 +156,7 @@ fun PlayerContainer(
             SettingsPanel(playerStatus) {
                 settingsVisible = false
                 Log.d("Quality", "Changed to $it")
-                playerEventsFlow.tryEmit(PlayerEvent.StreamQualityChange(it))
+                playerEvents(PlayerEvent.StreamQualityChange(it))
             }
         }
     }
@@ -235,6 +240,7 @@ private fun StreamInfo(
 fun Player(
     player: ExoPlayer,
     aspectRatio: PlayerStatus.AspectRatio,
+    modifier: Modifier = Modifier,
 ) {
     // todo: implement player controls
     // todo: respond to lifecycle events (disconnect from chat)
@@ -251,8 +257,7 @@ fun Player(
         update = {
             it.resizeMode = aspectRatio.value
         },
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = modifier,
     )
 }
 
@@ -261,10 +266,10 @@ fun PlayerControls(
     playerStatus: PlayerStatus,
     playPauseClicked: () -> Unit,
     settingsClicked: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier
     ) {
         val playButtonResource = remember(playerStatus.isPlaying) {
             when (playerStatus.isPlaying) {

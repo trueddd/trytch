@@ -23,8 +23,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,30 +36,28 @@ import com.github.trueddd.twitch.data.ConnectionStatus
 import com.github.trueddd.twitch.data.MessageWord
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
-
-class ChatStatusParameterProvider : PreviewParameterProvider<ChatStatus> {
-    override val values = sequenceOf(
-        ChatStatus(listOf(
-            ChatMessage("truetripled", "#1E90FF", listOf("https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/2"), listOf(MessageWord.Default("hello"))),
-            ChatMessage("eltripledo", words = listOf(MessageWord.Default("hey,"), MessageWord.Default("everyone!!"))),
-            ChatMessage("eltripledo", words = listOf(MessageWord.Default("mega supa dupa long message which for sure will not fit in this damn screen i bet it would not"))),
-            ChatMessage("truetripled", "#1E90FF", listOf("https://static-cdn.jtvnw.net/badges/v1/b817aba4-fad8-49e2-b88a-7cc744dfa6ec/2"), listOf(MessageWord.Default(":)"))),
-        ), ConnectionStatus.Connected),
-    )
-}
+import kotlinx.collections.immutable.ImmutableList
 
 @Preview
 @Composable
+private fun ChatPreview() {
+    Chat(chatStatus = ChatStatus.test())
+}
+
+@Composable
 fun Chat(
-    @PreviewParameter(provider = ChatStatusParameterProvider::class)
     chatStatus: ChatStatus,
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier
             .background(MaterialTheme.colorScheme.background)
     ) {
-        ChatMessages(messages = chatStatus.messages)
+        ChatMessages(
+            messages = chatStatus.messages,
+            modifier = Modifier
+                .fillMaxSize()
+        )
         if (chatStatus.connectionStatus is ConnectionStatus.Connecting) {
             CircularProgressIndicator(
                 modifier = Modifier
@@ -80,16 +76,21 @@ fun Chat(
 }
 
 @Composable
-fun MessageWord(word: MessageWord) {
+fun MessageWord(
+    word: MessageWord,
+    modifier: Modifier = Modifier,
+) {
     when (word) {
         is MessageWord.Default -> Text(
             text = word.content,
             color = MaterialTheme.colorScheme.onBackground,
+            modifier = modifier,
         )
         is MessageWord.Mention -> Text(
             text = word.content,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
+            modifier = modifier,
         )
         is MessageWord.Emote -> {
             val emoteVersion = word.emote.versions.last()
@@ -97,7 +98,7 @@ fun MessageWord(word: MessageWord) {
                 model = emoteVersion.url,
                 imageLoader = LocalImageLoader.current,
                 contentDescription = word.content,
-                modifier = Modifier
+                modifier = modifier
                     .height(16.sp.value.dp)
                     .width((16.sp.value * (emoteVersion.width.toFloat() / emoteVersion.height)).dp),
             )
@@ -108,7 +109,7 @@ fun MessageWord(word: MessageWord) {
                 text = word.content,
                 color = MaterialTheme.colorScheme.secondary,
                 textDecoration = TextDecoration.Underline,
-                modifier = Modifier
+                modifier = modifier
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -152,12 +153,14 @@ fun Message(
 }
 
 @Composable
-fun ChatMessages(messages: List<ChatMessage>) {
+fun ChatMessages(
+    messages: ImmutableList<ChatMessage>,
+    modifier: Modifier = Modifier,
+) {
     LazyColumn(
         reverseLayout = true,
         contentPadding = PaddingValues(horizontal = 4.dp),
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier,
     ) {
         items(messages) {
             Message(message = it)

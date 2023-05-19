@@ -7,6 +7,9 @@ import com.github.trueddd.truetripletwitch.ui.StatefulViewModel
 import com.github.trueddd.twitch.TwitchBadgesManager
 import com.github.trueddd.twitch.TwitchStreamsManager
 import com.github.trueddd.twitch.TwitchUserManager
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -56,7 +59,8 @@ class MainViewModel(
             .onEach { user -> updateState { it.copy(user = user) } }
             .launchIn(viewModelScope)
         twitchStreamsManager.followedStreamsFlow
-            .onEach { streams -> updateState { it.copy(streams = streams) } }
+            .onEach { streams -> updateState { it.copy(streams = streams.toImmutableList()) } }
+            .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
     }
 
