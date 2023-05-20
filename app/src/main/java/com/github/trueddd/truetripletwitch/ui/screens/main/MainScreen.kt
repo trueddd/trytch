@@ -55,8 +55,8 @@ class MainScreen(
         MainScreen(
             state = state,
             onLoginButtonClicked = ::login,
-            onLogoutButtonClicked = { mainViewModel.logout() },
-            onStreamClicked = { backStack.push(Routing.Stream(it.userName)) }
+            onProfileButtonClicked = { backStack.push(Routing.Profile) },
+            onStreamClicked = { backStack.push(Routing.Stream(it.userName)) },
         )
     }
 }
@@ -67,7 +67,7 @@ private fun MainScreen(
     @PreviewParameter(MainScreenStateParameters::class)
     state: MainScreenState,
     onLoginButtonClicked: () -> Unit = {},
-    onLogoutButtonClicked: () -> Unit = {},
+    onProfileButtonClicked: () -> Unit = {},
     onStreamClicked: (Stream) -> Unit = {},
 ) {
     Column(
@@ -79,7 +79,7 @@ private fun MainScreen(
             state,
             Modifier.fillMaxWidth(),
             onLoginButtonClicked,
-            onLogoutButtonClicked,
+            onProfileButtonClicked,
         )
         Box(modifier = Modifier.fillMaxSize()) {
             if (state.user != null) {

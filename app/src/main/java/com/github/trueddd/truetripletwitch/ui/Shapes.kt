@@ -6,13 +6,13 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
-import kotlin.math.sin
+import kotlin.math.PI
+import kotlin.math.tan
 
-// fixme
 class TiltedRectangle(private val tiltAngle: Float = 0f): Shape {
 
     private fun drawTiltedRectanglePath(size: Size): Path {
-        val xShift = sin(tiltAngle) * size.height
+        val xShift = tan(tiltAngle * PI.toFloat() / 180) * size.height
         return Path().apply {
             reset()
             moveTo(x = 0f, y = size.height)
