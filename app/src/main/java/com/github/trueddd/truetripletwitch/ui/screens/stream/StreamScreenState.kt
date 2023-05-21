@@ -12,6 +12,7 @@ data class StreamScreenState(
     val stream: Stream?,
     val chatStatus: ChatStatus,
     val playerStatus: PlayerStatus,
+    val chatOverlayStatus: ChatOverlayStatus, // todo: save it as user setting
 ) {
 
     companion object {
@@ -26,6 +27,7 @@ data class StreamScreenState(
                 connectionStatus = ConnectionStatus.Connected,
             ),
             playerStatus = PlayerStatus.test(),
+            chatOverlayStatus = ChatOverlayStatus.test(),
         )
 
         fun default(channel: String) = StreamScreenState(
@@ -36,6 +38,7 @@ data class StreamScreenState(
                 connectionStatus = ConnectionStatus.Disconnected(null),
             ),
             playerStatus = PlayerStatus.default(),
+            chatOverlayStatus = ChatOverlayStatus.default(),
         )
     }
 }

@@ -22,7 +22,10 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -77,16 +80,19 @@ fun Chat(
 @Composable
 fun MessageWord(
     word: MessageWord,
+    fontSize: TextUnit,
     modifier: Modifier = Modifier,
 ) {
     when (word) {
         is MessageWord.Default -> Text(
             text = word.content,
+            fontSize = fontSize,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = modifier,
         )
         is MessageWord.Mention -> Text(
             text = word.content,
+            fontSize = fontSize,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = modifier,
@@ -106,6 +112,7 @@ fun MessageWord(
             val uriHandler = LocalUriHandler.current
             Text(
                 text = word.content,
+                fontSize = fontSize,
                 color = MaterialTheme.colorScheme.secondary,
                 textDecoration = TextDecoration.Underline,
                 modifier = modifier
@@ -120,10 +127,16 @@ fun MessageWord(
     }
 }
 
+class ChatMessagePreviewParameterProvider : PreviewParameterProvider<ChatMessage> {
+    override val values = sequenceOf(ChatMessage.test())
+}
+
 @Preview(widthDp = 360)
 @Composable
-fun Message(
-    message: ChatMessage = ChatMessage("elptripledo", words = listOf(MessageWord.Default("Hello, my name is very long!")))
+private fun Message(
+    @PreviewParameter(provider = ChatMessagePreviewParameterProvider::class)
+    message: ChatMessage,
+    fontSize: TextUnit = 16.sp,
 ) {
     FlowRow(
         mainAxisSpacing = 4.dp,
@@ -134,17 +147,22 @@ fun Message(
                 model = buildImageRequest(badgeUrl),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(Dp(16.sp.value)),
+                    .size(Dp(fontSize.value)),
             )
         }
         Text(
             text = message.author,
             color = message.userColor?.parseHexColor() ?: MaterialTheme.colorScheme.primary,
-            fontSize = 16.sp,
+            fontSize = fontSize,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
         )
-        message.words.forEach { MessageWord(it) }
+        message.words.forEach {
+            MessageWord(
+                word = it,
+                fontSize = fontSize,
+            )
+        }
     }
 }
 
@@ -152,14 +170,17 @@ fun Message(
 fun ChatMessages(
     messages: ImmutableList<ChatMessage>,
     modifier: Modifier = Modifier,
+    fontSize: TextUnit = 16.sp,
+    scrollEnabled: Boolean = true,
 ) {
     LazyColumn(
         reverseLayout = true,
         contentPadding = PaddingValues(horizontal = 4.dp),
+        userScrollEnabled = scrollEnabled,
         modifier = modifier,
     ) {
         items(messages) {
-            Message(message = it)
+            Message(message = it, fontSize = fontSize)
         }
     }
 }

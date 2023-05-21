@@ -1,32 +1,44 @@
 package com.github.trueddd.truetripletwitch.ui.screens.stream
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.github.trueddd.truetripletwitch.R
 import com.github.trueddd.truetripletwitch.ui.detectPlayerZoom
 import com.github.trueddd.truetripletwitch.ui.theme.HalfTransparentBlack
+import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.Stream
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import kotlinx.coroutines.delay
+import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.seconds
 
 @Preview(widthDp = 400, heightDp = 250)
@@ -35,6 +47,9 @@ fun PlayerContainerPreview() {
     PlayerContainer(
         stream = Stream.test(),
         player = null,
+        playerStatus = PlayerStatus.test(),
+        chatOverlayStatus = ChatOverlayStatus.test(),
+        chatStatus = ChatStatus.test(),
         defaultControlsVisibility = true,
         defaultSettingsVisibility = false,
     )
@@ -46,6 +61,9 @@ fun PlayerContainerPreviewWithSettings() {
     PlayerContainer(
         stream = Stream.test(),
         player = null,
+        playerStatus = PlayerStatus.test(),
+        chatOverlayStatus = ChatOverlayStatus.test(),
+        chatStatus = ChatStatus.test(),
         defaultControlsVisibility = true,
         defaultSettingsVisibility = true,
     )
@@ -56,8 +74,11 @@ fun PlayerContainerPreviewWithSettings() {
 fun PlayerContainer(
     stream: Stream?,
     player: ExoPlayer?,
+    playerStatus: PlayerStatus,
+    chatOverlayStatus: ChatOverlayStatus,
+    chatStatus: ChatStatus,
     modifier: Modifier = Modifier,
-    playerStatus: PlayerStatus = PlayerStatus.test(),
+    chatOverlayChecked: (Boolean) -> Unit = {},
     playerEvents: (PlayerEvent) -> Unit = {},
     defaultControlsVisibility: Boolean = false,
     defaultSettingsVisibility: Boolean = false,
@@ -94,6 +115,10 @@ fun PlayerContainer(
                 Modifier.fillMaxSize(),
             )
         }
+        ChatOverlay(
+            chatOverlayStatus = chatOverlayStatus,
+            chatStatus = chatStatus,
+        )
         AnimatedVisibility(
             visible = controlsVisible,
             enter = fadeIn(),
@@ -153,11 +178,60 @@ fun PlayerContainer(
                 .fillMaxHeight()
                 .align(Alignment.CenterEnd)
         ) {
-            SettingsPanel(playerStatus) {
-                settingsVisible = false
-                Log.d("Quality", "Changed to $it")
-                playerEvents(PlayerEvent.StreamQualityChange(it))
-            }
+            SettingsPanel(
+                playerStatus = playerStatus,
+                chatOverlayStatus = chatOverlayStatus,
+                chatOverlayChecked = chatOverlayChecked,
+                onQualityClicked = {
+                    settingsVisible = false
+                    Log.d("Quality", "Changed to $it")
+                    playerEvents(PlayerEvent.StreamQualityChange(it))
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ChatOverlay(
+    chatOverlayStatus: ChatOverlayStatus,
+    chatStatus: ChatStatus,
+    defaultSize: DpSize = DpSize(128.dp, 220.dp), // todo: make it customizable
+) {
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+    val deviceScreenSize = remember(configuration, density) {
+        val widthDp = configuration.screenWidthDp.toFloat().let { Dp(it) }
+        val heightDp = configuration.screenHeightDp.toFloat().let { Dp(it) }
+        with(density) {
+            val maxWidth = widthDp.toPx() - defaultSize.width.toPx()
+            val maxHeight = heightDp.toPx() - defaultSize.height.toPx()
+            Size(maxWidth, maxHeight)
+        }
+    }
+    if (chatOverlayStatus.enabled && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        var positionX by remember { mutableStateOf(0f) }
+        var positionY by remember { mutableStateOf(0f) }
+        Box(
+            modifier = Modifier
+                .offset { IntOffset(positionX.roundToInt(), positionY.roundToInt()) }
+                .size(defaultSize)
+                .background(HalfTransparentBlack) // todo: make it customizable
+                .pointerInput(Unit) {
+                    detectDragGestures { change, dragAmount ->
+                        change.consume()
+                        positionX = (positionX + dragAmount.x).coerceIn(0f, deviceScreenSize.width)
+                        positionY = (positionY + dragAmount.y).coerceIn(0f, deviceScreenSize.height)
+                    }
+                }
+        ) {
+            ChatMessages(
+                messages = chatStatus.messages,
+                fontSize = 8.sp,
+                scrollEnabled = false,
+                modifier = Modifier
+                    .fillMaxSize()
+            )
         }
     }
 }
@@ -165,7 +239,9 @@ fun PlayerContainer(
 @Composable
 private fun SettingsPanel(
     playerStatus: PlayerStatus,
+    chatOverlayStatus: ChatOverlayStatus,
     onQualityClicked: (String) -> Unit,
+    chatOverlayChecked: (Boolean) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -174,6 +250,7 @@ private fun SettingsPanel(
         Column(
             modifier = Modifier
                 .width(IntrinsicSize.Max)
+                .verticalScroll(rememberScrollState())
         ) {
             Text(
                 text = "Stream quality",
@@ -204,6 +281,27 @@ private fun SettingsPanel(
                             .padding(horizontal = 8.dp)
                     )
                 }
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .padding(horizontal = 4.dp)
+            ) {
+                Text(
+                    text = "Chat overlay",
+                    modifier = Modifier
+                )
+                Switch(
+                    checked = chatOverlayStatus.enabled,
+                    onCheckedChange = chatOverlayChecked,
+                    modifier = Modifier
+                )
             }
         }
     }

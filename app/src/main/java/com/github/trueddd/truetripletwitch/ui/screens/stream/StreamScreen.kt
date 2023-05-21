@@ -39,10 +39,10 @@ class StreamScreen(
         StreamScreen(
             state,
             streamViewModel.player,
-            Modifier.fillMaxSize()
-        ) { event ->
-            streamViewModel.updateState { event.applyTo(it) }
-        }
+            Modifier.fillMaxSize(),
+            playerEvents = { event -> streamViewModel.updateState { event.applyTo(it) } },
+            chatOverlayChecked = { streamViewModel.updateChatOverlayVisibility(it) },
+        )
     }
 }
 
@@ -62,19 +62,21 @@ fun StreamScreen(
     player: ExoPlayer?,
     modifier: Modifier = Modifier,
     playerEvents: (PlayerEvent) -> Unit = {},
+    chatOverlayChecked: (Boolean) -> Unit = {},
 ) {
     Column(
         modifier = modifier
             .background(MaterialTheme.colorScheme.inversePrimary)
     ) {
+        val orientation = LocalConfiguration.current.orientation
         Box(
             modifier = Modifier
-                .modifyIf(LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                .modifyIf(orientation == Configuration.ORIENTATION_PORTRAIT) {
                     this
                         .fillMaxWidth()
                         .fillMaxHeight(0.3f)
                 }
-                .modifyIf(LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                .modifyIf(orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     this.fillMaxSize()
                 }
                 .background(MaterialTheme.colorScheme.error)
@@ -83,12 +85,15 @@ fun StreamScreen(
                 player = player,
                 stream = state.stream,
                 playerStatus = state.playerStatus,
+                chatStatus = state.chatStatus,
                 playerEvents = playerEvents,
+                chatOverlayStatus = state.chatOverlayStatus,
+                chatOverlayChecked = chatOverlayChecked,
                 modifier = Modifier
                     .fillMaxSize()
             )
         }
-        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             Chat(
                 chatStatus = state.chatStatus,
                 modifier = Modifier

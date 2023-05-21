@@ -104,6 +104,12 @@ class StreamViewModel(
         emotesProvider.update(EmoteUpdateOption.Channel(channel))
     }
 
+    fun updateChatOverlayVisibility(visible: Boolean) {
+        updateState { state ->
+            state.copy(chatOverlayStatus = state.chatOverlayStatus.copy(enabled = visible))
+        }
+    }
+
     override fun release() {
         super.release()
         Log.d(TAG, "clear")
