@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -27,8 +26,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.github.trueddd.truetripletwitch.LocalImageLoader
+import com.github.trueddd.truetripletwitch.ui.buildImageRequest
 import com.github.trueddd.truetripletwitch.ui.parseHexColor
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
@@ -132,10 +131,7 @@ fun Message(
     ) {
         message.badges.forEach { badgeUrl ->
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(badgeUrl)
-                    .crossfade(true)
-                    .build(),
+                model = buildImageRequest(badgeUrl),
                 contentDescription = null,
                 modifier = Modifier
                     .size(Dp(16.sp.value)),

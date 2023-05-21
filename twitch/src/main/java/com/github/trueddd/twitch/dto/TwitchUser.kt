@@ -17,6 +17,8 @@ data class TwitchUser(
     val description: String,
     @SerialName("profile_image_url")
     val profileImageUrl: String,
+    @SerialName("offline_image_url")
+    val offlineImageUrl: String,
 ) {
 
     fun toUser() = User(
@@ -24,6 +26,7 @@ data class TwitchUser(
         login,
         displayName,
         profileImageUrl,
+        offlineImageUrl,
         BroadcasterType.from(broadcasterType),
         description,
     )

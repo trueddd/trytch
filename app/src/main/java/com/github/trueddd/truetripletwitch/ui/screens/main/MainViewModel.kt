@@ -47,13 +47,6 @@ class MainViewModel(
         }
     }
 
-    fun logout() {
-        twitchUserManager.logout()
-            .onStart { updateState { it.copy(userLoading = true) } }
-            .onCompletion { updateState { it.copy(userLoading = false) } }
-            .launchIn(viewModelScope)
-    }
-
     init {
         twitchUserManager.userFlow
             .onEach { user -> updateState { it.copy(user = user) } }

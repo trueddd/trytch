@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,7 +24,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import com.github.trueddd.truetripletwitch.ui.buildImageRequest
 import com.github.trueddd.twitch.data.Stream
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -131,10 +130,7 @@ private fun BoxScope.StreamViewers(viewersCountText: String) {
 @Composable
 private fun StreamPreview(stream: Stream) {
     AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(stream.getThumbnailUrl(width = 320, height = 180))
-            .crossfade(true)
-            .build(),
+        model = buildImageRequest(stream.getThumbnailUrl(width = 320, height = 180)),
         contentDescription = "${stream.userName} stream thumbnail",
         contentScale = ContentScale.Crop,
         modifier = Modifier
