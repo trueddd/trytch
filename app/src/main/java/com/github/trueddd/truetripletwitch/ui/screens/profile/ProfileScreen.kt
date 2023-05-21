@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -37,9 +37,10 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
+import com.github.trueddd.truetripletwitch.R
+import com.github.trueddd.truetripletwitch.ui.buildImageRequest
 
 class ProfileScreen(
     private val profileViewModel: ProfileViewModel,
@@ -93,12 +94,12 @@ private fun ProfileScreen(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(16.dp)
-                .background(Color.Black, CircleShape)
+                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f), CircleShape)
                 .clickable { onBackButtonClicked() }
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onBackground,
                 contentDescription = "Back",
                 modifier = Modifier
                     .size(36.dp)
@@ -116,22 +117,26 @@ private fun ProfileScreen(
                     .padding(start = 16.dp, end = 16.dp, top = 96.dp)
             ) {
                 AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(screenState.user.profileImageUrl)
-                        .crossfade(true)
-                        .build(),
+                    model = buildImageRequest(screenState.user.profileImageUrl),
                     contentDescription = "${screenState.user.displayName} avatar",
                     modifier = Modifier
                         .size(96.dp)
                         .clip(CircleShape)
                         .background(Color.Gray)
                 )
-                Text(
-                    text = screenState.user.displayName,
-                    fontSize = 24.sp,
+                Box(
                     modifier = Modifier
                         .padding(start = 16.dp)
-                )
+                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                ) {
+                    Text(
+                        text = screenState.user.displayName,
+                        fontSize = 24.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
             }
             Text(
                 text = screenState.user.description,
@@ -141,21 +146,22 @@ private fun ProfileScreen(
                     .fillMaxWidth()
                     .padding(start = 8.dp, end = 8.dp, top = 8.dp)
             )
-            Button(
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(2.dp, Color.Red),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+        }
+        Button(
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(2.dp, Color.Red),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp),
+            onClick = onLogoutButtonClicked,
+        ) {
+            Text(
+                text = stringResource(R.string.profile_logout).uppercase(),
+                color = Color.Red,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier
-                    .padding(top = 72.dp, start = 8.dp, end = 8.dp),
-                onClick = onLogoutButtonClicked,
-            ) {
-                Text(
-                    text = "Log out".uppercase(),
-                    color = Color.Red,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                )
-            }
+            )
         }
     }
 }

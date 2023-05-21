@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">truetripletwitch</string>
+
+    <!-- main screen -->
+    <string name="main_login">Login</string>
+
+    <!-- profile screen -->
+    <string name="profile_logout">Log out</string>
 </resources>

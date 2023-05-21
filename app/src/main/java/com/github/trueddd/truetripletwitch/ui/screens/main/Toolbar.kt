@@ -23,12 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import com.github.trueddd.truetripletwitch.R
 import com.github.trueddd.truetripletwitch.ui.TiltedRectangle
+import com.github.trueddd.truetripletwitch.ui.buildImageRequest
 
 @Preview
 @Composable
@@ -68,7 +69,7 @@ fun Toolbar(
                         .padding(horizontal = 8.dp)
                 ) {
                     Text(
-                        text = "Login"
+                        text = stringResource(R.string.main_login),
                     )
                 }
             } else {
@@ -80,10 +81,7 @@ fun Toolbar(
                     Text(text = state.user.displayName)
                     Spacer(modifier = Modifier.width(8.dp))
                     AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(state.user.profileImageUrl)
-                            .crossfade(true)
-                            .build(),
+                        model = buildImageRequest(state.user.profileImageUrl),
                         contentDescription = state.user.displayName,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
