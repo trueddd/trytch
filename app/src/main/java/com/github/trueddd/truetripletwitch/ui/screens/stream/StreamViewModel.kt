@@ -14,7 +14,12 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 
 class StreamViewModel(
     private val channel: String,
@@ -107,6 +112,12 @@ class StreamViewModel(
     fun updateChatOverlayVisibility(visible: Boolean) {
         updateState { state ->
             state.copy(chatOverlayStatus = state.chatOverlayStatus.copy(enabled = visible))
+        }
+    }
+
+    fun updateChatOverlayOpacity(opacity: Float) {
+        updateState { state ->
+            state.copy(chatOverlayStatus = state.chatOverlayStatus.copy(opacity = opacity))
         }
     }
 
