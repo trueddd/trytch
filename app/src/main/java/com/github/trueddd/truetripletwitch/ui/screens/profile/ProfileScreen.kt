@@ -2,6 +2,7 @@ package com.github.trueddd.truetripletwitch.ui.screens.profile
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -80,72 +81,90 @@ private fun ProfileScreen(
         modifier = modifier
             .background(MaterialTheme.colorScheme.background)
     ) {
-        AsyncImage(
-            model = screenState.user.offlineImageUrl,
-            contentDescription = "${screenState.user.displayName} offline image",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(2f)
-                .align(Alignment.TopCenter)
-                .background(Color.Gray)
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f), CircleShape)
-                .clickable { onBackButtonClicked() }
-        ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                tint = MaterialTheme.colorScheme.onBackground,
-                contentDescription = "Back",
-                modifier = Modifier
-                    .size(36.dp)
-                    .padding(4.dp)
-            )
-        }
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 96.dp)
-            ) {
+            Box {
                 AsyncImage(
-                    model = buildImageRequest(screenState.user.profileImageUrl),
-                    contentDescription = "${screenState.user.displayName} avatar",
+                    model = screenState.user.offlineImageUrl,
+                    contentDescription = "${screenState.user.displayName} offline image",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(96.dp)
-                        .clip(CircleShape)
+                        .fillMaxWidth()
+                        .aspectRatio(2f)
+                        .align(Alignment.TopCenter)
                         .background(Color.Gray)
                 )
                 Box(
                     modifier = Modifier
-                        .padding(start = 16.dp)
-                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                        .align(Alignment.TopStart)
+                        .padding(16.dp)
+                        .clip(CircleShape)
+                        .clickable { onBackButtonClicked() }
+                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f))
                 ) {
-                    Text(
-                        text = screenState.user.displayName,
-                        fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        contentDescription = "Back",
                         modifier = Modifier
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .size(36.dp)
+                            .padding(4.dp)
                     )
                 }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    AsyncImage(
+                        model = buildImageRequest(screenState.user.profileImageUrl),
+                        contentDescription = "${screenState.user.displayName} avatar",
+                        modifier = Modifier
+                            .size(96.dp)
+                            .clip(CircleShape)
+                            .background(Color.Gray)
+                            .border(2.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape)
+                            .border(4.dp, Color.Gray, CircleShape)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .background(
+                                MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
+                                RoundedCornerShape(8.dp)
+                            )
+                    ) {
+                        Text(
+                            text = screenState.user.displayName,
+                            fontSize = 24.sp,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
             }
-            Text(
-                text = screenState.user.description,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 16.sp,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp, end = 8.dp, top = 8.dp)
-            )
+                    .padding(8.dp)
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        RoundedCornerShape(8.dp)
+                    )
+            ) {
+                Text(
+                    text = screenState.user.description,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    fontSize = 16.sp,
+                    modifier = Modifier
+                        .padding(8.dp)
+                )
+            }
         }
         Button(
             shape = RoundedCornerShape(8.dp),

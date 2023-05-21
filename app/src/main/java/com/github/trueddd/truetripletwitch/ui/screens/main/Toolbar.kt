@@ -1,18 +1,20 @@
 package com.github.trueddd.truetripletwitch.ui.screens.main
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -55,13 +57,17 @@ fun Toolbar(
             .height(48.dp)
             .background(MaterialTheme.colorScheme.onPrimary)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.End,
+        Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            if (state.user == null) {
+            AnimatedVisibility(
+                visible = state.user == null,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+            ) {
                 Button(
                     onClick = onLoginButtonClicked,
                     enabled = !state.userLoading,
@@ -72,17 +78,24 @@ fun Toolbar(
                         text = stringResource(R.string.main_login),
                     )
                 }
-            } else {
+            }
+            AnimatedVisibility(
+                visible = state.user != null,
+                enter = slideInHorizontally { it },
+                exit = slideOutHorizontally { it },
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+            ) {
+                val user = state.user!!
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clickable { onProfileButtonClicked() }
                 ) {
-                    Text(text = state.user.displayName)
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = user.displayName)
                     AsyncImage(
-                        model = buildImageRequest(state.user.profileImageUrl),
-                        contentDescription = state.user.displayName,
+                        model = buildImageRequest(user.profileImageUrl),
+                        contentDescription = user.displayName,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxHeight()
