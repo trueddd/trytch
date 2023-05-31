@@ -1,5 +1,6 @@
 package com.github.trueddd.truetripletwitch.ui.screens.stream
 
+import com.github.trueddd.truetripletwitch.settings.StreamSettings
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.ConnectionStatus
@@ -12,7 +13,7 @@ data class StreamScreenState(
     val stream: Stream?,
     val chatStatus: ChatStatus,
     val playerStatus: PlayerStatus,
-    val chatOverlayStatus: ChatOverlayStatus, // todo: save it as user setting
+    val chatOverlayStatus: ChatOverlayStatus,
 ) {
 
     companion object {
@@ -30,7 +31,10 @@ data class StreamScreenState(
             chatOverlayStatus = ChatOverlayStatus.test(),
         )
 
-        fun default(channel: String) = StreamScreenState(
+        fun default(
+            channel: String,
+            streamSettings: StreamSettings,
+        ) = StreamScreenState(
             channel,
             stream = null,
             chatStatus = ChatStatus(
@@ -38,7 +42,10 @@ data class StreamScreenState(
                 connectionStatus = ConnectionStatus.Disconnected(null),
             ),
             playerStatus = PlayerStatus.default(),
-            chatOverlayStatus = ChatOverlayStatus.default(),
+            chatOverlayStatus = ChatOverlayStatus(
+                enabled = streamSettings.chatOverlayEnabled,
+                opacity = streamSettings.chatOverlayOpacity,
+            ),
         )
     }
 }

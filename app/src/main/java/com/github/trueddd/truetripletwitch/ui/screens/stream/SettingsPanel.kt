@@ -80,12 +80,12 @@ fun SettingsPanel(
                     modifier = Modifier
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 )
-                Divider(thickness = Dp.Hairline)
+                Divider(thickness = Dp.Hairline, color = MaterialTheme.colorScheme.onPrimaryContainer)
                 playerStatus.streamLinks.forEach { (quality, _) ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .padding(horizontal = 8.dp)
+                            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
                             .fillMaxWidth()
                             .clickable { onQualityClicked(quality) }
                     ) {
@@ -133,7 +133,7 @@ fun SettingsPanel(
                             .padding(start = 8.dp)
                     )
                 }
-                Divider(thickness = Dp.Hairline)
+                Divider(thickness = Dp.Hairline, color = MaterialTheme.colorScheme.onPrimaryContainer)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier

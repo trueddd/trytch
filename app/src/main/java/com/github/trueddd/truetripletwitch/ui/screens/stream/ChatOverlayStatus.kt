@@ -11,10 +11,5 @@ data class ChatOverlayStatus(
             enabled = true,
             opacity = 0.5f,
         )
-
-        fun default() = ChatOverlayStatus(
-            enabled = true,
-            opacity = 0.5f,
-        )
     }
 }

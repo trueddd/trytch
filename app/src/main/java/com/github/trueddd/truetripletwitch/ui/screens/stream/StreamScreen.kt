@@ -40,7 +40,7 @@ class StreamScreen(
             state,
             streamViewModel.player,
             Modifier.fillMaxSize(),
-            playerEvents = { event -> streamViewModel.updateState { event.applyTo(it) } },
+            playerEvents = { streamViewModel.handlePlayerEvent(it) },
             chatOverlayChecked = { streamViewModel.updateChatOverlayVisibility(it) },
             chatOverlayOpacityChanged = { streamViewModel.updateChatOverlayOpacity(it) },
         )
