@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,6 +67,7 @@ fun PlayerContainer(
     modifier: Modifier = Modifier,
     chatOverlayChecked: (Boolean) -> Unit = {},
     chatOverlayOpacityChanged: (Float) -> Unit = {},
+    onChatOverlayDragged: (Offset) -> Unit = {},
     playerEvents: (PlayerEvent) -> Unit = {},
     defaultControlsVisibility: Boolean = false,
     defaultSettingsVisibility: Boolean = false,
@@ -105,6 +107,7 @@ fun PlayerContainer(
         ChatOverlay(
             chatOverlayStatus = chatOverlayStatus,
             chatStatus = chatStatus,
+            onChatOverlayDragged = onChatOverlayDragged,
         )
         AnimatedVisibility(
             visible = controlsVisible,

@@ -78,9 +78,14 @@ fun SettingsPanel(
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 16.sp,
                     modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .padding(horizontal = 8.dp, vertical = 8.dp)
                 )
-                Divider(thickness = Dp.Hairline, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Divider(
+                    thickness = Dp.Hairline,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                )
                 playerStatus.streamLinks.forEach { (quality, _) ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

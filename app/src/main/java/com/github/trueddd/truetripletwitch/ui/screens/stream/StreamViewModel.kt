@@ -131,6 +131,10 @@ class StreamViewModel(
         settingsManager.modifyStreamSettings { it.copy(chatOverlayOpacity = opacity) }
     }
 
+    fun saveChatOverlayPosition(shiftX: Float, shiftY: Float) {
+        settingsManager.modifyStreamSettings { it.copy(chatOverlayShiftX = shiftX, chatOverlayShiftY = shiftY) }
+    }
+
     fun handlePlayerEvent(playerEvent: PlayerEvent) {
         when (playerEvent) {
             is PlayerEvent.AspectRatioChange -> {

@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -43,6 +44,7 @@ class StreamScreen(
             playerEvents = { streamViewModel.handlePlayerEvent(it) },
             chatOverlayChecked = { streamViewModel.updateChatOverlayVisibility(it) },
             chatOverlayOpacityChanged = { streamViewModel.updateChatOverlayOpacity(it) },
+            onChatOverlayDragged = { streamViewModel.saveChatOverlayPosition(it.x, it.y) },
         )
     }
 }
@@ -65,6 +67,7 @@ fun StreamScreen(
     playerEvents: (PlayerEvent) -> Unit = {},
     chatOverlayChecked: (Boolean) -> Unit = {},
     chatOverlayOpacityChanged: (Float) -> Unit = {},
+    onChatOverlayDragged: (Offset) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -92,6 +95,7 @@ fun StreamScreen(
                 chatOverlayStatus = state.chatOverlayStatus,
                 chatOverlayChecked = chatOverlayChecked,
                 chatOverlayOpacityChanged = chatOverlayOpacityChanged,
+                onChatOverlayDragged = onChatOverlayDragged,
                 modifier = Modifier
                     .fillMaxSize()
             )

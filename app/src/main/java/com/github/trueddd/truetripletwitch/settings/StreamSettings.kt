@@ -4,6 +4,8 @@ data class StreamSettings(
     val preferredQuality: String?,
     val chatOverlayEnabled: Boolean,
     val chatOverlayOpacity: Float,
+    val chatOverlayShiftX: Float,
+    val chatOverlayShiftY: Float,
 ) {
 
     companion object {
@@ -11,6 +13,8 @@ data class StreamSettings(
             preferredQuality = null,
             chatOverlayEnabled = false,
             chatOverlayOpacity = 0.5f,
+            chatOverlayShiftX = 0f,
+            chatOverlayShiftY = 0f,
         )
     }
 }

@@ -26,6 +26,8 @@ class SettingsManagerImpl(
         val PreferredQualityKey = stringPreferencesKey("preferred_stream_quality")
         val ChatOverlayEnabledKey = booleanPreferencesKey("chat_overlay_enabled")
         val ChatOverlayOpacityKey = floatPreferencesKey("chat_overlay_opacity")
+        val ChatOverlayShiftXKey = floatPreferencesKey("chat_overlay_shift_x")
+        val ChatOverlayShiftYKey = floatPreferencesKey("chat_overlay_shift_y")
     }
 
     override val coroutineContext by lazy {
@@ -37,6 +39,8 @@ class SettingsManagerImpl(
             preferredQuality = this[PreferredQualityKey],
             chatOverlayEnabled = this[ChatOverlayEnabledKey] ?: false,
             chatOverlayOpacity = this[ChatOverlayOpacityKey] ?: 0.5f,
+            chatOverlayShiftX = this[ChatOverlayShiftXKey] ?: 0f,
+            chatOverlayShiftY = this[ChatOverlayShiftYKey] ?: 0f,
         )
         return UserSettings(
             streamSettings = streamSettings,
@@ -47,6 +51,8 @@ class SettingsManagerImpl(
         userSettings.streamSettings.preferredQuality?.let { this[PreferredQualityKey] = it }
         this[ChatOverlayEnabledKey] = userSettings.streamSettings.chatOverlayEnabled
         this[ChatOverlayOpacityKey] = userSettings.streamSettings.chatOverlayOpacity
+        this[ChatOverlayShiftXKey] = userSettings.streamSettings.chatOverlayShiftX
+        this[ChatOverlayShiftYKey] = userSettings.streamSettings.chatOverlayShiftY
     }
 
     override val settingsFlow = settingsDataStore.data
