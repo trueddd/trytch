@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -39,10 +40,13 @@ class StreamScreen(
         StreamScreen(
             state,
             streamViewModel.player,
-            Modifier.fillMaxSize()
-        ) { event ->
-            streamViewModel.updateState { event.applyTo(it) }
-        }
+            Modifier.fillMaxSize(),
+            playerEvents = { streamViewModel.handlePlayerEvent(it) },
+            chatOverlayChecked = { streamViewModel.updateChatOverlayVisibility(it) },
+            chatOverlayOpacityChanged = { streamViewModel.updateChatOverlayOpacity(it) },
+            onChatOverlayDragged = { streamViewModel.saveChatOverlayPosition(it.x, it.y) },
+            chatOverlaySizeChanged = { streamViewModel.updateChatOverlaySize(it) },
+        )
     }
 }
 
@@ -62,19 +66,24 @@ fun StreamScreen(
     player: ExoPlayer?,
     modifier: Modifier = Modifier,
     playerEvents: (PlayerEvent) -> Unit = {},
+    chatOverlayChecked: (Boolean) -> Unit = {},
+    chatOverlayOpacityChanged: (Float) -> Unit = {},
+    chatOverlaySizeChanged: (ChatOverlayStatus.Size) -> Unit = {},
+    onChatOverlayDragged: (Offset) -> Unit = {},
 ) {
     Column(
         modifier = modifier
             .background(MaterialTheme.colorScheme.inversePrimary)
     ) {
+        val orientation = LocalConfiguration.current.orientation
         Box(
             modifier = Modifier
-                .modifyIf(LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                .modifyIf(orientation == Configuration.ORIENTATION_PORTRAIT) {
                     this
                         .fillMaxWidth()
                         .fillMaxHeight(0.3f)
                 }
-                .modifyIf(LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                .modifyIf(orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     this.fillMaxSize()
                 }
                 .background(MaterialTheme.colorScheme.error)
@@ -83,12 +92,18 @@ fun StreamScreen(
                 player = player,
                 stream = state.stream,
                 playerStatus = state.playerStatus,
+                chatStatus = state.chatStatus,
                 playerEvents = playerEvents,
+                chatOverlayStatus = state.chatOverlayStatus,
+                chatOverlayChecked = chatOverlayChecked,
+                chatOverlayOpacityChanged = chatOverlayOpacityChanged,
+                chatOverlaySizeChanged = chatOverlaySizeChanged,
+                onChatOverlayDragged = onChatOverlayDragged,
                 modifier = Modifier
                     .fillMaxSize()
             )
         }
-        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             Chat(
                 chatStatus = state.chatStatus,
                 modifier = Modifier

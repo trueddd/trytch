@@ -26,7 +26,7 @@ data class PlayerStatus(
             isBuffering = false,
             streamLinks = emptyList(),
             streamUri = null,
-            aspectRatio = AspectRatio.Zoom,
+            aspectRatio = AspectRatio.Fit,
             selectedStream = null,
         )
         fun test() = PlayerStatus(

@@ -1,7 +1,7 @@
 import org.gradle.api.JavaVersion
 
 object Versions {
-    const val AndroidGradlePlugin = "8.0.1"
+    const val AndroidGradlePlugin = "8.0.2"
     const val Kotlin = "1.8.10"
     const val Compose = "1.3.3"
     const val ComposeMaterial3 = "1.0.1"

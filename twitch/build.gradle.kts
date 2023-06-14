@@ -43,24 +43,24 @@ ksp {
 }
 
 dependencies {
-    implementation(Dependency.Core.KotlinImmutable)
-    implementation(Dependency.Koin.Core)
-    implementation(Dependency.Koin.Annotations)
-    ksp(Dependency.Koin.Compiler)
+    implementation(Dependencies.Core.KotlinImmutable)
+    implementation(Dependencies.Koin.Core)
+    implementation(Dependencies.Koin.Annotations)
+    ksp(Dependencies.Koin.Compiler)
 
-    implementation(Dependency.Ktor.Core)
-    implementation(Dependency.Ktor.OkHttp)
-    implementation(Dependency.Ktor.OkHttpLogging)
-    implementation(Dependency.Ktor.ContentNegotiation)
-    implementation(Dependency.Ktor.KotlinX)
-    implementation(Dependency.Ktor.Auth)
+    implementation(Dependencies.Ktor.Core)
+    implementation(Dependencies.Ktor.OkHttp)
+    implementation(Dependencies.Ktor.OkHttpLogging)
+    implementation(Dependencies.Ktor.ContentNegotiation)
+    implementation(Dependencies.Ktor.KotlinX)
+    implementation(Dependencies.Ktor.Auth)
     implementation(files(projectDir.resolve("libs").resolve("tmik-jvm-0.1.3.jar")))
 
-    implementation(Dependency.Room.Core)
-    implementation(Dependency.Room.Ktx)
-    ksp(Dependency.Room.Compiler)
+    implementation(Dependencies.Room.Core)
+    implementation(Dependencies.Room.Ktx)
+    ksp(Dependencies.Room.Compiler)
 
-    api(Dependency.DataStore)
+    api(Dependencies.DataStore)
 }
 
 fun getTwitchKeys(): TwitchKeys {

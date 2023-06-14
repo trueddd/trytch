@@ -4,6 +4,12 @@
     <!-- main screen -->
     <string name="main_login">Login</string>
 
+    <!-- stream screen -->
+    <string name="stream_quality_title">Stream quality</string>
+    <string name="stream_chat_overlay_title">Chat overlay</string>
+    <string name="stream_chat_overlay_opacity">Opacity</string>
+    <string name="stream_chat_overlay_size">Size</string>
+
     <!-- profile screen -->
     <string name="profile_logout">Log out</string>
 </resources>

@@ -6,23 +6,22 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.github.trueddd.truetripletwitch.R
 import com.github.trueddd.truetripletwitch.ui.detectPlayerZoom
 import com.github.trueddd.truetripletwitch.ui.theme.HalfTransparentBlack
+import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.Stream
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.StyledPlayerView
@@ -35,6 +34,9 @@ fun PlayerContainerPreview() {
     PlayerContainer(
         stream = Stream.test(),
         player = null,
+        playerStatus = PlayerStatus.test(),
+        chatOverlayStatus = ChatOverlayStatus.test(),
+        chatStatus = ChatStatus.test(),
         defaultControlsVisibility = true,
         defaultSettingsVisibility = false,
     )
@@ -46,6 +48,9 @@ fun PlayerContainerPreviewWithSettings() {
     PlayerContainer(
         stream = Stream.test(),
         player = null,
+        playerStatus = PlayerStatus.test(),
+        chatOverlayStatus = ChatOverlayStatus.test(),
+        chatStatus = ChatStatus.test(),
         defaultControlsVisibility = true,
         defaultSettingsVisibility = true,
     )
@@ -56,20 +61,20 @@ fun PlayerContainerPreviewWithSettings() {
 fun PlayerContainer(
     stream: Stream?,
     player: ExoPlayer?,
+    playerStatus: PlayerStatus,
+    chatOverlayStatus: ChatOverlayStatus,
+    chatStatus: ChatStatus,
     modifier: Modifier = Modifier,
-    playerStatus: PlayerStatus = PlayerStatus.test(),
+    chatOverlayChecked: (Boolean) -> Unit = {},
+    chatOverlayOpacityChanged: (Float) -> Unit = {},
+    chatOverlaySizeChanged: (ChatOverlayStatus.Size) -> Unit = {},
+    onChatOverlayDragged: (Offset) -> Unit = {},
     playerEvents: (PlayerEvent) -> Unit = {},
     defaultControlsVisibility: Boolean = false,
     defaultSettingsVisibility: Boolean = false,
 ) {
     var controlsVisible by remember { mutableStateOf(defaultControlsVisibility) }
     var settingsVisible by remember { mutableStateOf(defaultSettingsVisibility) }
-    LaunchedEffect(settingsVisible) {
-        if (settingsVisible) {
-            delay(5.seconds)
-            settingsVisible = false
-        }
-    }
     LaunchedEffect(controlsVisible) {
         if (controlsVisible) {
             delay(3.seconds)
@@ -83,7 +88,13 @@ fun PlayerContainer(
             .combinedClickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = { controlsVisible = !controlsVisible },
+                onClick = {
+                    if (settingsVisible) {
+                        settingsVisible = false
+                    } else {
+                        controlsVisible = !controlsVisible
+                    }
+                },
                 onDoubleClick = { playerEvents(PlayerEvent.AspectRatioChange(!playerStatus.aspectRatio)) },
             )
     ) {
@@ -94,6 +105,11 @@ fun PlayerContainer(
                 Modifier.fillMaxSize(),
             )
         }
+        ChatOverlay(
+            chatOverlayStatus = chatOverlayStatus,
+            chatStatus = chatStatus,
+            onChatOverlayDragged = onChatOverlayDragged,
+        )
         AnimatedVisibility(
             visible = controlsVisible,
             enter = fadeIn(),
@@ -153,58 +169,18 @@ fun PlayerContainer(
                 .fillMaxHeight()
                 .align(Alignment.CenterEnd)
         ) {
-            SettingsPanel(playerStatus) {
-                settingsVisible = false
-                Log.d("Quality", "Changed to $it")
-                playerEvents(PlayerEvent.StreamQualityChange(it))
-            }
-        }
-    }
-}
-
-@Composable
-private fun SettingsPanel(
-    playerStatus: PlayerStatus,
-    onQualityClicked: (String) -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Column(
-            modifier = Modifier
-                .width(IntrinsicSize.Max)
-        ) {
-            Text(
-                text = "Stream quality",
-                fontSize = 16.sp,
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp, top = 8.dp)
+            SettingsPanel(
+                playerStatus = playerStatus,
+                chatOverlayStatus = chatOverlayStatus,
+                chatOverlayChecked = chatOverlayChecked,
+                onQualityClicked = {
+                    settingsVisible = false
+                    Log.d("Quality", "Changed to $it")
+                    playerEvents(PlayerEvent.StreamQualityChange(it))
+                },
+                chatOverlayOpacityChanged = chatOverlayOpacityChanged,
+                chatOverlaySizeChanged = chatOverlaySizeChanged,
             )
-            Divider(
-                thickness = Dp.Hairline,
-                modifier = Modifier.padding(bottom = 2.dp)
-            )
-            playerStatus.streamLinks.forEach { (quality, _) ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onQualityClicked(quality) }
-                ) {
-                    RadioButton(
-                        selected = quality == playerStatus.selectedStream,
-                        onClick = null,
-                        modifier = Modifier
-                            .padding(start = 8.dp, top = 2.dp, bottom = 2.dp)
-                    )
-                    Text(
-                        text = quality,
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                    )
-                }
-            }
         }
     }
 }
@@ -242,8 +218,6 @@ fun Player(
     aspectRatio: PlayerStatus.AspectRatio,
     modifier: Modifier = Modifier,
 ) {
-    // todo: implement player controls
-    // todo: respond to lifecycle events (disconnect from chat)
     AndroidView(
         factory = {
             StyledPlayerView(it).apply {
@@ -287,6 +261,7 @@ fun PlayerControls(
                     .clickable { playPauseClicked() }
             )
         }
+        // todo: extend clickable area
         Image(
             painter = painterResource(R.drawable.ic_settings_48),
             contentDescription = "Settings",

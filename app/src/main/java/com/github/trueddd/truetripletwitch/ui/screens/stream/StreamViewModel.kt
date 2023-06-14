@@ -4,6 +4,8 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.github.trueddd.truetripletwitch.player.playbackStateFlow
+import com.github.trueddd.truetripletwitch.settings.SettingsManager
+import com.github.trueddd.truetripletwitch.settings.modifyStreamSettings
 import com.github.trueddd.truetripletwitch.ui.StatefulViewModel
 import com.github.trueddd.twitch.TwitchBadgesManager
 import com.github.trueddd.twitch.TwitchStreamsManager
@@ -14,7 +16,12 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 
 class StreamViewModel(
     private val channel: String,
@@ -23,13 +30,17 @@ class StreamViewModel(
     val player: ExoPlayer,
     private val chatManager: ChatManager,
     private val emotesProvider: EmotesProvider,
+    private val settingsManager: SettingsManager,
 ) : StatefulViewModel<StreamScreenState>() {
 
     init {
         initStreamScreen()
     }
 
-    override fun initialState() = StreamScreenState.default(channel)
+    override fun initialState() = StreamScreenState.default(
+        channel = channel,
+        streamSettings = settingsManager.settingsFlow.value.streamSettings,
+    )
 
     private fun initStreamScreen() {
         loadStreamVideoInfo()
@@ -75,8 +86,10 @@ class StreamViewModel(
         twitchStreamsManager.getStreamVideoInfo(channel)
             .onEach { Log.d(TAG, "Stream links: $it") }
             .onEach { streamInfoList ->
+                val streamSettings = settingsManager.settingsFlow.value.streamSettings
                 updateState { state ->
-                    val stream = streamInfoList.lastOrNull()
+                    val stream = streamInfoList.firstOrNull { it.quality == streamSettings.preferredQuality }
+                        ?: streamInfoList.lastOrNull()
                     val playerStatus = state.playerStatus.copy(
                         streamUri = stream?.url?.let { Uri.parse(it) },
                         streamLinks = streamInfoList,
@@ -102,6 +115,56 @@ class StreamViewModel(
 
     private fun updateEmotes() {
         emotesProvider.update(EmoteUpdateOption.Channel(channel))
+    }
+
+    fun updateChatOverlayVisibility(visible: Boolean) {
+        updateState { state ->
+            state.copy(chatOverlayStatus = state.chatOverlayStatus.copy(enabled = visible))
+        }
+        settingsManager.modifyStreamSettings { it.copy(chatOverlayEnabled = visible) }
+    }
+
+    fun updateChatOverlayOpacity(opacity: Float) {
+        updateState { state ->
+            state.copy(chatOverlayStatus = state.chatOverlayStatus.copy(opacity = opacity))
+        }
+        settingsManager.modifyStreamSettings { it.copy(chatOverlayOpacity = opacity) }
+    }
+
+    fun updateChatOverlaySize(size: ChatOverlayStatus.Size) {
+        updateState { state ->
+            state.copy(chatOverlayStatus = state.chatOverlayStatus.copy(size = size))
+        }
+        settingsManager.modifyStreamSettings {
+            it.copy(chatOverlayHeightDp = size.heightDp, chatOverlayWidthDp = size.widthDp)
+        }
+    }
+
+    fun saveChatOverlayPosition(shiftX: Float, shiftY: Float) {
+        settingsManager.modifyStreamSettings { it.copy(chatOverlayShiftX = shiftX, chatOverlayShiftY = shiftY) }
+    }
+
+    fun handlePlayerEvent(playerEvent: PlayerEvent) {
+        when (playerEvent) {
+            is PlayerEvent.AspectRatioChange -> {
+                updateState { streamScreenState ->
+                    val playerStatus = streamScreenState.playerStatus.copy(aspectRatio = playerEvent.newValue)
+                    streamScreenState.copy(playerStatus = playerStatus)
+                }
+            }
+            is PlayerEvent.StreamQualityChange -> {
+                updateState { streamScreenState ->
+                    val playerStatus = streamScreenState.playerStatus.copy(
+                        selectedStream = playerEvent.newValue,
+                        streamUri = streamScreenState.playerStatus
+                            .streamLinks.firstOrNull { it.quality == playerEvent.newValue }
+                            ?.let { Uri.parse(it.url) },
+                    )
+                    streamScreenState.copy(playerStatus = playerStatus)
+                }
+                settingsManager.modifyStreamSettings { it.copy(preferredQuality = playerEvent.newValue) }
+            }
+        }
     }
 
     override fun release() {
