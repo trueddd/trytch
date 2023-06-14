@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +29,8 @@ class SettingsManagerImpl(
         val ChatOverlayOpacityKey = floatPreferencesKey("chat_overlay_opacity")
         val ChatOverlayShiftXKey = floatPreferencesKey("chat_overlay_shift_x")
         val ChatOverlayShiftYKey = floatPreferencesKey("chat_overlay_shift_y")
+        val ChatOverlayWidthKey = intPreferencesKey("chat_overlay_width")
+        val ChatOverlayHeightKey = intPreferencesKey("chat_overlay_height")
     }
 
     override val coroutineContext by lazy {
@@ -37,10 +40,12 @@ class SettingsManagerImpl(
     private fun Preferences.toUserSettings(): UserSettings {
         val streamSettings = StreamSettings(
             preferredQuality = this[PreferredQualityKey],
-            chatOverlayEnabled = this[ChatOverlayEnabledKey] ?: false,
-            chatOverlayOpacity = this[ChatOverlayOpacityKey] ?: 0.5f,
-            chatOverlayShiftX = this[ChatOverlayShiftXKey] ?: 0f,
-            chatOverlayShiftY = this[ChatOverlayShiftYKey] ?: 0f,
+            chatOverlayEnabled = this[ChatOverlayEnabledKey],
+            chatOverlayOpacity = this[ChatOverlayOpacityKey],
+            chatOverlayShiftX = this[ChatOverlayShiftXKey],
+            chatOverlayShiftY = this[ChatOverlayShiftYKey],
+            chatOverlayWidthDp = this[ChatOverlayWidthKey],
+            chatOverlayHeightDp = this[ChatOverlayHeightKey],
         )
         return UserSettings(
             streamSettings = streamSettings,
@@ -48,11 +53,14 @@ class SettingsManagerImpl(
     }
 
     private fun MutablePreferences.writeSettings(userSettings: UserSettings) {
+        Log.d(TAG, "Saving settings: $userSettings")
         userSettings.streamSettings.preferredQuality?.let { this[PreferredQualityKey] = it }
         this[ChatOverlayEnabledKey] = userSettings.streamSettings.chatOverlayEnabled
         this[ChatOverlayOpacityKey] = userSettings.streamSettings.chatOverlayOpacity
         this[ChatOverlayShiftXKey] = userSettings.streamSettings.chatOverlayShiftX
         this[ChatOverlayShiftYKey] = userSettings.streamSettings.chatOverlayShiftY
+        this[ChatOverlayWidthKey] = userSettings.streamSettings.chatOverlayWidthDp
+        this[ChatOverlayHeightKey] = userSettings.streamSettings.chatOverlayHeightDp
     }
 
     override val settingsFlow = settingsDataStore.data

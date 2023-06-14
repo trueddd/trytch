@@ -47,6 +47,7 @@ data class StreamScreenState(
                 opacity = streamSettings.chatOverlayOpacity,
                 shiftX = streamSettings.chatOverlayShiftX,
                 shiftY = streamSettings.chatOverlayShiftY,
+                size = streamSettings.overlaySize(),
             ),
         )
     }

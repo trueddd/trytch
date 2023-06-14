@@ -20,7 +20,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,7 +31,6 @@ fun ChatOverlay(
     chatOverlayStatus: ChatOverlayStatus,
     chatStatus: ChatStatus,
     modifier: Modifier = Modifier,
-    defaultSize: DpSize = DpSize(128.dp, 220.dp), // todo: make it customizable
     onChatOverlayDragged: (Offset) -> Unit = {},
 ) {
     val configuration = LocalConfiguration.current
@@ -41,8 +39,8 @@ fun ChatOverlay(
         val widthDp = configuration.screenWidthDp.toFloat().let { Dp(it) }
         val heightDp = configuration.screenHeightDp.toFloat().let { Dp(it) }
         with(density) {
-            val maxWidth = widthDp.toPx() - defaultSize.width.toPx()
-            val maxHeight = heightDp.toPx() - defaultSize.height.toPx()
+            val maxWidth = widthDp.toPx() - chatOverlayStatus.size.widthDp.dp.toPx()
+            val maxHeight = heightDp.toPx() - chatOverlayStatus.size.heightDp.dp.toPx()
             Size(maxWidth, maxHeight)
         }
     }
@@ -52,16 +50,14 @@ fun ChatOverlay(
         Box(
             modifier = modifier
                 .offset { IntOffset(positionX.roundToInt(), positionY.roundToInt()) }
-                .size(defaultSize)
+                .size(chatOverlayStatus.size.widthDp.dp, chatOverlayStatus.size.heightDp.dp)
                 .background(Color.Black.copy(alpha = chatOverlayStatus.opacity))
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDrag = { change, dragAmount ->
                             change.consume()
-                            positionX =
-                                (positionX + dragAmount.x).coerceIn(0f, deviceScreenSize.width)
-                            positionY =
-                                (positionY + dragAmount.y).coerceIn(0f, deviceScreenSize.height)
+                            positionX = (positionX + dragAmount.x).coerceIn(0f, deviceScreenSize.width)
+                            positionY = (positionY + dragAmount.y).coerceIn(0f, deviceScreenSize.height)
                         },
                         onDragEnd = { onChatOverlayDragged(Offset(positionX, positionY)) },
                     )

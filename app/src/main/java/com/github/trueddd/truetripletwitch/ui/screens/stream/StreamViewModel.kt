@@ -131,6 +131,15 @@ class StreamViewModel(
         settingsManager.modifyStreamSettings { it.copy(chatOverlayOpacity = opacity) }
     }
 
+    fun updateChatOverlaySize(size: ChatOverlayStatus.Size) {
+        updateState { state ->
+            state.copy(chatOverlayStatus = state.chatOverlayStatus.copy(size = size))
+        }
+        settingsManager.modifyStreamSettings {
+            it.copy(chatOverlayHeightDp = size.heightDp, chatOverlayWidthDp = size.widthDp)
+        }
+    }
+
     fun saveChatOverlayPosition(shiftX: Float, shiftY: Float) {
         settingsManager.modifyStreamSettings { it.copy(chatOverlayShiftX = shiftX, chatOverlayShiftY = shiftY) }
     }

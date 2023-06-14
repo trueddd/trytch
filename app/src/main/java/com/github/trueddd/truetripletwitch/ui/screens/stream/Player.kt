@@ -67,6 +67,7 @@ fun PlayerContainer(
     modifier: Modifier = Modifier,
     chatOverlayChecked: (Boolean) -> Unit = {},
     chatOverlayOpacityChanged: (Float) -> Unit = {},
+    chatOverlaySizeChanged: (ChatOverlayStatus.Size) -> Unit = {},
     onChatOverlayDragged: (Offset) -> Unit = {},
     playerEvents: (PlayerEvent) -> Unit = {},
     defaultControlsVisibility: Boolean = false,
@@ -178,6 +179,7 @@ fun PlayerContainer(
                     playerEvents(PlayerEvent.StreamQualityChange(it))
                 },
                 chatOverlayOpacityChanged = chatOverlayOpacityChanged,
+                chatOverlaySizeChanged = chatOverlaySizeChanged,
             )
         }
     }
@@ -259,6 +261,7 @@ fun PlayerControls(
                     .clickable { playPauseClicked() }
             )
         }
+        // todo: extend clickable area
         Image(
             painter = painterResource(R.drawable.ic_settings_48),
             contentDescription = "Settings",

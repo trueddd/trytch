@@ -45,6 +45,7 @@ class StreamScreen(
             chatOverlayChecked = { streamViewModel.updateChatOverlayVisibility(it) },
             chatOverlayOpacityChanged = { streamViewModel.updateChatOverlayOpacity(it) },
             onChatOverlayDragged = { streamViewModel.saveChatOverlayPosition(it.x, it.y) },
+            chatOverlaySizeChanged = { streamViewModel.updateChatOverlaySize(it) },
         )
     }
 }
@@ -67,6 +68,7 @@ fun StreamScreen(
     playerEvents: (PlayerEvent) -> Unit = {},
     chatOverlayChecked: (Boolean) -> Unit = {},
     chatOverlayOpacityChanged: (Float) -> Unit = {},
+    chatOverlaySizeChanged: (ChatOverlayStatus.Size) -> Unit = {},
     onChatOverlayDragged: (Offset) -> Unit = {},
 ) {
     Column(
@@ -95,6 +97,7 @@ fun StreamScreen(
                 chatOverlayStatus = state.chatOverlayStatus,
                 chatOverlayChecked = chatOverlayChecked,
                 chatOverlayOpacityChanged = chatOverlayOpacityChanged,
+                chatOverlaySizeChanged = chatOverlaySizeChanged,
                 onChatOverlayDragged = onChatOverlayDragged,
                 modifier = Modifier
                     .fillMaxSize()

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.trueddd.truetripletwitch.R
+import kotlin.math.roundToInt
 
 @Preview
 @Composable
@@ -43,6 +44,7 @@ private fun SettingsPanelPreview() {
         onQualityClicked = {},
         chatOverlayChecked = {},
         chatOverlayOpacityChanged = {},
+        chatOverlaySizeChanged = {},
     )
 }
 
@@ -53,6 +55,7 @@ fun SettingsPanel(
     onQualityClicked: (String) -> Unit,
     chatOverlayChecked: (Boolean) -> Unit,
     chatOverlayOpacityChanged: (Float) -> Unit,
+    chatOverlaySizeChanged: (ChatOverlayStatus.Size) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -138,7 +141,10 @@ fun SettingsPanel(
                             .padding(start = 8.dp)
                     )
                 }
-                Divider(thickness = Dp.Hairline, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Divider(
+                    thickness = Dp.Hairline,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -150,7 +156,9 @@ fun SettingsPanel(
                         modifier = Modifier
                             .padding(start = 8.dp)
                     )
-                    var sliderValue by remember(chatOverlayStatus.opacity) { mutableStateOf(chatOverlayStatus.opacity) }
+                    var sliderValue by remember(chatOverlayStatus.opacity) {
+                        mutableStateOf(chatOverlayStatus.opacity)
+                    }
                     Slider(
                         value = sliderValue,
                         enabled = chatOverlayStatus.enabled,
@@ -158,6 +166,40 @@ fun SettingsPanel(
                         onValueChangeFinished = { chatOverlayOpacityChanged(sliderValue) },
                         modifier = Modifier
                             .width(120.dp)
+                            .padding(end = 8.dp)
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(R.string.stream_chat_overlay_size),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                    )
+                    var sliderValue by remember(chatOverlayStatus.size) {
+                        chatOverlayStatus.size.order
+                            .toFloat()
+                            .let { mutableStateOf(it) }
+                    }
+                    val steps = ChatOverlaySizes.count() - 2
+                    Slider(
+                        value = sliderValue,
+                        valueRange = 0f .. ChatOverlaySizes.size.minus(1).toFloat(),
+                        steps = steps,
+                        enabled = chatOverlayStatus.enabled,
+                        onValueChange = { sliderValue = it },
+                        onValueChangeFinished = {
+                            chatOverlaySizeFrom(sliderValue.roundToInt())
+                                ?.let(chatOverlaySizeChanged)
+                        },
+                        modifier = Modifier
+                            .width(120.dp)
+                            .padding(end = 8.dp)
                     )
                 }
             }
