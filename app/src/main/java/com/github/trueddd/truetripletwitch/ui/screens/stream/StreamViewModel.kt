@@ -16,7 +16,10 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
@@ -51,9 +54,13 @@ class StreamViewModel(
         loadStreamInfo()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadStreamInfo() {
         twitchStreamsManager.getStreamFlow(channel)
             .onEach { stream -> updateState { it.copy(stream = stream) } }
+            .filterNotNull()
+            .flatMapLatest { twitchStreamsManager.getStreamBroadcasterUserFlow(it.userId) }
+            .onEach { user -> updateState { it.copy(broadcaster = user) } }
             .launchIn(viewModelScope)
     }
 

@@ -27,6 +27,9 @@ internal interface TwitchDao {
     @Query("select * from users where displayName = :displayName limit 1")
     suspend fun getUserByName(displayName: String): User?
 
+    @Query("select * from users where id = :userId limit 1")
+    fun getUserByIdFlow(userId: String): Flow<User?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUserToken(tokens: Tokens)
 

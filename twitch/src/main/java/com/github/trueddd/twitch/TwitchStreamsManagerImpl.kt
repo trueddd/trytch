@@ -3,15 +3,18 @@ package com.github.trueddd.twitch
 import android.util.Log
 import com.github.trueddd.twitch.data.Stream
 import com.github.trueddd.twitch.data.StreamInfo
+import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.data.UserRequestType
 import com.github.trueddd.twitch.db.TwitchDao
 import com.github.trueddd.twitch.dto.PaginatedTwitchResponse
 import com.github.trueddd.twitch.dto.TwitchStream
 import com.github.trueddd.twitch.dto.TwitchStreamVideoInfo
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.http.Url
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -21,21 +24,27 @@ import kotlinx.coroutines.withContext
 internal class TwitchStreamsManagerImpl(
     private val httpClient: HttpClient,
     private val twitchDao: TwitchDao,
-) : TwitchStreamsManager {
+) : TwitchStreamsManager, CoroutineScope {
 
     companion object {
         private const val TAG = "TwitchStreamsManager"
     }
+
+    override val coroutineContext = Dispatchers.IO
 
     private val twitchApiWrapper by lazy {
         TwitchApiWrapper(httpClient)
     }
 
     override val followedStreamsFlow: Flow<List<Stream>>
-        get() = twitchDao.getStreamsFlow().flowOn(Dispatchers.IO)
+        get() = twitchDao.getStreamsFlow().flowOn(coroutineContext)
 
     override fun getStreamFlow(channel: String): Flow<Stream?> {
-        return twitchDao.getStreamFlowByChannel(channel).flowOn(Dispatchers.IO)
+        return twitchDao.getStreamFlowByChannel(channel).flowOn(coroutineContext)
+    }
+
+    override fun getStreamBroadcasterUserFlow(streamBroadcasterUserId: String): Flow<User?> {
+        return twitchDao.getUserByIdFlow(streamBroadcasterUserId).flowOn(coroutineContext)
     }
 
     private suspend fun loadFollowedStreams(userId: String): List<TwitchStream>? {
@@ -69,7 +78,7 @@ internal class TwitchStreamsManagerImpl(
                 Log.d(TAG, "Loaded ${users.size} users from followed streams")
                 twitchDao.insertUsers(users)
             }
-        }.flowOn(Dispatchers.IO)
+        }.flowOn(coroutineContext)
     }
 
     override fun getStreamVideoInfo(channel: String) = flow {
@@ -90,10 +99,10 @@ internal class TwitchStreamsManagerImpl(
             e.printStackTrace()
             emit(emptyList())
         }
-    }.flowOn(Dispatchers.IO)
+    }.flowOn(coroutineContext)
 
     override suspend fun clearStreams() {
-        withContext(Dispatchers.IO) {
+        withContext(coroutineContext) {
             twitchDao.deleteStreams()
         }
     }

@@ -5,26 +5,37 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import coil.compose.AsyncImage
 import com.github.trueddd.truetripletwitch.R
+import com.github.trueddd.truetripletwitch.ui.buildImageRequest
 import com.github.trueddd.truetripletwitch.ui.detectPlayerZoom
+import com.github.trueddd.truetripletwitch.ui.isLandscape
 import com.github.trueddd.truetripletwitch.ui.theme.HalfTransparentBlack
+import com.github.trueddd.truetripletwitch.ui.toDp
+import com.github.trueddd.truetripletwitch.ui.widgets.StreamTags
 import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.Stream
+import com.github.trueddd.twitch.data.User
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ui.StyledPlayerView
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -33,6 +44,7 @@ import kotlin.time.Duration.Companion.seconds
 fun PlayerContainerPreview() {
     PlayerContainer(
         stream = Stream.test(),
+        broadcaster = User.test(),
         player = null,
         playerStatus = PlayerStatus.test(),
         chatOverlayStatus = ChatOverlayStatus.test(),
@@ -47,6 +59,7 @@ fun PlayerContainerPreview() {
 fun PlayerContainerPreviewWithSettings() {
     PlayerContainer(
         stream = Stream.test(),
+        broadcaster = User.test(),
         player = null,
         playerStatus = PlayerStatus.test(),
         chatOverlayStatus = ChatOverlayStatus.test(),
@@ -60,6 +73,7 @@ fun PlayerContainerPreviewWithSettings() {
 @Composable
 fun PlayerContainer(
     stream: Stream?,
+    broadcaster: User?,
     player: ExoPlayer?,
     playerStatus: PlayerStatus,
     chatOverlayStatus: ChatOverlayStatus,
@@ -159,7 +173,7 @@ fun PlayerContainer(
                 .fillMaxHeight(0.25f)
                 .align(Alignment.BottomCenter)
         ) {
-            stream?.let { StreamInfo(stream = it) }
+            stream?.let { StreamInfo(stream = it, broadcaster = broadcaster) }
         }
         AnimatedVisibility(
             visible = settingsVisible,
@@ -185,29 +199,83 @@ fun PlayerContainer(
     }
 }
 
-// todo: add streamer avatar, viewer count, tags, etc.
 @Composable
 private fun StreamInfo(
-    stream: Stream
+    stream: Stream,
+    broadcaster: User?,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.primaryContainer)
+            .padding(start = 8.dp)
     ) {
-        Column(
+        AsyncImage(
+            model = broadcaster?.profileImageUrl?.let { buildImageRequest(model = it) },
+            contentDescription = "${stream.userName} avatar",
             modifier = Modifier
-                .padding(8.dp)
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.background)
+        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            modifier = Modifier
         ) {
-            Text(
-                text = stream.title,
-                fontSize = 16.sp,
-            )
-            Text(
-                text = stream.userName,
-                fontSize = 12.sp,
-            )
+            Row {
+                Text(
+                    text = stream.userName,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(horizontal = 8.dp)
+                        .size(4.dp)
+                        .background(MaterialTheme.colorScheme.onPrimaryContainer, CircleShape)
+                )
+                Text(
+                    text = stream.gameName,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
+            Row {
+                Image(
+                    painter = painterResource(R.drawable.ic_person),
+                    contentDescription = "Viewers count image",
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
+                    modifier = Modifier
+                        .size(12.sp.toDp())
+                        .align(Alignment.CenterVertically)
+                )
+                Text(
+                    text = stream.shortenedViewerCount,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(horizontal = 8.dp)
+                        .size(4.dp)
+                        .background(MaterialTheme.colorScheme.onPrimaryContainer, CircleShape)
+                )
+                Text(
+                    text = stream.title,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
+            if (LocalConfiguration.current.isLandscape) {
+                StreamTags(
+                    tags = stream.tags.toImmutableList(),
+                    modifier = Modifier
+                )
+            }
         }
     }
 }

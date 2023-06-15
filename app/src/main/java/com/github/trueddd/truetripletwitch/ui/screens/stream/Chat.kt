@@ -24,7 +24,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +31,7 @@ import coil.compose.AsyncImage
 import com.github.trueddd.truetripletwitch.LocalImageLoader
 import com.github.trueddd.truetripletwitch.ui.buildImageRequest
 import com.github.trueddd.truetripletwitch.ui.parseHexColor
+import com.github.trueddd.truetripletwitch.ui.toDp
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.ConnectionStatus
@@ -147,7 +147,7 @@ private fun Message(
                 model = buildImageRequest(badgeUrl),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(Dp(fontSize.value)),
+                    .size(fontSize.toDp()),
             )
         }
         Text(

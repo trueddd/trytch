@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.github.trueddd.truetripletwitch.ui.buildImageRequest
+import com.github.trueddd.truetripletwitch.ui.widgets.StreamTags
 import com.github.trueddd.twitch.data.Stream
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -72,32 +72,6 @@ private fun StreamInfo(value: String) {
             .fillMaxWidth()
             .padding(horizontal = StreamFieldHorizontalPadding)
     )
-}
-
-@Composable
-private fun StreamTags(tags: ImmutableList<String>) {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(StreamFieldHorizontalPadding),
-        contentPadding = PaddingValues(horizontal = StreamFieldHorizontalPadding),
-        modifier = Modifier
-            .padding(vertical = 2.dp)
-            .height(16.dp)
-    ) {
-        items(tags) { tag ->
-            Box(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
-            ) {
-                Text(
-                    text = tag,
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    fontSize = 12.sp,
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                )
-            }
-        }
-    }
 }
 
 @Composable
@@ -180,7 +154,7 @@ private fun Stream(
                 StreamerName(stream.userName)
                 StreamTitle(stream.title)
                 StreamInfo(stream.gameName)
-                StreamTags(stream.tags.toImmutableList())
+                StreamTags(stream.tags.toImmutableList(), contentSpacing = StreamFieldHorizontalPadding)
             }
         }
     }

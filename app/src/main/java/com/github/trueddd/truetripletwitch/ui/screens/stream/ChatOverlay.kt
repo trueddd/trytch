@@ -1,6 +1,5 @@
 package com.github.trueddd.truetripletwitch.ui.screens.stream
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
@@ -23,6 +22,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.trueddd.truetripletwitch.ui.isLandscape
 import com.github.trueddd.twitch.data.ChatStatus
 import kotlin.math.roundToInt
 
@@ -44,7 +44,7 @@ fun ChatOverlay(
             Size(maxWidth, maxHeight)
         }
     }
-    if (chatOverlayStatus.enabled && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+    if (chatOverlayStatus.enabled && configuration.isLandscape) {
         var positionX by remember(chatOverlayStatus.shiftX) { mutableStateOf(chatOverlayStatus.shiftX) }
         var positionY by remember(chatOverlayStatus.shiftY) { mutableStateOf(chatOverlayStatus.shiftY) }
         Box(
