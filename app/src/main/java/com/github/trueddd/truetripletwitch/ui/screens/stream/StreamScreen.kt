@@ -1,8 +1,11 @@
 package com.github.trueddd.truetripletwitch.ui.screens.stream
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,9 +21,14 @@ import androidx.lifecycle.Lifecycle
 import com.bumble.appyx.core.lifecycle.asFlow
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
+import com.github.trueddd.truetripletwitch.ui.isLandscape
+import com.github.trueddd.truetripletwitch.ui.isPortrait
 import com.github.trueddd.truetripletwitch.ui.modifyIf
 import com.google.android.exoplayer2.ExoPlayer
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class StreamScreen(
     private val streamViewModel: StreamViewModel,
@@ -75,15 +83,15 @@ fun StreamScreen(
         modifier = modifier
             .background(MaterialTheme.colorScheme.inversePrimary)
     ) {
-        val orientation = LocalConfiguration.current.orientation
+        val configuration = LocalConfiguration.current
         Box(
             modifier = Modifier
-                .modifyIf(orientation == Configuration.ORIENTATION_PORTRAIT) {
+                .modifyIf(configuration.isPortrait) {
                     this
                         .fillMaxWidth()
                         .fillMaxHeight(0.3f)
                 }
-                .modifyIf(orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                .modifyIf(configuration.isLandscape) {
                     this.fillMaxSize()
                 }
                 .background(MaterialTheme.colorScheme.error)
@@ -91,6 +99,7 @@ fun StreamScreen(
             PlayerContainer(
                 player = player,
                 stream = state.stream,
+                broadcaster = state.broadcaster,
                 playerStatus = state.playerStatus,
                 chatStatus = state.chatStatus,
                 playerEvents = playerEvents,
@@ -103,7 +112,7 @@ fun StreamScreen(
                     .fillMaxSize()
             )
         }
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (configuration.isPortrait) {
             Chat(
                 chatStatus = state.chatStatus,
                 modifier = Modifier
