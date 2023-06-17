@@ -33,6 +33,7 @@ data class Dependency(val notation: String)
 object Dependencies {
     object Core {
         val Ktx = Dependency("androidx.core:core-ktx:1.10.1")
+        val SplashScreen = Dependency("androidx.core:core-splashscreen:1.0.1")
         val AppCompat = Dependency("androidx.appcompat:appcompat:1.6.1")
         val KotlinImmutable = Dependency("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.5")
     }

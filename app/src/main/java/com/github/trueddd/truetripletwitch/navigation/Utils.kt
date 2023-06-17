@@ -20,22 +20,23 @@ fun RootNode.activeNodesFlow(): StateFlow<ActiveNodes> {
 }
 
 fun StateFlow<ActiveNodes>.disposeViewModels(viewModelStore: NodeViewModelStore): Flow<ActiveNodes> {
-    var lastItem = value
-    return onEach { nodes ->
-        Log.d("RootNode", "Nodes change: previous($lastItem), new($nodes)")
-        val left = lastItem - nodes.toSet()
-        lastItem = nodes
-        if (left.isEmpty()) {
+    var previousActiveNodes = value
+    return onEach { activeNodes ->
+        Log.d("RootNode", "Nodes change: previous($previousActiveNodes), new($activeNodes)")
+        val leftNodes = previousActiveNodes - activeNodes.toSet()
+        previousActiveNodes = activeNodes
+        if (leftNodes.isEmpty()) {
             return@onEach
         }
-        Log.d("RootNode", "VMs to clear: $left; Store keys: ${viewModelStore.keys}")
-        left.forEach {
+        Log.d("RootNode", "VMs to clear: $leftNodes; Store keys: ${viewModelStore.keys}")
+        leftNodes.forEach {
             viewModelStore[it]?.release()
             viewModelStore.remove(it)
         }
     }
 }
 
+@Suppress("DEPRECATION")
 fun Flow<ActiveNodes>.handleWindowRotations(window: Window): Flow<ActiveNodes> {
     val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
     return onEach { nodes ->

@@ -62,6 +62,7 @@ dependencies {
     implementation(Dependencies.Core.Ktx)
     implementation(Dependencies.Core.AppCompat)
     implementation(Dependencies.Core.KotlinImmutable)
+    implementation(Dependencies.Core.SplashScreen)
 
     implementation(Dependencies.Compose.Ui)
     implementation(Dependencies.Compose.Runtime)

@@ -30,7 +30,7 @@ val appModule = module {
         settingsManager = get(),
     ) }
 
-    factory { SplashViewModel(
+    single { SplashViewModel(
         twitchStreamsManager = get(),
         twitchBadgesManager = get(),
         twitchUserManager = get(),
