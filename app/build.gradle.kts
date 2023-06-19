@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.github.trueddd.truetripletwitch"
+    namespace = "${Config.PackageName}.${Config.AppName}"
     compileSdk = Config.Android.CompileSdk
 
     defaultConfig {

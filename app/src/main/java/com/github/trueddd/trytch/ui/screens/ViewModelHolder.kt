@@ -1,0 +1,18 @@
+package com.github.trueddd.trytch.ui.screens
+
+import android.util.Log
+import com.github.trueddd.trytch.di.NodeViewModelStore
+import com.github.trueddd.trytch.ui.StatelessViewModel
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+import org.koin.core.parameter.ParametersDefinition
+
+inline fun <reified T : StatelessViewModel> KoinComponent.viewModel(key: String, noinline parametersDefinition: ParametersDefinition? = null): T {
+    val store = get<NodeViewModelStore>()
+    return (store[key] as? T)?.also {
+        Log.d("ViewModelStore", "Found instance in store: returning")
+    } ?: get<T>(parameters = parametersDefinition).also {
+        Log.d("ViewModelStore", "Created new instance")
+        store[key] = it
+    }
+}

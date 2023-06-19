@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.github.trueddd.twitch"
+    namespace = "${Config.PackageName}.twitch"
     compileSdk = Config.Android.CompileSdk
 
     defaultConfig {
