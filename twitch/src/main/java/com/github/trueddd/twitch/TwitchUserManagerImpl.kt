@@ -47,7 +47,7 @@ internal class TwitchUserManagerImpl(
             parameters = Parameters.build {
                 append("client_id", BuildConfig.twitchClientId)
                 append("response_type", "token")
-                append("redirect_uri", "https://truetripletwitch/login")
+                append("redirect_uri", "https://trytch/login")
                 append("scope", scopes.joinToString(" "))
                 append("state", state)
             }
