@@ -12,11 +12,11 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.bumble.appyx.core.integration.NodeHost
 import com.bumble.appyx.core.integrationpoint.LocalIntegrationPoint
-import com.bumble.appyx.core.integrationpoint.NodeActivity
 import com.github.trueddd.trytch.navigation.RootNode
 import com.github.trueddd.trytch.navigation.activeNodesFlow
 import com.github.trueddd.trytch.navigation.disposeViewModels
 import com.github.trueddd.trytch.navigation.handleWindowRotations
+import com.github.trueddd.trytch.ui.NodeActivity
 import com.github.trueddd.trytch.ui.screens.splash.SplashViewModel
 import com.github.trueddd.trytch.ui.theme.TrytchTheme
 import kotlinx.coroutines.flow.launchIn
