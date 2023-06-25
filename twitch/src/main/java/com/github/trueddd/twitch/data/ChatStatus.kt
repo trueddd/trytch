@@ -24,6 +24,10 @@ data class ChatStatus(
                 ),
                 ChatMessage(
                     author = "eltripledo",
+                    words = listOf(MessageWord.Default("hey,"), MessageWord.Mention("@dan"))
+                ),
+                ChatMessage(
+                    author = "eltripledo",
                     words = listOf(MessageWord.Default("mega supa dupa long message which for sure will not fit in this damn screen i bet it would not"))
                 ),
                 ChatMessage(

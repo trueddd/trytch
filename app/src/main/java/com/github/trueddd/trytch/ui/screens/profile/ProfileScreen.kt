@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +41,7 @@ import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
 import com.github.trueddd.trytch.R
 import com.github.trueddd.trytch.ui.buildImageRequest
+import com.github.trueddd.trytch.ui.theme.AppTheme
 
 class ProfileScreen(
     private val profileViewModel: ProfileViewModel,
@@ -79,7 +79,7 @@ private fun ProfileScreen(
 ) {
     Box(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.background)
+            .background(AppTheme.Primary)
     ) {
         Column(
             modifier = Modifier
@@ -102,11 +102,11 @@ private fun ProfileScreen(
                         .padding(16.dp)
                         .clip(CircleShape)
                         .clickable { onBackButtonClicked() }
-                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f))
+                        .background(AppTheme.Primary)
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
-                        tint = MaterialTheme.colorScheme.onBackground,
+                        tint = AppTheme.Accent,
                         contentDescription = "Back",
                         modifier = Modifier
                             .size(36.dp)
@@ -127,21 +127,17 @@ private fun ProfileScreen(
                             .size(96.dp)
                             .clip(CircleShape)
                             .background(Color.Gray)
-                            .border(2.dp, MaterialTheme.colorScheme.primaryContainer, CircleShape)
-                            .border(4.dp, Color.Gray, CircleShape)
+                            .border(2.dp, AppTheme.Primary, CircleShape)
                     )
                     Box(
                         modifier = Modifier
                             .padding(start = 16.dp)
-                            .background(
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
-                                RoundedCornerShape(8.dp)
-                            )
+                            .background(AppTheme.Primary, RoundedCornerShape(8.dp))
                     ) {
                         Text(
                             text = screenState.user.displayName,
                             fontSize = 24.sp,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = AppTheme.AccentText,
                             modifier = Modifier
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         )
@@ -152,14 +148,11 @@ private fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
-                    .background(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        RoundedCornerShape(8.dp)
-                    )
+                    .background(AppTheme.SecondaryText, RoundedCornerShape(8.dp))
             ) {
                 Text(
                     text = screenState.user.description,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = AppTheme.PrimaryText,
                     fontSize = 16.sp,
                     modifier = Modifier
                         .padding(8.dp)
@@ -168,7 +161,7 @@ private fun ProfileScreen(
         }
         Button(
             shape = RoundedCornerShape(8.dp),
-            border = BorderStroke(2.dp, Color.Red),
+            border = BorderStroke(2.dp, AppTheme.Secondary),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -177,7 +170,7 @@ private fun ProfileScreen(
         ) {
             Text(
                 text = stringResource(R.string.profile_logout).uppercase(),
-                color = Color.Red,
+                color = AppTheme.Secondary,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
             )

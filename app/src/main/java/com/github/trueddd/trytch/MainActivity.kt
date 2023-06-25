@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -18,6 +17,7 @@ import com.github.trueddd.trytch.navigation.disposeViewModels
 import com.github.trueddd.trytch.navigation.handleWindowRotations
 import com.github.trueddd.trytch.ui.NodeActivity
 import com.github.trueddd.trytch.ui.screens.splash.SplashViewModel
+import com.github.trueddd.trytch.ui.theme.AppTheme
 import com.github.trueddd.trytch.ui.theme.TrytchTheme
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
@@ -59,7 +59,7 @@ class MainActivity : NodeActivity() {
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
+                        color = AppTheme.Primary
                     ) {
                         NodeHost(integrationPoint = LocalIntegrationPoint.current) { context ->
                             RootNode(context).also { rootNode = it }

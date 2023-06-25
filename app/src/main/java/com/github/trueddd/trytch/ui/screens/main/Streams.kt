@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +28,7 @@ import coil.compose.AsyncImage
 import com.github.trueddd.trytch.ui.buildImageRequest
 import com.github.trueddd.trytch.ui.isLandscape
 import com.github.trueddd.trytch.ui.modifyIf
+import com.github.trueddd.trytch.ui.theme.AppTheme
 import com.github.trueddd.trytch.ui.widgets.StreamTags
 import com.github.trueddd.twitch.data.Stream
 import kotlinx.collections.immutable.ImmutableList
@@ -39,7 +39,7 @@ private val StreamFieldHorizontalPadding = 4.dp
 @Composable
 private fun StreamerName(
     name: String,
-    color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    color: Color = AppTheme.AccentText,
     fontWeight: FontWeight = FontWeight.Bold,
     fontSize: TextUnit = 16.sp,
 ) {
@@ -59,7 +59,7 @@ private fun StreamerName(
 @Composable
 private fun StreamTitle(
     title: String,
-    color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    color: Color = AppTheme.PrimaryText,
 ) {
     Text(
         text = title,
@@ -76,11 +76,12 @@ private fun StreamTitle(
 @Composable
 private fun StreamInfo(
     value: String,
-    color: Color = MaterialTheme.colorScheme.secondary,
+    color: Color = AppTheme.PrimaryText,
+    fontSize: TextUnit = 14.sp,
 ) {
     Text(
         text = value,
-        fontSize = 14.sp,
+        fontSize = fontSize,
         color = color,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -92,10 +93,11 @@ private fun StreamInfo(
 
 @Composable
 private fun BoxScope.StreamViewers(viewersCountText: String) {
-    Box(modifier = Modifier
-        .padding(4.dp)
-        .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(4.dp))
-        .align(Alignment.BottomEnd)
+    Box(
+        modifier = Modifier
+            .padding(4.dp)
+            .background(AppTheme.Primary, RoundedCornerShape(4.dp))
+            .align(Alignment.BottomEnd)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -106,11 +108,11 @@ private fun BoxScope.StreamViewers(viewersCountText: String) {
             Box(
                 modifier = Modifier
                     .size(6.dp)
-                    .background(Color.Red, CircleShape)
+                    .background(AppTheme.Secondary, CircleShape)
             )
             Text(
                 text = viewersCountText,
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = AppTheme.PrimaryText,
                 fontSize = 12.sp,
             )
         }
@@ -120,7 +122,7 @@ private fun BoxScope.StreamViewers(viewersCountText: String) {
 @Composable
 private fun StreamPreview(
     stream: Stream,
-    rounded: Boolean = true,
+    rounded: Boolean = false,
 ) {
     AsyncImage(
         model = buildImageRequest(stream.getThumbnailUrl(width = 320, height = 180)),
@@ -137,6 +139,8 @@ private fun StreamPreview(
 @Preview(
     widthDp = 450,
     heightDp = 100,
+    showBackground = true,
+    backgroundColor = 0xFF1D1C1D,
 )
 @Composable
 private fun Stream(
@@ -149,15 +153,14 @@ private fun Stream(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.inversePrimary)
+            .background(AppTheme.Primary)
             .clickable { onStreamClicked(stream) }
     ) {
         Box(
             modifier = Modifier
+                .padding(start = 8.dp)
                 .weight(2f)
                 .aspectRatio(16 / 9f)
-                .background(MaterialTheme.colorScheme.inversePrimary)
         ) {
             StreamPreview(stream)
             StreamViewers(viewersCountText = stream.shortenedViewerCount)
@@ -166,54 +169,7 @@ private fun Stream(
             modifier = Modifier
                 .fillMaxHeight()
                 .weight(3f)
-        ) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                StreamerName(stream.userName)
-                StreamTitle(stream.title)
-                StreamInfo(stream.gameName)
-                StreamTags(stream.tags.toImmutableList(), contentSpacing = StreamFieldHorizontalPadding)
-            }
-        }
-    }
-}
-
-@Preview(
-    widthDp = 450,
-    heightDp = 100,
-    showBackground = true,
-    backgroundColor = 0xFFEADDFF,
-)
-@Composable
-private fun BoundlessStream(
-    @PreviewParameter(StreamParameters::class)
-    stream: Stream,
-    onStreamClicked: (Stream) -> Unit = {},
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min)
-            .clickable { onStreamClicked(stream) }
-    ) {
-        Box(
-            modifier = Modifier
                 .padding(start = 8.dp)
-                .weight(2f)
-                .aspectRatio(16 / 9f)
-                .background(MaterialTheme.colorScheme.inversePrimary)
-        ) {
-            StreamPreview(stream, rounded = false)
-            StreamViewers(viewersCountText = stream.shortenedViewerCount)
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .weight(3f)
         ) {
             Column(
                 verticalArrangement = Arrangement.Center,
@@ -222,13 +178,18 @@ private fun BoundlessStream(
             ) {
                 StreamerName(
                     stream.userName,
+                    color = AppTheme.AccentText,
                     fontWeight = FontWeight.Normal,
                     fontSize = 18.sp,
                 )
-                StreamTitle(stream.title)
+                StreamTitle(
+                    stream.title,
+                    color = AppTheme.PrimaryText,
+                )
                 StreamInfo(
                     stream.gameName,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = AppTheme.PrimaryTextDark,
+                    fontSize = 14.sp,
                 )
                 StreamTags(
                     stream.tags.toImmutableList(),
@@ -253,7 +214,7 @@ fun Streams(
         modifier = modifier,
     ) {
         items(streams) { stream ->
-            BoundlessStream(
+            Stream(
                 stream = stream,
                 onStreamClicked = onStreamClicked,
             )

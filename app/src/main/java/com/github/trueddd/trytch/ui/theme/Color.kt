@@ -61,7 +61,15 @@ val md_theme_dark_onPrimary = Color(0xFF381E72)
 val md_theme_dark_primaryContainer = Color(0xFF4F378B)
 val md_theme_dark_primary = Color(0xFFD0BCFF)
 
-val seed = Color(0xFF6750A4)
+object AppTheme {
+    val Primary = Color(0xFF1D1C1D)
+    val Secondary = Color(0xFF633B48)
+    val Accent = Color(0xFFC4A57C)
+    val AccentText = Color(0xFFC4C2C0)
+    val PrimaryText = Color(0xFFACA9A5)
+    val PrimaryTextDark = Color(0xFF837F7C)
+    val SecondaryText = Color(0xFF312F31)
+}
 
 @Stable
 val HalfTransparentBlack = Color.Black.copy(alpha = 0.5f)

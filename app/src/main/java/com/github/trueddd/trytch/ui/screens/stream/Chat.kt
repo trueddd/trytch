@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -31,6 +30,7 @@ import coil.compose.AsyncImage
 import com.github.trueddd.trytch.LocalImageLoader
 import com.github.trueddd.trytch.ui.buildImageRequest
 import com.github.trueddd.trytch.ui.parseHexColor
+import com.github.trueddd.trytch.ui.theme.AppTheme
 import com.github.trueddd.trytch.ui.toDp
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ChatStatus
@@ -53,7 +53,7 @@ fun Chat(
 ) {
     Box(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.background)
+            .background(AppTheme.Primary)
     ) {
         ChatMessages(
             messages = chatStatus.messages,
@@ -62,6 +62,7 @@ fun Chat(
         )
         if (chatStatus.connectionStatus is ConnectionStatus.Connecting) {
             CircularProgressIndicator(
+                color = AppTheme.Accent,
                 modifier = Modifier
                     .align(Alignment.Center)
                     .size(48.dp)
@@ -87,14 +88,14 @@ fun MessageWord(
         is MessageWord.Default -> Text(
             text = word.content,
             fontSize = fontSize,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = AppTheme.PrimaryText,
             modifier = modifier,
         )
         is MessageWord.Mention -> Text(
             text = word.content,
             fontSize = fontSize,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = AppTheme.PrimaryText,
             modifier = modifier,
         )
         is MessageWord.Emote -> {
@@ -113,7 +114,7 @@ fun MessageWord(
             Text(
                 text = word.content,
                 fontSize = fontSize,
-                color = MaterialTheme.colorScheme.secondary,
+                color = AppTheme.Accent,
                 textDecoration = TextDecoration.Underline,
                 modifier = modifier
                     .clickable(
@@ -152,7 +153,7 @@ private fun Message(
         }
         Text(
             text = message.author,
-            color = message.userColor?.parseHexColor() ?: MaterialTheme.colorScheme.primary,
+            color = message.userColor?.parseHexColor() ?: AppTheme.PrimaryText,
             fontSize = fontSize,
             fontWeight = FontWeight.Bold,
             modifier = Modifier

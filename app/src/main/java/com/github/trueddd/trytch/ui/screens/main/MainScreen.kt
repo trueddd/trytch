@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,6 +23,7 @@ import com.bumble.appyx.navmodel.backstack.BackStack
 import com.bumble.appyx.navmodel.backstack.operation.push
 import com.github.trueddd.trytch.navigation.IntentHandler
 import com.github.trueddd.trytch.navigation.Routing
+import com.github.trueddd.trytch.ui.theme.AppTheme
 import com.github.trueddd.twitch.data.Stream
 
 class MainScreen(
@@ -73,7 +73,7 @@ private fun MainScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.primaryContainer)
+            .background(color = AppTheme.Primary)
     ) {
         Toolbar(
             state,
@@ -90,7 +90,7 @@ private fun MainScreen(
             }
             if (state.streamsLoading) {
                 CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
+                    color = AppTheme.Accent,
                     modifier = Modifier
                         .align(Alignment.Center)
                 )

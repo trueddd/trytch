@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,6 +23,7 @@ import com.bumble.appyx.core.node.Node
 import com.github.trueddd.trytch.ui.isLandscape
 import com.github.trueddd.trytch.ui.isPortrait
 import com.github.trueddd.trytch.ui.modifyIf
+import com.github.trueddd.trytch.ui.theme.AppTheme
 import com.google.android.exoplayer2.ExoPlayer
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -81,7 +81,7 @@ fun StreamScreen(
 ) {
     Column(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.inversePrimary)
+            .background(AppTheme.Primary)
     ) {
         val configuration = LocalConfiguration.current
         Box(
@@ -94,7 +94,7 @@ fun StreamScreen(
                 .modifyIf(configuration.isLandscape) {
                     this.fillMaxSize()
                 }
-                .background(MaterialTheme.colorScheme.error)
+                .background(AppTheme.Secondary)
         ) {
             PlayerContainer(
                 player = player,
