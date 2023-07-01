@@ -230,13 +230,7 @@ private fun StreamInfo(
                     fontSize = 16.sp,
                     color = AppTheme.AccentText,
                 )
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(horizontal = 8.dp)
-                        .size(4.dp)
-                        .background(AppTheme.PrimaryTextDark, CircleShape)
-                )
+                TextBullet()
                 Text(
                     text = stream.gameName,
                     fontSize = 16.sp,
@@ -257,27 +251,34 @@ private fun StreamInfo(
                     fontSize = 12.sp,
                     color = AppTheme.AccentText,
                 )
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(horizontal = 8.dp)
-                        .size(4.dp)
-                        .background(AppTheme.PrimaryTextDark, CircleShape)
-                )
+                TextBullet()
                 Text(
                     text = stream.title,
                     fontSize = 12.sp,
                     color = AppTheme.PrimaryText,
+                    maxLines = 1,
                 )
             }
             if (LocalConfiguration.current.isLandscape) {
                 StreamTags(
                     tags = stream.tags.toImmutableList(),
                     modifier = Modifier
+                        .padding(top = 2.dp)
                 )
             }
         }
     }
+}
+
+@Composable
+private fun RowScope.TextBullet() {
+    Box(
+        modifier = Modifier
+            .align(Alignment.CenterVertically)
+            .padding(horizontal = 8.dp)
+            .size(4.dp)
+            .background(AppTheme.PrimaryTextDark, CircleShape)
+    )
 }
 
 @Composable
@@ -329,15 +330,14 @@ fun PlayerControls(
                     .clickable { playPauseClicked() }
             )
         }
-        // todo: extend clickable area
         Image(
             painter = painterResource(R.drawable.ic_settings_48),
             contentDescription = "Settings",
             modifier = Modifier
-                .padding(12.dp)
                 .align(Alignment.BottomEnd)
-                .size(24.dp)
+                .size(40.dp)
                 .clickable { settingsClicked() }
+                .padding(8.dp)
         )
     }
 }
