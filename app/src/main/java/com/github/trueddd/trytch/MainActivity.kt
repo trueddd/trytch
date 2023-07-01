@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -15,6 +16,7 @@ import com.github.trueddd.trytch.navigation.RootNode
 import com.github.trueddd.trytch.navigation.activeNodesFlow
 import com.github.trueddd.trytch.navigation.disposeViewModels
 import com.github.trueddd.trytch.navigation.handleWindowRotations
+import com.github.trueddd.trytch.ui.AppRippleTheme
 import com.github.trueddd.trytch.ui.NodeActivity
 import com.github.trueddd.trytch.ui.screens.splash.SplashViewModel
 import com.github.trueddd.trytch.ui.theme.AppTheme
@@ -56,6 +58,7 @@ class MainActivity : NodeActivity() {
                 CompositionLocalProvider(
                     LocalIntegrationPoint provides appyxIntegrationPoint,
                     LocalImageLoader provides createImageLoader(),
+                    LocalRippleTheme provides AppRippleTheme,
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),

@@ -28,7 +28,6 @@ fun StreamTags(
         horizontalArrangement = Arrangement.spacedBy(contentSpacing),
         contentPadding = PaddingValues(horizontal = contentSpacing),
         modifier = modifier
-            .padding(vertical = 2.dp)
             .height(16.dp)
     ) {
         items(tags) { tag ->
