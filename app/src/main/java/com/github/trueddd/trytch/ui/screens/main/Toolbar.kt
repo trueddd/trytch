@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,10 +28,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.github.trueddd.trytch.R
 import com.github.trueddd.trytch.ui.TiltedRectangle
 import com.github.trueddd.trytch.ui.buildImageRequest
+import com.github.trueddd.trytch.ui.theme.AppTheme
 
 @Preview
 @Composable
@@ -55,7 +57,7 @@ fun Toolbar(
     Box(
         modifier = modifier
             .height(48.dp)
-            .background(MaterialTheme.colorScheme.onPrimary)
+            .background(AppTheme.Primary)
     ) {
         Box(
             modifier = Modifier
@@ -71,11 +73,16 @@ fun Toolbar(
                 Button(
                     onClick = onLoginButtonClicked,
                     enabled = !state.userLoading,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AppTheme.Accent,
+                    ),
                     modifier = Modifier
                         .padding(horizontal = 8.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.main_login),
+                        fontSize = 14.sp,
+                        color = AppTheme.SecondaryText,
                     )
                 }
             }
@@ -92,7 +99,10 @@ fun Toolbar(
                     modifier = Modifier
                         .clickable { onProfileButtonClicked() }
                 ) {
-                    Text(text = user.displayName)
+                    Text(
+                        text = user.displayName,
+                        color = AppTheme.AccentText,
+                    )
                     AsyncImage(
                         model = buildImageRequest(user.profileImageUrl),
                         contentDescription = user.displayName,

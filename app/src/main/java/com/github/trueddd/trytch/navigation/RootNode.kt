@@ -1,6 +1,8 @@
 package com.github.trueddd.trytch.navigation
 
 import android.content.Intent
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -9,6 +11,7 @@ import com.bumble.appyx.core.composable.Children
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.ParentNode
 import com.bumble.appyx.navmodel.backstack.BackStack
+import com.bumble.appyx.navmodel.backstack.transitionhandler.rememberBackstackSlider
 import com.github.trueddd.trytch.ui.screens.main.MainScreen
 import com.github.trueddd.trytch.ui.screens.profile.ProfileScreen
 import com.github.trueddd.trytch.ui.screens.stream.StreamScreen
@@ -32,7 +35,13 @@ class RootNode(
 
     @Composable
     override fun View(modifier: Modifier) {
-        Children(navModel = backStack, modifier = modifier.fillMaxSize()) {
+        Children(
+            navModel = backStack,
+            modifier = modifier.fillMaxSize(),
+            transitionHandler = rememberBackstackSlider(
+                transitionSpec = { spring(stiffness = Spring.StiffnessMedium) }
+            ),
+        ) {
             children<Routing> { child ->
                 child()
             }

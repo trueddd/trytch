@@ -2,7 +2,7 @@
 <resources>
 
     <style name="Theme.App" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#4F378B</item>
+        <item name="windowSplashScreenBackground">#1D1C1D</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_animated</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>

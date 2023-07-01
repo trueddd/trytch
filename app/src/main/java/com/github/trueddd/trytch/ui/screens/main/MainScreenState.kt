@@ -17,7 +17,11 @@ data class MainScreenState(
         fun test() = MainScreenState(
             user = User.test(),
             userLoading = false,
-            streams = persistentListOf(Stream.test()),
+            streams = persistentListOf(
+                Stream.test(),
+                Stream.test(),
+                Stream.test(),
+            ),
             streamsLoading = true,
         )
 

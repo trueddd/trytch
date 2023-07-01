@@ -13,11 +13,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,12 +28,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.trueddd.trytch.R
+import com.github.trueddd.trytch.ui.theme.AppTheme
 import kotlin.math.roundToInt
 
 @Preview
@@ -60,7 +62,7 @@ fun SettingsPanel(
 ) {
     Box(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.background)
+            .background(AppTheme.Primary)
     ) {
         Column(
             modifier = Modifier
@@ -72,43 +74,46 @@ fun SettingsPanel(
                 modifier = Modifier
                     .padding(8.dp)
                     .background(
-                        MaterialTheme.colorScheme.primaryContainer,
+                        AppTheme.SecondaryText,
                         RoundedCornerShape(8.dp)
                     ),
             ) {
                 Text(
                     text = stringResource(R.string.stream_quality_title),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontSize = 16.sp,
+                    color = AppTheme.AccentText,
+                    fontSize = 18.sp,
                     modifier = Modifier
                         .padding(horizontal = 8.dp, vertical = 8.dp)
                 )
-                Divider(
-                    thickness = Dp.Hairline,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier
                         .padding(bottom = 8.dp)
-                )
-                playerStatus.streamLinks.forEach { (quality, _) ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
-                            .fillMaxWidth()
-                            .clickable { onQualityClicked(quality) }
-                    ) {
-                        RadioButton(
-                            selected = quality == playerStatus.selectedStream,
-                            onClick = null,
+                ) {
+                    playerStatus.streamLinks.forEach { (quality, _) ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .padding(vertical = 2.dp)
-                        )
-                        Text(
-                            text = quality,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                        )
+                                .padding(start = 8.dp, end = 8.dp)
+                                .fillMaxWidth()
+                                .clickable { onQualityClicked(quality) }
+                        ) {
+                            RadioButton(
+                                selected = quality == playerStatus.selectedStream,
+                                onClick = null,
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = AppTheme.Accent,
+                                    unselectedColor = AppTheme.PrimaryText,
+                                ),
+                                modifier = Modifier
+                            )
+                            Text(
+                                text = quality,
+                                color = if (quality == playerStatus.selectedStream) AppTheme.Accent else AppTheme.PrimaryText,
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -116,10 +121,7 @@ fun SettingsPanel(
                 modifier = Modifier
                     .width(IntrinsicSize.Max)
                     .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
-                    .background(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        RoundedCornerShape(8.dp)
-                    )
+                    .background(AppTheme.SecondaryText, RoundedCornerShape(8.dp))
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -130,21 +132,24 @@ fun SettingsPanel(
                 ) {
                     Text(
                         text = stringResource(R.string.stream_chat_overlay_title),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = AppTheme.AccentText,
                         modifier = Modifier
                     )
                     Switch(
                         checked = chatOverlayStatus.enabled,
                         onCheckedChange = chatOverlayChecked,
+                        colors = SwitchDefaults.colors(
+                            checkedTrackColor = AppTheme.Accent,
+                            checkedThumbColor = Color.White,
+                            uncheckedBorderColor = AppTheme.PrimaryTextDark,
+                            uncheckedThumbColor = AppTheme.PrimaryTextDark,
+                            uncheckedTrackColor = AppTheme.Primary,
+                        ),
                         modifier = Modifier
                             .scale(0.8f)
                             .padding(start = 8.dp)
                     )
                 }
-                Divider(
-                    thickness = Dp.Hairline,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -152,7 +157,7 @@ fun SettingsPanel(
                 ) {
                     Text(
                         text = stringResource(R.string.stream_chat_overlay_opacity),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = AppTheme.PrimaryText,
                         modifier = Modifier
                             .padding(start = 8.dp)
                     )
@@ -162,6 +167,10 @@ fun SettingsPanel(
                     Slider(
                         value = sliderValue,
                         enabled = chatOverlayStatus.enabled,
+                        colors = SliderDefaults.colors(
+                            activeTrackColor = AppTheme.Accent,
+                            thumbColor = AppTheme.Accent,
+                        ),
                         onValueChange = { sliderValue = it },
                         onValueChangeFinished = { chatOverlayOpacityChanged(sliderValue) },
                         modifier = Modifier
@@ -177,7 +186,7 @@ fun SettingsPanel(
                 ) {
                     Text(
                         text = stringResource(R.string.stream_chat_overlay_size),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = AppTheme.PrimaryText,
                         modifier = Modifier
                             .padding(start = 8.dp)
                     )
@@ -191,6 +200,10 @@ fun SettingsPanel(
                         value = sliderValue,
                         valueRange = 0f .. ChatOverlaySizes.size.minus(1).toFloat(),
                         steps = steps,
+                        colors = SliderDefaults.colors(
+                            activeTrackColor = AppTheme.Accent,
+                            thumbColor = AppTheme.Accent,
+                        ),
                         enabled = chatOverlayStatus.enabled,
                         onValueChange = { sliderValue = it },
                         onValueChangeFinished = {

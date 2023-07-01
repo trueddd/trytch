@@ -2,12 +2,14 @@ package com.github.trueddd.trytch.ui.screens.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,71 +17,92 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.github.trueddd.trytch.ui.buildImageRequest
+import com.github.trueddd.trytch.ui.isLandscape
+import com.github.trueddd.trytch.ui.modifyIf
+import com.github.trueddd.trytch.ui.theme.AppTheme
 import com.github.trueddd.trytch.ui.widgets.StreamTags
 import com.github.trueddd.twitch.data.Stream
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
-private val StreamFieldHorizontalPadding = 4.dp
-
 @Composable
-private fun StreamerName(name: String) {
+private fun StreamerName(
+    name: String,
+    modifier: Modifier = Modifier,
+    color: Color = AppTheme.AccentText,
+    fontWeight: FontWeight = FontWeight.Bold,
+    fontSize: TextUnit = 16.sp,
+) {
     Text(
         text = name,
-        fontSize = 16.sp,
+        fontSize = fontSize,
         maxLines = 1,
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
-        fontWeight = FontWeight.Bold,
+        color = color,
+        fontWeight = fontWeight,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = StreamFieldHorizontalPadding)
+//            .padding(horizontal = StreamFieldHorizontalPadding)
+            .then(modifier)
     )
 }
 
 @Composable
-private fun StreamTitle(title: String) {
+private fun StreamTitle(
+    title: String,
+    modifier: Modifier = Modifier,
+    color: Color = AppTheme.PrimaryText,
+) {
     Text(
         text = title,
         fontSize = 14.sp,
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        color = color,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = StreamFieldHorizontalPadding)
+            .then(modifier)
     )
 }
 
 @Composable
-private fun StreamInfo(value: String) {
+private fun StreamInfo(
+    value: String,
+    modifier: Modifier = Modifier,
+    color: Color = AppTheme.PrimaryText,
+    fontSize: TextUnit = 14.sp,
+) {
     Text(
         text = value,
-        fontSize = 14.sp,
-        color = MaterialTheme.colorScheme.secondary,
+        fontSize = fontSize,
+        color = color,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = StreamFieldHorizontalPadding)
+            .then(modifier)
+//            .padding(horizontal = StreamFieldHorizontalPadding)
     )
 }
 
 @Composable
 private fun BoxScope.StreamViewers(viewersCountText: String) {
-    Box(modifier = Modifier
-        .padding(4.dp)
-        .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(4.dp))
-        .align(Alignment.BottomEnd)
+    Box(
+        modifier = Modifier
+            .padding(4.dp)
+            .background(AppTheme.Primary, RoundedCornerShape(4.dp))
+            .align(Alignment.BottomEnd)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -90,11 +113,11 @@ private fun BoxScope.StreamViewers(viewersCountText: String) {
             Box(
                 modifier = Modifier
                     .size(6.dp)
-                    .background(Color.Red, CircleShape)
+                    .background(AppTheme.Secondary, CircleShape)
             )
             Text(
                 text = viewersCountText,
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = AppTheme.PrimaryText,
                 fontSize = 12.sp,
             )
         }
@@ -102,20 +125,27 @@ private fun BoxScope.StreamViewers(viewersCountText: String) {
 }
 
 @Composable
-private fun StreamPreview(stream: Stream) {
+private fun StreamPreview(
+    stream: Stream,
+    rounded: Boolean = false,
+) {
     AsyncImage(
         model = buildImageRequest(stream.getThumbnailUrl(width = 320, height = 180)),
         contentDescription = "${stream.userName} stream thumbnail",
         contentScale = ContentScale.Crop,
         modifier = Modifier
             .fillMaxSize()
-            .clip(RoundedCornerShape(8.dp))
+            .modifyIf(rounded) {
+                clip(RoundedCornerShape(8.dp))
+            }
     )
 }
 
 @Preview(
     widthDp = 450,
     heightDp = 100,
+    showBackground = true,
+    backgroundColor = 0xFF1D1C1D,
 )
 @Composable
 private fun Stream(
@@ -123,20 +153,24 @@ private fun Stream(
     stream: Stream,
     onStreamClicked: (Stream) -> Unit = {},
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.inversePrimary)
-            .clickable { onStreamClicked(stream) }
+            .background(AppTheme.Primary)
+            .clickable(
+                indication = rememberRipple(),
+                interactionSource = interactionSource,
+                onClick = { onStreamClicked(stream) },
+            )
     ) {
         Box(
             modifier = Modifier
+                .padding(start = 8.dp)
                 .weight(2f)
                 .aspectRatio(16 / 9f)
-                .background(MaterialTheme.colorScheme.inversePrimary)
         ) {
             StreamPreview(stream)
             StreamViewers(viewersCountText = stream.shortenedViewerCount)
@@ -151,10 +185,33 @@ private fun Stream(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                StreamerName(stream.userName)
-                StreamTitle(stream.title)
-                StreamInfo(stream.gameName)
-                StreamTags(stream.tags.toImmutableList(), contentSpacing = StreamFieldHorizontalPadding)
+                StreamerName(
+                    stream.userName,
+                    color = AppTheme.AccentText,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 18.sp,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                )
+                StreamTitle(
+                    stream.title,
+                    color = AppTheme.PrimaryText,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                )
+                StreamInfo(
+                    stream.gameName,
+                    color = AppTheme.PrimaryTextDark,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                )
+                StreamTags(
+                    stream.tags.toImmutableList(),
+                    contentSpacing = 8.dp,
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                )
             }
         }
     }
@@ -166,9 +223,12 @@ fun Streams(
     modifier: Modifier = Modifier,
     onStreamClicked: (Stream) -> Unit,
 ) {
-    LazyColumn(
-        contentPadding = PaddingValues(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+    val verticalSpacing = 20.dp
+    val isLandscape = LocalConfiguration.current.isLandscape
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(if (isLandscape) 2 else 1),
+        contentPadding = PaddingValues(vertical = verticalSpacing),
+        verticalArrangement = Arrangement.spacedBy(verticalSpacing),
         modifier = modifier,
     ) {
         items(streams) { stream ->

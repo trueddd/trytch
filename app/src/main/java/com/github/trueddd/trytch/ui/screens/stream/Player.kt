@@ -7,7 +7,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,6 +26,7 @@ import com.github.trueddd.trytch.R
 import com.github.trueddd.trytch.ui.buildImageRequest
 import com.github.trueddd.trytch.ui.detectPlayerZoom
 import com.github.trueddd.trytch.ui.isLandscape
+import com.github.trueddd.trytch.ui.theme.AppTheme
 import com.github.trueddd.trytch.ui.theme.HalfTransparentBlack
 import com.github.trueddd.trytch.ui.toDp
 import com.github.trueddd.trytch.ui.widgets.StreamTags
@@ -209,7 +209,7 @@ private fun StreamInfo(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(AppTheme.Primary)
             .padding(start = 8.dp)
     ) {
         AsyncImage(
@@ -218,7 +218,7 @@ private fun StreamInfo(
             modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.background)
+                .background(AppTheme.SecondaryText)
         )
         Column(
             verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -228,26 +228,20 @@ private fun StreamInfo(
                 Text(
                     text = stream.userName,
                     fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = AppTheme.AccentText,
                 )
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(horizontal = 8.dp)
-                        .size(4.dp)
-                        .background(MaterialTheme.colorScheme.onPrimaryContainer, CircleShape)
-                )
+                TextBullet()
                 Text(
                     text = stream.gameName,
                     fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = AppTheme.PrimaryText,
                 )
             }
             Row {
                 Image(
                     painter = painterResource(R.drawable.ic_person),
                     contentDescription = "Viewers count image",
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer),
+                    colorFilter = ColorFilter.tint(AppTheme.AccentText),
                     modifier = Modifier
                         .size(12.sp.toDp())
                         .align(Alignment.CenterVertically)
@@ -255,29 +249,36 @@ private fun StreamInfo(
                 Text(
                     text = stream.shortenedViewerCount,
                     fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = AppTheme.AccentText,
                 )
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(horizontal = 8.dp)
-                        .size(4.dp)
-                        .background(MaterialTheme.colorScheme.onPrimaryContainer, CircleShape)
-                )
+                TextBullet()
                 Text(
                     text = stream.title,
                     fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = AppTheme.PrimaryText,
+                    maxLines = 1,
                 )
             }
             if (LocalConfiguration.current.isLandscape) {
                 StreamTags(
                     tags = stream.tags.toImmutableList(),
                     modifier = Modifier
+                        .padding(top = 2.dp)
                 )
             }
         }
     }
+}
+
+@Composable
+private fun RowScope.TextBullet() {
+    Box(
+        modifier = Modifier
+            .align(Alignment.CenterVertically)
+            .padding(horizontal = 8.dp)
+            .size(4.dp)
+            .background(AppTheme.PrimaryTextDark, CircleShape)
+    )
 }
 
 @Composable
@@ -329,15 +330,14 @@ fun PlayerControls(
                     .clickable { playPauseClicked() }
             )
         }
-        // todo: extend clickable area
         Image(
             painter = painterResource(R.drawable.ic_settings_48),
             contentDescription = "Settings",
             modifier = Modifier
-                .padding(12.dp)
                 .align(Alignment.BottomEnd)
-                .size(24.dp)
+                .size(40.dp)
                 .clickable { settingsClicked() }
+                .padding(8.dp)
         )
     }
 }
