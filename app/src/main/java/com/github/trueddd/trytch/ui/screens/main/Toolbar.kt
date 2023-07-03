@@ -5,8 +5,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -47,12 +48,14 @@ private fun NoUserToolbarPreview() {
     Toolbar(state = MainScreenState.default())
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Toolbar(
     state: MainScreenState,
     modifier: Modifier = Modifier,
     onLoginButtonClicked: () -> Unit = {},
     onProfileButtonClicked: () -> Unit = {},
+    onProfileButtonLongClicked: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -97,7 +100,11 @@ fun Toolbar(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clickable { onProfileButtonClicked() }
+                        .combinedClickable(
+                            onClick = onProfileButtonClicked,
+                            onLongClick = onProfileButtonLongClicked,
+                        )
+//                        .clickable { onProfileButtonClicked() }
                 ) {
                     Text(
                         text = user.displayName,

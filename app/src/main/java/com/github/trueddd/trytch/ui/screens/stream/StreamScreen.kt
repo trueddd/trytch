@@ -3,7 +3,7 @@ package com.github.trueddd.trytch.ui.screens.stream
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -54,6 +54,7 @@ class StreamScreen(
             chatOverlayOpacityChanged = { streamViewModel.updateChatOverlayOpacity(it) },
             onChatOverlayDragged = { streamViewModel.saveChatOverlayPosition(it.x, it.y) },
             chatOverlaySizeChanged = { streamViewModel.updateChatOverlaySize(it) },
+            onSendMessageClicked = { streamViewModel.sendMessage(it) },
         )
     }
 }
@@ -73,6 +74,7 @@ fun StreamScreen(
     state: StreamScreenState,
     player: ExoPlayer?,
     modifier: Modifier = Modifier,
+    onSendMessageClicked: (String) -> Unit = {},
     playerEvents: (PlayerEvent) -> Unit = {},
     chatOverlayChecked: (Boolean) -> Unit = {},
     chatOverlayOpacityChanged: (Float) -> Unit = {},
@@ -89,7 +91,7 @@ fun StreamScreen(
                 .modifyIf(configuration.isPortrait) {
                     this
                         .fillMaxWidth()
-                        .fillMaxHeight(0.3f)
+                        .aspectRatio(16f / 9)
                 }
                 .modifyIf(configuration.isLandscape) {
                     this.fillMaxSize()
@@ -113,11 +115,21 @@ fun StreamScreen(
             )
         }
         if (configuration.isPortrait) {
-            Chat(
-                chatStatus = state.chatStatus,
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-            )
+            ) {
+                Chat(
+                    chatStatus = state.chatStatus,
+                    modifier = Modifier
+                        .weight(1f)
+                )
+                ChatInput(
+                    onSendMessageClicked = onSendMessageClicked,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                )
+            }
         }
     }
 }

@@ -19,4 +19,6 @@ interface ChatManager {
     }
 
     fun connectChat(channel: String): Flow<ChatStatus>
+
+    fun sendMessage(channel: String, text: String)
 }

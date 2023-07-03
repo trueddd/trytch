@@ -174,6 +174,10 @@ class StreamViewModel(
         }
     }
 
+    fun sendMessage(text: String) {
+        chatManager.sendMessage(channel, text)
+    }
+
     override fun release() {
         super.release()
         Log.d(TAG, "clear")
