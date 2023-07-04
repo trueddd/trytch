@@ -1,7 +1,8 @@
 package com.github.trueddd.twitch.chat
 
 import com.github.trueddd.twitch.TwitchBadgesManager
-import com.github.trueddd.twitch.data.ChatStatus
+import com.github.trueddd.twitch.data.ChatMessage
+import com.github.trueddd.twitch.data.ConnectionStatus
 import com.github.trueddd.twitch.db.TwitchDatabase
 import com.github.trueddd.twitch.emotes.EmotesProvider
 import kotlinx.coroutines.flow.Flow
@@ -18,7 +19,9 @@ interface ChatManager {
         }
     }
 
-    fun connectChat(channel: String): Flow<ChatStatus>
+    fun connectChat(channel: String): Flow<ConnectionStatus>
 
-    fun sendMessage(channel: String, text: String)
+    fun getMessagesFlow(channel: String): Flow<ChatMessage>
+
+    suspend fun sendMessage(channel: String, text: String)
 }

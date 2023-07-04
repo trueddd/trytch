@@ -3,7 +3,6 @@ package com.github.trueddd.twitch.chat
 import android.util.Log
 import com.github.trueddd.twitch.TwitchBadgesManager
 import com.github.trueddd.twitch.data.ChatMessage
-import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.ConnectionStatus
 import com.github.trueddd.twitch.db.TwitchDao
 import com.github.trueddd.twitch.emotes.EmotesProvider
@@ -15,21 +14,27 @@ import com.ktmi.tmi.dsl.builder.scopes.MainScope
 import com.ktmi.tmi.dsl.builder.scopes.channel
 import com.ktmi.tmi.dsl.builder.scopes.tmi
 import com.ktmi.tmi.dsl.plugins.Reconnect
+import com.ktmi.tmi.events.filterMessage
 import com.ktmi.tmi.events.onConnected
 import com.ktmi.tmi.events.onMessage
 import com.ktmi.tmi.events.onTwitchMessage
 import com.ktmi.tmi.messages.TwitchMessage
-import kotlinx.collections.immutable.toImmutableList
+import com.ktmi.tmi.messages.UserStateMessage
+import com.ktmi.tmi.messages.UserStateRelated
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
-import java.util.LinkedList
+import kotlinx.coroutines.flow.onStart
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-// TODO: Implement chat IRC client
 internal class ChatManagerImpl(
     private val badgesManager: TwitchBadgesManager,
     private val twitchDao: TwitchDao,
@@ -47,8 +52,42 @@ internal class ChatManagerImpl(
     private var mainScope: MainScope? = null
     private val chatClientsMap = mutableMapOf<String, ChannelScope>()
 
-    override fun sendMessage(channel: String, text: String) {
-        chatClientsMap[channel]?.sendMessage(channel, text)
+    private val chatMessagesFlow = MutableSharedFlow<ChatMessage>()
+
+    override fun getMessagesFlow(channel: String): Flow<ChatMessage> {
+        return chatMessagesFlow.filter { it.channel == channel }
+    }
+
+    private suspend fun UserStateRelated.toChatMessage(content: String): ChatMessage {
+        return coroutineScope {
+            val messageWords = async(Dispatchers.Default) { chatMessageWordsParser.split(content) }
+            val badges = async(Dispatchers.IO) {
+                badges?.mapNotNull { (name, tier) ->
+                    badgesManager.getBadgeUrl(channel, name, tier)
+                } ?: emptyList()
+            }
+            ChatMessage(
+                author = displayName ?: username!!,
+                channel = channel.removePrefix("#"),
+                userColor = color?.ifEmpty { null },
+                badges = badges.await(),
+                words = messageWords.await(),
+            )
+        }
+    }
+
+    override suspend fun sendMessage(channel: String, text: String) {
+        chatClientsMap[channel]?.let { client ->
+            coroutineScope {
+                val userName = async(Dispatchers.IO) { twitchDao.getUser()?.displayName }
+                val userStateMessage = client.getTwitchFlow()
+                    .onStart { client.sendMessage(channel, text) }
+                    .filterMessage<UserStateMessage>()
+                    .first { it.displayName == userName.await() }
+                val message = userStateMessage.toChatMessage(content = text)
+                chatMessagesFlow.emit(message)
+            }
+        }
     }
 
     private suspend fun resolveMainScope(): MainScope? {
@@ -70,34 +109,20 @@ internal class ChatManagerImpl(
         }
     }
 
-    override fun connectChat(channel: String): Flow<ChatStatus> {
+    override fun connectChat(channel: String): Flow<ConnectionStatus> {
         return channelFlow {
-            val messages = LinkedList<ChatMessage>()
-            send(ChatStatus(messages.toImmutableList(), ConnectionStatus.Connecting))
+            send(ConnectionStatus.Connecting)
             resolveMainScope()?.channel(channel) {
                 chatClientsMap[channel] = this
                 join(channel)
-                send(ChatStatus(messages.toImmutableList(), ConnectionStatus.Connected))
+                send(ConnectionStatus.Connected)
                 onTwitchMessage<TwitchMessage> {
                     Log.d(TAG, "TwitchMessage: ${it.rawMessage.raw}")
                 }
                 onMessage {
-                    Log.d(TAG, "${this.message.displayName} ${message.message}")
-                    val badges = message.badges
-                        ?.mapNotNull { (name, tier) -> badgesManager.getBadgeUrl(channel, name, tier) }
-                        ?: emptyList()
-                    val newMessage = ChatMessage(
-                        author = message.displayName ?: message.username,
-                        userColor = message.color?.ifEmpty { null },
-                        badges = badges,
-                        words = chatMessageWordsParser.split(message.message),
-                    )
-                    Log.d(TAG, "New message: $newMessage")
-                    messages.add(0, newMessage)
-                    if (messages.size > 100) {
-                        messages.removeLast()
-                    }
-                    trySend(ChatStatus(messages.toImmutableList(), ConnectionStatus.Connected))
+                    Log.d(TAG, "${message.displayName} ${message.message}")
+                    val chatMessage = message.toChatMessage(message.message)
+                    chatMessagesFlow.emit(chatMessage)
                 }
             }
             awaitClose {

@@ -25,8 +25,8 @@ data class StreamScreenState(
             broadcaster = User.test(),
             chatStatus = ChatStatus(
                 messages = persistentListOf(
-                    ChatMessage("qwe1", words = listOf(MessageWord.Default("Hello"))),
-                    ChatMessage("qwe2", words = listOf(MessageWord.Default("Hi!"))),
+                    ChatMessage(channel = "twitch", author = "qwe1", words = listOf(MessageWord.Default("Hello"))),
+                    ChatMessage(channel = "twitch", author = "qwe2", words = listOf(MessageWord.Default("Hi!"))),
                 ),
                 connectionStatus = ConnectionStatus.Connected,
             ),
