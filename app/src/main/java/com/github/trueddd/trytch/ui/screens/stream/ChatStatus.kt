@@ -1,9 +1,11 @@
-package com.github.trueddd.twitch.data
+package com.github.trueddd.trytch.ui.screens.stream
 
+import com.github.trueddd.twitch.data.ChatMessage
+import com.github.trueddd.twitch.data.ConnectionStatus
+import com.github.trueddd.twitch.data.MessageWord
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
-// todo: move to app module
 data class ChatStatus(
     val messages: ImmutableList<ChatMessage>,
     val connectionStatus: ConnectionStatus,

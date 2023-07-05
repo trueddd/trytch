@@ -13,6 +13,7 @@ import com.github.trueddd.twitch.chat.ChatManager
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.emotes.EmoteUpdateOption
 import com.github.trueddd.twitch.emotes.EmotesProvider
+import com.github.trueddd.twitch.onEachWithLock
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
@@ -20,6 +21,8 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -30,7 +33,6 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Semaphore
 
 class StreamViewModel(
     private val channel: String,
@@ -54,7 +56,8 @@ class StreamViewModel(
     private fun initStreamScreen() {
         loadStreamVideoInfo()
         setupStreamPlayer()
-        setupChat()
+        listenChatConnectionStatus()
+        collectChatMessages()
         loadChannelBadges()
         updateEmotes()
         loadStreamInfo()
@@ -114,20 +117,12 @@ class StreamViewModel(
             .launchIn(viewModelScope)
     }
 
-    private fun setupChat() {
-        chatManager.connectChat(channel)
-            .onStart { Log.d(TAG, "Connecting chat") }
-            .onEach { status ->
-                updateState { it.copy(chatStatus = it.chatStatus.copy(connectionStatus = status)) }
-            }
-            .onCompletion { Log.d(TAG, "Disconnecting chat") }
-            .launchIn(viewModelScope)
+    private fun collectChatMessages() {
         val cachedMessages = MutableList<ChatMessage?>(200) { null }
-        val lock = Semaphore(1)
-        // TODO: prettify
         chatManager.getMessagesFlow(channel)
-            .onEach { message ->
-                lock.acquire()
+            .onEach { Log.d(TAG, "New message: $it") }
+            .buffer(UNLIMITED)
+            .onEachWithLock { message ->
                 if (cachedMessages.lastOrNull() != null) {
                     cachedMessages.removeLastOrNull()
                 }
@@ -145,9 +140,18 @@ class StreamViewModel(
                     }
                     .build()
                 updateState { it.copy(chatStatus = it.chatStatus.copy(messages = messages)) }
-                lock.release()
             }
             .flowOn(Dispatchers.Default)
+            .launchIn(viewModelScope)
+    }
+
+    private fun listenChatConnectionStatus() {
+        chatManager.connectChat(channel)
+            .onStart { Log.d(TAG, "Connecting chat") }
+            .onEach { status ->
+                updateState { it.copy(chatStatus = it.chatStatus.copy(connectionStatus = status)) }
+            }
+            .onCompletion { Log.d(TAG, "Disconnecting chat") }
             .launchIn(viewModelScope)
     }
 

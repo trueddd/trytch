@@ -11,8 +11,10 @@ internal class CommonEmotesProvider(
     private val emoteDao: EmoteDao,
 ) : EmotesProvider {
 
-    private val providers = listOf(
+    private val providers = listOf<EmoteStorage>(
         SevenTvEmotesProvider(httpClient, twitchDao, emoteDao),
+        FrankerFaceZEmotesProvider(httpClient, twitchDao, emoteDao),
+        BetterTTVEmotesProvider(httpClient, twitchDao, emoteDao),
     )
 
     override fun update(updateOption: EmoteUpdateOption) {
@@ -24,13 +26,14 @@ internal class CommonEmotesProvider(
     override suspend fun getEmote(word: String): Emote? {
         return emoteDao.getEmoteByName(word)
             .entries
-            .firstOrNull()
+            .minByOrNull { it.key.sortingOrder }
             ?.let { (info, versions) ->
                 Emote(
-                    info.id,
-                    info.name,
-                    info.provider,
-                    versions.map { Emote.Version(it.width, it.height, it.url) },
+                    id = info.id,
+                    name = info.name,
+                    provider = info.provider,
+                    global = info.global,
+                    versions = versions.map { Emote.Version(it.width, it.height, it.url) },
                 )
             }
     }

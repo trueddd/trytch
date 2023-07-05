@@ -4,7 +4,8 @@ import android.util.Log
 import com.github.trueddd.twitch.data.Emote
 import com.github.trueddd.twitch.db.EmoteDao
 import com.github.trueddd.twitch.db.TwitchDao
-import com.github.trueddd.twitch.dto.SevenTvEmote
+import com.github.trueddd.twitch.dto.bttv.BttvChannelEmotesResponse
+import com.github.trueddd.twitch.dto.bttv.BttvEmote
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -14,27 +15,27 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-// TODO: implement real-time emotes updates - https://github.com/SevenTV/EventAPI
-internal class SevenTvEmotesProvider(
+// TODO: implement real-time emotes updates - https://betterttv.com/developers/websocket
+internal class BetterTTVEmotesProvider(
     private val httpClient: HttpClient,
     private val twitchDao: TwitchDao,
     private val emoteDao: EmoteDao,
 ) : EmoteStorage, CoroutineScope {
 
     companion object {
-        private const val TAG = "SevenTvEmotesProvider"
+        private const val TAG = "BTTVEmotesProvider"
     }
 
     override val coroutineContext by lazy {
         SupervisorJob() + Dispatchers.IO
     }
 
-    private fun String.sevenTvEmotesUrl() = "https://api.7tv.app/v2/users/$this/emotes"
+    private fun String.channelEmotesUrl() = "https://api.betterttv.net/3/cached/users/twitch/$this"
 
     private suspend fun getEmotesUrl(updateOption: EmoteUpdateOption): String? {
         return when (updateOption) {
-            is EmoteUpdateOption.Global -> "https://api.7tv.app/v2/emotes/global"
-            is EmoteUpdateOption.Channel -> twitchDao.getUserByName(updateOption.name)?.id?.sevenTvEmotesUrl()
+            is EmoteUpdateOption.Global -> "https://api.betterttv.net/3/cached/emotes/global"
+            is EmoteUpdateOption.Channel -> twitchDao.getUserByName(updateOption.name)?.id?.channelEmotesUrl()
         }
     }
 
@@ -45,14 +46,22 @@ internal class SevenTvEmotesProvider(
                 return@launch
             }
             val emotes = try {
-                httpClient.get(Url(url))
-                    .body<List<SevenTvEmote>>()
-                    .map { it.toEmote(updateOption) }
+                val response = httpClient.get(Url(url))
+                val emotes = when (updateOption) {
+                    is EmoteUpdateOption.Global -> {
+                        response.body<List<BttvEmote>>()
+                    }
+                    is EmoteUpdateOption.Channel -> {
+                        response.body<BttvChannelEmotesResponse>()
+                            .let { it.channelEmotes + it.sharedEmotes }
+                    }
+                }
+                emotes.map { it.toEmote(updateOption) }
             } catch (e: Exception) {
                 e.printStackTrace()
                 return@launch
             }
-            emoteDao.updateEmotes(Emote.Provider.SevenTv, emotes, updateOption)
+            emoteDao.updateEmotes(Emote.Provider.BetterTtv, emotes, updateOption)
             Log.d(TAG, "${emotes.size} emotes loaded for $updateOption")
         }
     }

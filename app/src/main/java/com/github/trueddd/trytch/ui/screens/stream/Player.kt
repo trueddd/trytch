@@ -30,7 +30,6 @@ import com.github.trueddd.trytch.ui.theme.AppTheme
 import com.github.trueddd.trytch.ui.theme.HalfTransparentBlack
 import com.github.trueddd.trytch.ui.toDp
 import com.github.trueddd.trytch.ui.widgets.StreamTags
-import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.Stream
 import com.github.trueddd.twitch.data.User
 import com.google.android.exoplayer2.ExoPlayer

@@ -33,7 +33,6 @@ import com.github.trueddd.trytch.ui.parseHexColor
 import com.github.trueddd.trytch.ui.theme.AppTheme
 import com.github.trueddd.trytch.ui.toDp
 import com.github.trueddd.twitch.data.ChatMessage
-import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.ConnectionStatus
 import com.github.trueddd.twitch.data.MessageWord
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
