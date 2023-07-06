@@ -6,8 +6,8 @@ import com.github.trueddd.twitch.data.StreamInfo
 import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.data.UserRequestType
 import com.github.trueddd.twitch.db.TwitchDao
-import com.github.trueddd.twitch.dto.PaginatedTwitchResponse
-import com.github.trueddd.twitch.dto.TwitchStream
+import com.github.trueddd.twitch.dto.twitch.PaginatedTwitchResponse
+import com.github.trueddd.twitch.dto.twitch.TwitchStream
 import com.github.trueddd.twitch.dto.TwitchStreamVideoInfo
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

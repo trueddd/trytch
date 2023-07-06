@@ -7,8 +7,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import com.github.trueddd.twitch.db.BadgeDao
 import com.github.trueddd.twitch.db.TwitchDao
-import com.github.trueddd.twitch.dto.TwitchBadgeSet
-import com.github.trueddd.twitch.dto.TwitchResponse
+import com.github.trueddd.twitch.dto.twitch.TwitchBadgeSet
+import com.github.trueddd.twitch.dto.twitch.TwitchResponse
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*

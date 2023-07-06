@@ -11,15 +11,16 @@ internal class CommonEmotesProvider(
     private val emoteDao: EmoteDao,
 ) : EmotesProvider {
 
-    private val providers = listOf<EmoteStorage>(
-        SevenTvEmotesProvider(httpClient, twitchDao, emoteDao),
-        FrankerFaceZEmotesProvider(httpClient, twitchDao, emoteDao),
-        BetterTTVEmotesProvider(httpClient, twitchDao, emoteDao),
+    private val providers = mapOf<Emote.Provider, EmoteStorage>(
+        Emote.Provider.Twitch to TwitchEmotesProvider(httpClient, twitchDao, emoteDao),
+        Emote.Provider.SevenTv to SevenTvEmotesProvider(httpClient, twitchDao, emoteDao),
+        Emote.Provider.FrankerFacez to FrankerFaceZEmotesProvider(httpClient, twitchDao, emoteDao),
+        Emote.Provider.BetterTtv to BetterTTVEmotesProvider(httpClient, twitchDao, emoteDao),
     )
 
     override fun update(updateOption: EmoteUpdateOption) {
-        providers.forEach {
-            it.update(updateOption)
+        providers.forEach { (_, storage) ->
+            storage.update(updateOption)
         }
     }
 
@@ -36,5 +37,9 @@ internal class CommonEmotesProvider(
                     versions = versions.map { Emote.Version(it.width, it.height, it.url) },
                 )
             }
+    }
+
+    override fun updateEmoteSets(emoteSetIds: List<String>) {
+        providers[Emote.Provider.Twitch]?.updateEmoteSets(emoteSetIds)
     }
 }

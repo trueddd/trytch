@@ -18,10 +18,13 @@ import com.ktmi.tmi.events.filterMessage
 import com.ktmi.tmi.events.onConnected
 import com.ktmi.tmi.events.onMessage
 import com.ktmi.tmi.events.onTwitchMessage
+import com.ktmi.tmi.messages.GlobalUserStateMessage
 import com.ktmi.tmi.messages.TwitchMessage
 import com.ktmi.tmi.messages.UserStateMessage
 import com.ktmi.tmi.messages.UserStateRelated
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
@@ -31,14 +34,17 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 internal class ChatManagerImpl(
     private val badgesManager: TwitchBadgesManager,
     private val twitchDao: TwitchDao,
-    emotesProvider: EmotesProvider,
+    private val emotesProvider: EmotesProvider,
 ) : ChatManager {
 
     companion object {
@@ -50,6 +56,23 @@ internal class ChatManagerImpl(
     }
 
     private var mainScope: MainScope? = null
+        set(value) {
+            if (field != value) {
+                field?.disconnect()
+            }
+            field = value
+            if (value == null) {
+                return
+            }
+            value.getTwitchFlow()
+                .filterMessage<GlobalUserStateMessage>()
+                .onEach { message ->
+                    val emoteSets = message.rawMessage.tags["emote-sets"]?.split(",") ?: return@onEach
+                    if (emoteSets.isEmpty()) return@onEach
+                    emotesProvider.updateEmoteSets(emoteSets)
+                }
+                .launchIn(value)
+        }
     private val chatClientsMap = mutableMapOf<String, ChannelScope>()
 
     private val chatMessagesFlow = MutableSharedFlow<ChatMessage>()
@@ -109,6 +132,17 @@ internal class ChatManagerImpl(
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
+    override fun initialize() {
+        if (mainScope != null) {
+            return
+        }
+        GlobalScope.launch {
+            resolveMainScope()
+        }
+    }
+
+    // TODO: load Twitch emotes from messages
     override fun connectChat(channel: String): Flow<ConnectionStatus> {
         return channelFlow {
             send(ConnectionStatus.Connecting)

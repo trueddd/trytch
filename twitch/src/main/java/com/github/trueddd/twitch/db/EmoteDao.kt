@@ -30,6 +30,9 @@ internal interface EmoteDao {
     @Query("delete from emote_info where provider = :platform and global = 0")
     suspend fun clearChannelEmotes(platform: Emote.Provider)
 
+    @Query("delete from emote_info where provider = 'twitch' and global = 0 and id in (:emoteIds)")
+    suspend fun clearTwitchChannelEmotes(emoteIds: List<String>)
+
     @Transaction
     suspend fun updateEmotes(
         provider: Emote.Provider,
@@ -46,7 +49,13 @@ internal interface EmoteDao {
             withContext(Dispatchers.IO) {
                 when (updateOption) {
                     is EmoteUpdateOption.Global -> clearPlatformEmotes(provider)
-                    is EmoteUpdateOption.Channel -> clearChannelEmotes(provider)
+                    is EmoteUpdateOption.Channel -> {
+                        if (provider == Emote.Provider.Twitch) {
+                            clearTwitchChannelEmotes(info.map { it.id })
+                        } else {
+                            clearChannelEmotes(provider)
+                        }
+                    }
                 }
                 insertEmoteInfo(info)
                 insertEmoteVersions(versions)

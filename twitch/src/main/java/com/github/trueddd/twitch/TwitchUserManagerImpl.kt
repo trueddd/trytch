@@ -3,7 +3,7 @@ package com.github.trueddd.twitch
 import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.data.UserRequestType
 import com.github.trueddd.twitch.db.TwitchDao
-import com.github.trueddd.twitch.dto.TwitchTokens
+import com.github.trueddd.twitch.dto.twitch.TwitchTokens
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*

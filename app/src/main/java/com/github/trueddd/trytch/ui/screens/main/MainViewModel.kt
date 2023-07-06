@@ -7,8 +7,11 @@ import com.github.trueddd.trytch.ui.StatefulViewModel
 import com.github.trueddd.twitch.TwitchBadgesManager
 import com.github.trueddd.twitch.TwitchStreamsManager
 import com.github.trueddd.twitch.TwitchUserManager
+import com.github.trueddd.twitch.chat.ChatManager
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
@@ -21,6 +24,7 @@ class MainViewModel(
     private val twitchUserManager: TwitchUserManager,
     private val twitchStreamsManager: TwitchStreamsManager,
     private val twitchBadgesManager: TwitchBadgesManager,
+    private val chatManager: ChatManager,
 ) : StatefulViewModel<MainScreenState>() {
 
     private companion object {
@@ -57,6 +61,11 @@ class MainViewModel(
     init {
         twitchUserManager.userFlow
             .onEach { user -> updateState { it.copy(user = user) } }
+            .launchIn(viewModelScope)
+        twitchUserManager.userFlow
+            .filterNotNull()
+            .distinctUntilChanged()
+            .onEach { chatManager.initialize() }
             .launchIn(viewModelScope)
         twitchStreamsManager.followedStreamsFlow
             .onEach { streams -> updateState { it.copy(streams = streams.toImmutableList()) } }

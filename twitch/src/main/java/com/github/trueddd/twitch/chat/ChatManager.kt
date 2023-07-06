@@ -19,6 +19,8 @@ interface ChatManager {
         }
     }
 
+    fun initialize()
+
     fun connectChat(channel: String): Flow<ConnectionStatus>
 
     fun getMessagesFlow(channel: String): Flow<ChatMessage>
