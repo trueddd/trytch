@@ -15,8 +15,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
 import com.bumble.appyx.navmodel.backstack.BackStack
@@ -73,8 +71,24 @@ class MainScreen(
 
 @Preview
 @Composable
+private fun MainScreenPreview() {
+    MainScreen(state = MainScreenState.test())
+}
+
+@Preview
+@Composable
+private fun MainScreenNoStreamsPreview() {
+    MainScreen(state = MainScreenState.noStreamsTest())
+}
+
+@Preview
+@Composable
+private fun MainScreenNoUserPreview() {
+    MainScreen(state = MainScreenState.noUserTest())
+}
+
+@Composable
 private fun MainScreen(
-    @PreviewParameter(MainScreenStateParameters::class)
     state: MainScreenState,
     onLoginButtonClicked: () -> Unit = {},
     onProfileButtonClicked: () -> Unit = {},
@@ -94,11 +108,21 @@ private fun MainScreen(
             onProfileButtonLongClicked,
         )
         Box(modifier = Modifier.fillMaxSize()) {
-            if (state.user != null) {
-                Streams(
-                    streams = state.streams,
-                    onStreamClicked = onStreamClicked,
-                )
+            when {
+                state.user == null -> {
+                    NoUser(modifier = Modifier.align(Alignment.Center))
+                }
+                state.streams.isEmpty() && !state.streamsLoading -> {
+                    NoStreams(modifier = Modifier.align(Alignment.Center))
+                }
+                else -> {
+                    Streams(
+                        streams = state.streams,
+                        onStreamClicked = onStreamClicked,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+                }
             }
             if (state.streamsLoading) {
                 CircularProgressIndicator(
@@ -109,9 +133,4 @@ private fun MainScreen(
             }
         }
     }
-}
-
-class MainScreenStateParameters : PreviewParameterProvider<MainScreenState> {
-    override val values: Sequence<MainScreenState>
-        get() = sequenceOf(MainScreenState.test())
 }

@@ -9,17 +9,14 @@ import com.github.trueddd.twitch.emotes.EmotesProvider
 import com.ktmi.tmi.commands.join
 import com.ktmi.tmi.commands.leave
 import com.ktmi.tmi.commands.sendMessage
-import com.ktmi.tmi.dsl.builder.scopes.ChannelScope
 import com.ktmi.tmi.dsl.builder.scopes.MainScope
-import com.ktmi.tmi.dsl.builder.scopes.channel
 import com.ktmi.tmi.dsl.builder.scopes.tmi
 import com.ktmi.tmi.dsl.plugins.Reconnect
 import com.ktmi.tmi.events.filterMessage
 import com.ktmi.tmi.events.onConnected
-import com.ktmi.tmi.events.onMessage
-import com.ktmi.tmi.events.onTwitchMessage
 import com.ktmi.tmi.messages.GlobalUserStateMessage
-import com.ktmi.tmi.messages.TwitchMessage
+import com.ktmi.tmi.messages.JoinMessage
+import com.ktmi.tmi.messages.TextMessage
 import com.ktmi.tmi.messages.UserStateMessage
 import com.ktmi.tmi.messages.UserStateRelated
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -37,6 +34,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -57,6 +55,7 @@ internal class ChatManagerImpl(
 
     private var mainScope: MainScope? = null
         set(value) {
+            Log.d(TAG, "Main scope init: prev($field), new($value)")
             if (field != value) {
                 field?.disconnect()
             }
@@ -73,7 +72,6 @@ internal class ChatManagerImpl(
                 }
                 .launchIn(value)
         }
-    private val chatClientsMap = mutableMapOf<String, ChannelScope>()
 
     private val chatMessagesFlow = MutableSharedFlow<ChatMessage>()
 
@@ -105,17 +103,13 @@ internal class ChatManagerImpl(
     }
 
     override suspend fun sendMessage(channel: String, text: String) {
-        chatClientsMap[channel]?.let { client ->
-            coroutineScope {
-                val userName = async(Dispatchers.IO) { twitchDao.getUser()?.displayName }
-                val userStateMessage = client.getTwitchFlow()
-                    .onStart { client.sendMessage(channel, text) }
-                    .filterMessage<UserStateMessage>()
-                    .first { it.displayName == userName.await() }
-                val message = userStateMessage.toChatMessage(text, TwitchEmotesInfo.NotIncluded)
-                chatMessagesFlow.emit(message)
-            }
-        }
+        val client = resolveMainScope() ?: return
+        val userStateMessage = client.getTwitchFlow()
+            .onStart { client.sendMessage(channel, text) }
+            .filterMessage<UserStateMessage>()
+            .first { it.displayName.contentEquals(client.username, ignoreCase = true) }
+        val message = userStateMessage.toChatMessage(text, TwitchEmotesInfo.NotIncluded)
+        chatMessagesFlow.emit(message)
     }
 
     private suspend fun resolveMainScope(): MainScope? {
@@ -129,7 +123,9 @@ internal class ChatManagerImpl(
                     + Reconnect(5)
                     onConnected {
                         Log.d(TAG, "Chat connected")
-                        mainScope = this
+                        getTwitchFlow()
+                            .onEach { Log.d(TAG, "IRC: ${it.rawMessage.raw}") }
+                            .launchIn(this)
                         it.resume(this)
                     }
                 }
@@ -143,33 +139,34 @@ internal class ChatManagerImpl(
             return
         }
         GlobalScope.launch {
-            resolveMainScope()
+            mainScope = resolveMainScope()
         }
     }
 
     override fun connectChat(channel: String): Flow<ConnectionStatus> {
         return channelFlow {
             send(ConnectionStatus.Connecting)
-            resolveMainScope()?.channel(channel) {
-                chatClientsMap[channel] = this
-                join(channel)
-                send(ConnectionStatus.Connected)
-                onTwitchMessage<TwitchMessage> {
-                    Log.d(TAG, "TwitchMessage: ${it.rawMessage.raw}")
-                }
-                onMessage {
-                    val chatMessage = message.toChatMessage(
-                        content = message.message,
-                        twitchEmotesInfo = TwitchEmotesInfo.Included.from(emotes = message.emotes ?: emptyList())
+            val mainScope = resolveMainScope() ?: return@channelFlow
+            mainScope.getTwitchFlow()
+                .filterMessage<JoinMessage>()
+                .filter { it.channel.removePrefix("#").contentEquals(channel, ignoreCase = true) }
+                .take(1)
+                .onEach { send(ConnectionStatus.Connected) }
+                .onStart { mainScope.join(channel) }
+                .launchIn(this)
+            mainScope.getTwitchFlow()
+                .filterMessage<TextMessage>()
+                .collect {
+                    val chatMessage = it.toChatMessage(
+                        content = it.message,
+                        twitchEmotesInfo = TwitchEmotesInfo.Included.from(emotes = it.emotes ?: emptyList())
                     )
                     Log.d(TAG, "Formed message: $chatMessage")
                     chatMessagesFlow.emit(chatMessage)
                 }
-            }
             awaitClose {
                 Log.d(TAG, "Disconnecting")
-                chatClientsMap[channel]?.leave(channel)
-                chatClientsMap.remove(channel)
+                mainScope.leave(channel)
             }
         }.flowOn(Dispatchers.IO)
     }
