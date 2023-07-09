@@ -11,7 +11,7 @@ object Versions {
     const val Ksp = "1.8.10-1.0.9"
     const val Koin = "3.2.0"
     const val KoinAnnotations = "1.0.1"
-    const val Ktor = "2.3.0"
+    const val Ktor = "2.3.2"
     const val Room = "2.5.0"
     const val ExoPlayer = "2.18.1"
     const val Accompanist = "0.27.1"

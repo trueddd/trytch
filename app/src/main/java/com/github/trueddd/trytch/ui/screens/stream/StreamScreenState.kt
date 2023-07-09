@@ -2,7 +2,6 @@ package com.github.trueddd.trytch.ui.screens.stream
 
 import com.github.trueddd.trytch.settings.StreamSettings
 import com.github.trueddd.twitch.data.ChatMessage
-import com.github.trueddd.twitch.data.ChatStatus
 import com.github.trueddd.twitch.data.ConnectionStatus
 import com.github.trueddd.twitch.data.Stream
 import com.github.trueddd.twitch.data.MessageWord
@@ -25,8 +24,8 @@ data class StreamScreenState(
             broadcaster = User.test(),
             chatStatus = ChatStatus(
                 messages = persistentListOf(
-                    ChatMessage("qwe1", words = listOf(MessageWord.Default("Hello"))),
-                    ChatMessage("qwe2", words = listOf(MessageWord.Default("Hi!"))),
+                    ChatMessage(channel = "twitch", author = "qwe1", words = listOf(MessageWord.Default("Hello"))),
+                    ChatMessage(channel = "twitch", author = "qwe2", words = listOf(MessageWord.Default("Hi!"))),
                 ),
                 connectionStatus = ConnectionStatus.Connected,
             ),

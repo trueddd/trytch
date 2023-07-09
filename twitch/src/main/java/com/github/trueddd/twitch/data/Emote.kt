@@ -4,6 +4,7 @@ data class Emote(
     val id: String,
     val name: String,
     val provider: Provider,
+    val global: Boolean,
     val versions: List<Version>,
 ) {
 

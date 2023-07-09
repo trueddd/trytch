@@ -1,4 +1,4 @@
-package com.github.trueddd.twitch.dto
+package com.github.trueddd.twitch.dto.twitch
 
 import com.github.trueddd.twitch.data.BroadcasterType
 import com.github.trueddd.twitch.data.User

@@ -5,14 +5,13 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.room.*
-import androidx.room.migration.AutoMigrationSpec
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.github.trueddd.twitch.data.Stream
-import com.github.trueddd.twitch.data.Tokens
-import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.data.BadgeVersion
 import com.github.trueddd.twitch.data.EmoteInfo
 import com.github.trueddd.twitch.data.EmoteVersion
+import com.github.trueddd.twitch.data.Stream
+import com.github.trueddd.twitch.data.Tokens
+import com.github.trueddd.twitch.data.User
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -26,16 +25,13 @@ import kotlinx.coroutines.launch
         EmoteInfo::class,
         EmoteVersion::class,
     ],
-    version = 9,
+    version = 1,
     autoMigrations = [
-        AutoMigration(from = 3, to = 4),
-        AutoMigration(from = 4, to = 5),
-        AutoMigration(from = 5, to = 6, spec = TwitchDatabase.TwitchStreamTagsMigration::class),
-        AutoMigration(from = 8, to = 9),
     ],
 )
 @TypeConverters(
     TwitchStreamTagsConverter::class,
+    EmoteProviderConverter::class,
 )
 abstract class TwitchDatabase : RoomDatabase() {
 
@@ -59,7 +55,4 @@ abstract class TwitchDatabase : RoomDatabase() {
                 .build()
         }
     }
-
-    @RenameColumn(tableName = "streams", fromColumnName = "tagIds", toColumnName = "tags")
-    class TwitchStreamTagsMigration : AutoMigrationSpec
 }

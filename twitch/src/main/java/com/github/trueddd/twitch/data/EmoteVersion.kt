@@ -5,7 +5,7 @@ import androidx.room.ForeignKey
 
 @Entity(
     tableName = "emote_versions",
-    primaryKeys = ["id", "provider"],
+    primaryKeys = ["id", "provider", "width", "height"],
     foreignKeys = [
         ForeignKey(
             entity = EmoteInfo::class,

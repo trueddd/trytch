@@ -1,4 +1,4 @@
-package com.github.trueddd.twitch.dto
+package com.github.trueddd.twitch.dto.twitch
 
 import com.github.trueddd.twitch.data.Stream
 import kotlinx.serialization.SerialName
@@ -26,7 +26,7 @@ data class TwitchStream(
     val language: String,
     @SerialName("thumbnail_url")
     val thumbnailUrl: String,
-    val tags: List<String>,
+    val tags: List<String>?,
 ) {
 
     fun toStream(userId: String) = Stream(
@@ -42,7 +42,7 @@ data class TwitchStream(
         startedAt,
         language,
         thumbnailUrl,
-        tags,
+        tags ?: emptyList(),
         userId,
     )
 }

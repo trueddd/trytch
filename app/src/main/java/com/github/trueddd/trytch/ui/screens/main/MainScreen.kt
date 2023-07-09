@@ -21,6 +21,7 @@ import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
 import com.bumble.appyx.navmodel.backstack.BackStack
 import com.bumble.appyx.navmodel.backstack.operation.push
+import com.github.trueddd.trytch.BuildConfig
 import com.github.trueddd.trytch.navigation.IntentHandler
 import com.github.trueddd.trytch.navigation.Routing
 import com.github.trueddd.trytch.ui.theme.AppTheme
@@ -44,6 +45,14 @@ class MainScreen(
         mainViewModel.login(intent)
     }
 
+    private fun openSelfStream() {
+        if (BuildConfig.DEBUG) {
+            mainViewModel.stateFlow.value.user?.login?.let {
+                backStack.push(Routing.Stream(it))
+            }
+        }
+    }
+
     @Composable
     override fun View(modifier: Modifier) {
         val state by mainViewModel.stateFlow.collectAsState()
@@ -56,6 +65,7 @@ class MainScreen(
             state = state,
             onLoginButtonClicked = ::login,
             onProfileButtonClicked = { backStack.push(Routing.Profile) },
+            onProfileButtonLongClicked = { openSelfStream() },
             onStreamClicked = { backStack.push(Routing.Stream(it.userName)) },
         )
     }
@@ -68,6 +78,7 @@ private fun MainScreen(
     state: MainScreenState,
     onLoginButtonClicked: () -> Unit = {},
     onProfileButtonClicked: () -> Unit = {},
+    onProfileButtonLongClicked: () -> Unit = {},
     onStreamClicked: (Stream) -> Unit = {},
 ) {
     Column(
@@ -80,6 +91,7 @@ private fun MainScreen(
             Modifier.fillMaxWidth(),
             onLoginButtonClicked,
             onProfileButtonClicked,
+            onProfileButtonLongClicked,
         )
         Box(modifier = Modifier.fillMaxSize()) {
             if (state.user != null) {

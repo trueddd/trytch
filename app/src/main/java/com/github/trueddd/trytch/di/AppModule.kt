@@ -18,6 +18,7 @@ val appModule = module {
         twitchUserManager = get(),
         twitchStreamsManager = get(),
         twitchBadgesManager = get(),
+        chatManager = get(),
     ) }
 
     factory { (channel: String) -> StreamViewModel(

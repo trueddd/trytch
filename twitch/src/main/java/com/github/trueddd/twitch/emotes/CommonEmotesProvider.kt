@@ -11,27 +11,35 @@ internal class CommonEmotesProvider(
     private val emoteDao: EmoteDao,
 ) : EmotesProvider {
 
-    private val providers = listOf(
-        SevenTvEmotesProvider(httpClient, twitchDao, emoteDao),
+    private val providers = mapOf<Emote.Provider, EmoteStorage>(
+        Emote.Provider.Twitch to TwitchEmotesProvider(httpClient, twitchDao, emoteDao),
+        Emote.Provider.SevenTv to SevenTvEmotesProvider(httpClient, twitchDao, emoteDao),
+        Emote.Provider.FrankerFacez to FrankerFaceZEmotesProvider(httpClient, twitchDao, emoteDao),
+        Emote.Provider.BetterTtv to BetterTTVEmotesProvider(httpClient, twitchDao, emoteDao),
     )
 
     override fun update(updateOption: EmoteUpdateOption) {
-        providers.forEach {
-            it.update(updateOption)
+        providers.forEach { (_, storage) ->
+            storage.update(updateOption)
         }
     }
 
-    override suspend fun getEmote(word: String): Emote? {
-        return emoteDao.getEmoteByName(word)
+    override suspend fun getEmote(word: String, providers: List<Emote.Provider>): Emote? {
+        return emoteDao.getEmoteByName(word, providers)
             .entries
-            .firstOrNull()
+            .minByOrNull { it.key.sortingOrder }
             ?.let { (info, versions) ->
                 Emote(
-                    info.id,
-                    info.name,
-                    info.provider,
-                    versions.map { Emote.Version(it.width, it.height, it.url) },
+                    id = info.id,
+                    name = info.name,
+                    provider = info.provider,
+                    global = info.global,
+                    versions = versions.map { Emote.Version(it.width, it.height, it.url) },
                 )
             }
+    }
+
+    override fun updateEmoteSets(emoteSetIds: List<String>) {
+        providers[Emote.Provider.Twitch]?.updateEmoteSets(emoteSetIds)
     }
 }

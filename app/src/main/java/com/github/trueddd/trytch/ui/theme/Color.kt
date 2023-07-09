@@ -69,6 +69,7 @@ object AppTheme {
     val PrimaryText = Color(0xFFACA9A5)
     val PrimaryTextDark = Color(0xFF837F7C)
     val SecondaryText = Color(0xFF312F31)
+    val TextMention = Color.White
 }
 
 @Stable

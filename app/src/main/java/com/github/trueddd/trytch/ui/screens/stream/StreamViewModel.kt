@@ -10,21 +10,29 @@ import com.github.trueddd.trytch.ui.StatefulViewModel
 import com.github.trueddd.twitch.TwitchBadgesManager
 import com.github.trueddd.twitch.TwitchStreamsManager
 import com.github.trueddd.twitch.chat.ChatManager
+import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.emotes.EmoteUpdateOption
 import com.github.trueddd.twitch.emotes.EmotesProvider
+import com.github.trueddd.twitch.onEachWithLock
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 class StreamViewModel(
     private val channel: String,
@@ -48,7 +56,8 @@ class StreamViewModel(
     private fun initStreamScreen() {
         loadStreamVideoInfo()
         setupStreamPlayer()
-        setupChat()
+        listenChatConnectionStatus()
+        collectChatMessages()
         loadChannelBadges()
         updateEmotes()
         loadStreamInfo()
@@ -61,6 +70,7 @@ class StreamViewModel(
             .filterNotNull()
             .flatMapLatest { twitchStreamsManager.getStreamBroadcasterUserFlow(it.userId) }
             .onEach { user -> updateState { it.copy(broadcaster = user) } }
+            .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
     }
 
@@ -105,14 +115,48 @@ class StreamViewModel(
                     state.copy(playerStatus = playerStatus)
                 }
             }
+            .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
     }
 
-    private fun setupChat() {
+    private fun collectChatMessages() {
+        val cachedMessages = MutableList<ChatMessage?>(200) { null }
+        chatManager.getMessagesFlow(channel)
+            .onStart { Log.d(TAG, "Collecting chat messages") }
+            .onEach { Log.d(TAG, "New message: $it") }
+            .buffer(UNLIMITED)
+            .onEachWithLock { message ->
+                if (cachedMessages.lastOrNull() != null) {
+                    cachedMessages.removeLastOrNull()
+                }
+                cachedMessages.add(0, message)
+                val messages = persistentListOf<ChatMessage>()
+                    .builder()
+                    .apply {
+                        cachedMessages.forEach {
+                            if (it != null) {
+                                add(it)
+                            } else {
+                                return@apply
+                            }
+                        }
+                    }
+                    .build()
+                updateState { it.copy(chatStatus = it.chatStatus.copy(messages = messages)) }
+            }
+            .onCompletion { Log.d(TAG, "Stop collecting chat messages") }
+            .flowOn(Dispatchers.Default)
+            .launchIn(viewModelScope)
+    }
+
+    private fun listenChatConnectionStatus() {
         chatManager.connectChat(channel)
             .onStart { Log.d(TAG, "Connecting chat") }
-            .onEach { status -> updateState { it.copy(chatStatus = status) } }
+            .onEach { status ->
+                updateState { it.copy(chatStatus = it.chatStatus.copy(connectionStatus = status)) }
+            }
             .onCompletion { Log.d(TAG, "Disconnecting chat") }
+            .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
     }
 
@@ -171,6 +215,12 @@ class StreamViewModel(
                 }
                 settingsManager.modifyStreamSettings { it.copy(preferredQuality = playerEvent.newValue) }
             }
+        }
+    }
+
+    fun sendMessage(text: String) {
+        viewModelScope.launch(Dispatchers.Default) {
+            chatManager.sendMessage(channel, text.trim())
         }
     }
 

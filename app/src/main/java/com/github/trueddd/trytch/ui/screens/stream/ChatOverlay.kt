@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.trueddd.trytch.ui.isLandscape
-import com.github.trueddd.twitch.data.ChatStatus
 import kotlin.math.roundToInt
 
 @Composable

@@ -14,4 +14,9 @@ data class EmoteInfo(
     val id: String,
     val name: String,
     val provider: Emote.Provider,
-)
+    val global: Boolean,
+) {
+
+    val sortingOrder: Int
+        get() = if (global) 1 else 0
+}

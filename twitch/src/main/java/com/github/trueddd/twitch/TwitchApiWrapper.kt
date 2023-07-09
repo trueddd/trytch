@@ -1,8 +1,8 @@
 package com.github.trueddd.twitch
 
 import com.github.trueddd.twitch.data.UserRequestType
-import com.github.trueddd.twitch.dto.TwitchResponse
-import com.github.trueddd.twitch.dto.TwitchUser
+import com.github.trueddd.twitch.dto.twitch.TwitchResponse
+import com.github.trueddd.twitch.dto.twitch.TwitchUser
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
