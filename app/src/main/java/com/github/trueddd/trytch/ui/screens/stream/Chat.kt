@@ -96,7 +96,7 @@ fun MessageWord(
         is MessageWord.Mention -> Text(
             text = word.content,
             fontSize = fontSize,
-            fontWeight = FontWeight.ExtraBold,
+            fontWeight = FontWeight.SemiBold,
             color = AppTheme.TextMention,
             modifier = modifier,
         )
