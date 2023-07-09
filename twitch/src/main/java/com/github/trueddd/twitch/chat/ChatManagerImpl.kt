@@ -78,12 +78,17 @@ internal class ChatManagerImpl(
     private val chatMessagesFlow = MutableSharedFlow<ChatMessage>()
 
     override fun getMessagesFlow(channel: String): Flow<ChatMessage> {
-        return chatMessagesFlow.filter { it.channel == channel }
+        return chatMessagesFlow.filter { it.channel.contentEquals(channel, ignoreCase = true) }
     }
 
-    private suspend fun UserStateRelated.toChatMessage(content: String): ChatMessage {
+    private suspend fun UserStateRelated.toChatMessage(
+        content: String,
+        twitchEmotesInfo: TwitchEmotesInfo,
+    ): ChatMessage {
         return coroutineScope {
-            val messageWords = async(Dispatchers.Default) { chatMessageWordsParser.split(content) }
+            val messageWords = async(Dispatchers.Default) {
+                chatMessageWordsParser.split(content, twitchEmotesInfo)
+            }
             val badges = async(Dispatchers.IO) {
                 badges?.mapNotNull { (name, tier) ->
                     badgesManager.getBadgeUrl(channel, name, tier)
@@ -107,7 +112,7 @@ internal class ChatManagerImpl(
                     .onStart { client.sendMessage(channel, text) }
                     .filterMessage<UserStateMessage>()
                     .first { it.displayName == userName.await() }
-                val message = userStateMessage.toChatMessage(content = text)
+                val message = userStateMessage.toChatMessage(text, TwitchEmotesInfo.NotIncluded)
                 chatMessagesFlow.emit(message)
             }
         }
@@ -142,7 +147,6 @@ internal class ChatManagerImpl(
         }
     }
 
-    // TODO: load Twitch emotes from messages
     override fun connectChat(channel: String): Flow<ConnectionStatus> {
         return channelFlow {
             send(ConnectionStatus.Connecting)
@@ -154,8 +158,11 @@ internal class ChatManagerImpl(
                     Log.d(TAG, "TwitchMessage: ${it.rawMessage.raw}")
                 }
                 onMessage {
-                    Log.d(TAG, "${message.displayName} ${message.message}")
-                    val chatMessage = message.toChatMessage(message.message)
+                    val chatMessage = message.toChatMessage(
+                        content = message.message,
+                        twitchEmotesInfo = TwitchEmotesInfo.Included.from(emotes = message.emotes ?: emptyList())
+                    )
+                    Log.d(TAG, "Formed message: $chatMessage")
                     chatMessagesFlow.emit(chatMessage)
                 }
             }

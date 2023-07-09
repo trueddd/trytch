@@ -3,6 +3,7 @@ package com.github.trueddd.trytch.ui.screens.stream
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,6 +57,7 @@ fun Chat(
     ) {
         ChatMessages(
             messages = chatStatus.messages,
+            fontSize = 14.sp,
             modifier = Modifier
                 .fillMaxSize()
         )
@@ -87,14 +89,15 @@ fun MessageWord(
         is MessageWord.Default -> Text(
             text = word.content,
             fontSize = fontSize,
-            color = AppTheme.PrimaryText,
+            color = AppTheme.AccentText,
+            fontWeight = FontWeight.SemiBold,
             modifier = modifier,
         )
         is MessageWord.Mention -> Text(
             text = word.content,
             fontSize = fontSize,
-            fontWeight = FontWeight.Bold,
-            color = AppTheme.PrimaryText,
+            fontWeight = FontWeight.ExtraBold,
+            color = AppTheme.TextMention,
             modifier = modifier,
         )
         is MessageWord.Emote -> {
@@ -104,8 +107,17 @@ fun MessageWord(
                 imageLoader = LocalImageLoader.current,
                 contentDescription = word.content,
                 modifier = modifier
-                    .height(16.sp.value.dp)
-                    .width((16.sp.value * (emoteVersion.width.toFloat() / emoteVersion.height)).dp),
+                    .height(16.sp.toDp())
+                    .width((16.sp.value * (emoteVersion.width.toFloat() / emoteVersion.height)).sp.toDp()),
+            )
+        }
+        is MessageWord.UnknownTwitchEmote -> {
+            AsyncImage(
+                model = word.url(),
+                imageLoader = LocalImageLoader.current,
+                contentDescription = word.content,
+                modifier = modifier
+                    .size(16.sp.toDp()),
             )
         }
         is MessageWord.Link -> {
@@ -113,6 +125,7 @@ fun MessageWord(
             Text(
                 text = word.content,
                 fontSize = fontSize,
+                fontWeight = FontWeight.SemiBold,
                 color = AppTheme.Accent,
                 textDecoration = TextDecoration.Underline,
                 modifier = modifier
@@ -131,7 +144,6 @@ class ChatMessagePreviewParameterProvider : PreviewParameterProvider<ChatMessage
     override val values = sequenceOf(ChatMessage.test())
 }
 
-@Preview(widthDp = 360)
 @Composable
 private fun Message(
     @PreviewParameter(provider = ChatMessagePreviewParameterProvider::class)
@@ -154,7 +166,7 @@ private fun Message(
             text = message.author,
             color = message.userColor?.parseHexColor() ?: AppTheme.PrimaryText,
             fontSize = fontSize,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
             modifier = Modifier
         )
         message.words.forEach {
@@ -176,6 +188,7 @@ fun ChatMessages(
     LazyColumn(
         reverseLayout = true,
         contentPadding = PaddingValues(horizontal = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.Bottom),
         userScrollEnabled = scrollEnabled,
         modifier = modifier,
     ) {

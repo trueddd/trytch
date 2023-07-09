@@ -4,9 +4,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class TwitchEmoteThemeMode {
+enum class TwitchEmoteThemeMode(val modeValue: String) {
     @SerialName("dark")
-    Dark,
+    Dark("dark"),
     @SerialName("light")
-    Light,
+    Light("light"),
 }

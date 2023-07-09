@@ -4,9 +4,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class TwitchEmoteFormat {
+enum class TwitchEmoteFormat(val formatValue: String) {
     @SerialName("static")
-    Static,
+    Static("static"),
     @SerialName("animated")
-    Animated,
+    Animated("animated"),
 }

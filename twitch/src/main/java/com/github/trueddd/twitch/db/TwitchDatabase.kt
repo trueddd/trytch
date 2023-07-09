@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 )
 @TypeConverters(
     TwitchStreamTagsConverter::class,
+    EmoteProviderConverter::class,
 )
 abstract class TwitchDatabase : RoomDatabase() {
 

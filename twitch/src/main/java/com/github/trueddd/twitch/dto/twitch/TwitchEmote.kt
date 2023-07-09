@@ -76,7 +76,7 @@ sealed class TwitchEmote {
         override fun toEmote(templateUrl: String) = createEmote(
             id = id,
             name = name,
-            global = false,
+            global = ownerId == "0",
             scale = scale,
             format = format,
             themeMode = themeMode,

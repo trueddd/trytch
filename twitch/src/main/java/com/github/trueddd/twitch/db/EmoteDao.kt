@@ -15,8 +15,8 @@ import kotlinx.coroutines.withContext
 @Dao
 internal interface EmoteDao {
 
-    @Query("select * from emote_info join emote_versions on (emote_info.id = emote_versions.id and emote_info.provider = emote_versions.provider) where name = :name")
-    suspend fun getEmoteByName(name: String): Map<EmoteInfo, List<EmoteVersion>>
+    @Query("select * from emote_info join emote_versions on (emote_info.id = emote_versions.id and emote_info.provider = emote_versions.provider) where name = :name and emote_info.provider in (:providers)")
+    suspend fun getEmoteByName(name: String, providers: List<Emote.Provider>): Map<EmoteInfo, List<EmoteVersion>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEmoteInfo(emotesInfo: List<EmoteInfo>)
@@ -40,7 +40,17 @@ internal interface EmoteDao {
         updateOption: EmoteUpdateOption,
     ) {
         withContext(Dispatchers.Default) {
-            val info = emotes.map { EmoteInfo(it.id, it.name, it.provider, global = updateOption is EmoteUpdateOption.Global) }
+            val info = emotes.map {
+                EmoteInfo(
+                    id = it.id,
+                    name = it.name,
+                    provider = it.provider,
+                    global = when {
+                        (updateOption as? EmoteUpdateOption.Channel)?.name == "" -> it.global
+                        else -> updateOption is EmoteUpdateOption.Global
+                    },
+                )
+            }
             val versions = emotes.flatMap { emote ->
                 emote.versions.map {
                     EmoteVersion(emote.id, emote.provider, it.width, it.height, it.url)

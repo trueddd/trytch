@@ -24,8 +24,8 @@ internal class CommonEmotesProvider(
         }
     }
 
-    override suspend fun getEmote(word: String): Emote? {
-        return emoteDao.getEmoteByName(word)
+    override suspend fun getEmote(word: String, providers: List<Emote.Provider>): Emote? {
+        return emoteDao.getEmoteByName(word, providers)
             .entries
             .minByOrNull { it.key.sortingOrder }
             ?.let { (info, versions) ->

@@ -70,6 +70,7 @@ class StreamViewModel(
             .filterNotNull()
             .flatMapLatest { twitchStreamsManager.getStreamBroadcasterUserFlow(it.userId) }
             .onEach { user -> updateState { it.copy(broadcaster = user) } }
+            .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
     }
 
@@ -114,12 +115,14 @@ class StreamViewModel(
                     state.copy(playerStatus = playerStatus)
                 }
             }
+            .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
     }
 
     private fun collectChatMessages() {
         val cachedMessages = MutableList<ChatMessage?>(200) { null }
         chatManager.getMessagesFlow(channel)
+            .onStart { Log.d(TAG, "Collecting chat messages") }
             .onEach { Log.d(TAG, "New message: $it") }
             .buffer(UNLIMITED)
             .onEachWithLock { message ->
@@ -141,6 +144,7 @@ class StreamViewModel(
                     .build()
                 updateState { it.copy(chatStatus = it.chatStatus.copy(messages = messages)) }
             }
+            .onCompletion { Log.d(TAG, "Stop collecting chat messages") }
             .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
     }
@@ -152,6 +156,7 @@ class StreamViewModel(
                 updateState { it.copy(chatStatus = it.chatStatus.copy(connectionStatus = status)) }
             }
             .onCompletion { Log.d(TAG, "Disconnecting chat") }
+            .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
     }
 
@@ -214,8 +219,8 @@ class StreamViewModel(
     }
 
     fun sendMessage(text: String) {
-        viewModelScope.launch {
-            chatManager.sendMessage(channel, text)
+        viewModelScope.launch(Dispatchers.Default) {
+            chatManager.sendMessage(channel, text.trim())
         }
     }
 
