@@ -25,6 +25,20 @@ data class MainScreenState(
             streamsLoading = true,
         )
 
+        fun noStreamsTest() = MainScreenState(
+            user = User.test(),
+            userLoading = false,
+            streams = persistentListOf(),
+            streamsLoading = false,
+        )
+
+        fun noUserTest() = MainScreenState(
+            user = null,
+            userLoading = false,
+            streams = persistentListOf(),
+            streamsLoading = false,
+        )
+
         fun default() = MainScreenState(
             user = null,
             userLoading = false,

@@ -3,6 +3,9 @@
 
     <!-- main screen -->
     <string name="main_login">Login</string>
+    <string name="main_login_text">Login to view\nyour followed streams</string>
+    <string name="main_no_streams_text">It is a bit quite here for a while</string>
+    <string name="main_explore_streams_text">Explore streams</string>
 
     <!-- stream screen -->
     <string name="stream_quality_title">Stream quality</string>

@@ -104,7 +104,6 @@ fun Toolbar(
                             onClick = onProfileButtonClicked,
                             onLongClick = onProfileButtonLongClicked,
                         )
-//                        .clickable { onProfileButtonClicked() }
                 ) {
                     Text(
                         text = user.displayName,
@@ -125,6 +124,7 @@ fun Toolbar(
         }
         if (state.userLoading) {
             LinearProgressIndicator(
+                color = AppTheme.Accent,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(4.dp)
