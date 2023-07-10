@@ -187,7 +187,7 @@ fun ChatMessages(
 ) {
     LazyColumn(
         reverseLayout = true,
-        contentPadding = PaddingValues(horizontal = 4.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.Bottom),
         userScrollEnabled = scrollEnabled,
         modifier = modifier,

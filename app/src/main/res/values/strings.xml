@@ -15,6 +15,7 @@
 
     <!-- chat -->
     <string name="chat_send_message">Send a message</string>
+    <string name="chat_search_emote">Search emotes</string>
 
     <!-- profile screen -->
     <string name="profile_logout">Log out</string>

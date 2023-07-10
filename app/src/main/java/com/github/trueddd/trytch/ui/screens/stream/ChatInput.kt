@@ -44,14 +44,18 @@ private fun ChatInput1() {
 @Preview
 @Composable
 private fun ChatInput2() {
-    ChatInput()
+    ChatInput(
+        emotesOpen = true,
+    )
 }
 
 @Composable
 fun ChatInput(
     modifier: Modifier = Modifier,
     initialText: String = "",
+    emotesOpen: Boolean = false,
     onSendMessageClicked: (String) -> Unit = {},
+    onEmoteButtonClicked: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
@@ -106,9 +110,9 @@ fun ChatInput(
                     Icon(
                         imageVector = Icons.Default.Face,
                         contentDescription = "Emotes",
-                        tint = if (isFocused) AppTheme.Accent else AppTheme.PrimaryTextDark,
+                        tint = if (emotesOpen) AppTheme.Accent else AppTheme.PrimaryTextDark,
                         modifier = Modifier
-                            .clickable {}
+                            .clickable(onClick = onEmoteButtonClicked)
                     )
                 }
             },
