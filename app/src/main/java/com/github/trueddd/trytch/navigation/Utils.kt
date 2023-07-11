@@ -40,7 +40,7 @@ fun StateFlow<ActiveNodes>.disposeViewModels(viewModelStore: NodeViewModelStore)
 fun Flow<ActiveNodes>.handleWindowRotations(window: Window): Flow<ActiveNodes> {
     val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
     return onEach { nodes ->
-        if (nodes.any { it == Routing.Companion.Keys.STREAM }) {
+        if (nodes.any { it == Routing.Keys.Stream }) {
             windowInsetsController.systemBarsBehavior = when (window.context.resources.configuration.orientation) {
                 Configuration.ORIENTATION_LANDSCAPE -> {
                     windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())

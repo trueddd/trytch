@@ -1,4 +1,4 @@
-package com.github.trueddd.trytch.ui.screens.stream
+package com.github.trueddd.trytch.ui.screens.stream.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

@@ -1,6 +1,6 @@
 package com.github.trueddd.trytch.settings
 
-import com.github.trueddd.trytch.ui.screens.stream.ChatOverlayStatus
+import com.github.trueddd.trytch.ui.screens.stream.chat.ChatOverlayStatus
 
 data class StreamSettings(
     val preferredQuality: String?,

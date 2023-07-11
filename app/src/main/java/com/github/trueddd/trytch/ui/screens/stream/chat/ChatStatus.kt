@@ -1,4 +1,4 @@
-package com.github.trueddd.trytch.ui.screens.stream
+package com.github.trueddd.trytch.ui.screens.stream.chat
 
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ConnectionStatus

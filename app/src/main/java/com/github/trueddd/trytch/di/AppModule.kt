@@ -8,6 +8,7 @@ import com.github.trueddd.trytch.ui.screens.main.MainViewModel
 import com.github.trueddd.trytch.ui.screens.profile.ProfileViewModel
 import com.github.trueddd.trytch.ui.screens.splash.SplashViewModel
 import com.github.trueddd.trytch.ui.screens.stream.StreamViewModel
+import com.github.trueddd.trytch.ui.screens.stream.chat.EmotesPanelViewModel
 import com.google.android.exoplayer2.ExoPlayer
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
@@ -29,6 +30,10 @@ val appModule = module {
         twitchBadgesManager = get(),
         emotesProvider = get(),
         settingsManager = get(),
+    ) }
+
+    factory { EmotesPanelViewModel(
+        emotesProvider = get(),
     ) }
 
     single { SplashViewModel(

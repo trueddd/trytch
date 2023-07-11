@@ -1,9 +1,18 @@
 package com.github.trueddd.twitch.emotes
 
 import com.github.trueddd.twitch.data.Emote
+import com.github.trueddd.twitch.data.EmoteInfo
+import com.github.trueddd.twitch.data.EmoteVersion
 import com.github.trueddd.twitch.db.EmoteDao
 import com.github.trueddd.twitch.db.TwitchDao
 import io.ktor.client.HttpClient
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapLatest
 
 internal class CommonEmotesProvider(
     httpClient: HttpClient,
@@ -24,19 +33,27 @@ internal class CommonEmotesProvider(
         }
     }
 
+    private fun Map.Entry<EmoteInfo, List<EmoteVersion>>.toEmote() = Emote(
+        id = key.id,
+        name = key.name,
+        provider = key.provider,
+        global = key.global,
+        versions = value.map { Emote.Version(it.width, it.height, it.url) },
+    )
+
     override suspend fun getEmote(word: String, providers: List<Emote.Provider>): Emote? {
         return emoteDao.getEmoteByName(word, providers)
             .entries
             .minByOrNull { it.key.sortingOrder }
-            ?.let { (info, versions) ->
-                Emote(
-                    id = info.id,
-                    name = info.name,
-                    provider = info.provider,
-                    global = info.global,
-                    versions = versions.map { Emote.Version(it.width, it.height, it.url) },
-                )
-            }
+            ?.toEmote()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getEmotesFlow(provider: Emote.Provider): Flow<ImmutableList<Emote>> {
+        return emoteDao.getEmotesByProvider(provider)
+            .flowOn(Dispatchers.IO)
+            .mapLatest { emotes -> emotes.map { it.toEmote() }.toImmutableList() }
+            .flowOn(Dispatchers.Default)
     }
 
     override fun updateEmoteSets(emoteSetIds: List<String>) {

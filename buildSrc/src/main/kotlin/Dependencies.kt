@@ -63,6 +63,7 @@ object Dependencies {
     object Koin {
         val Core = Dependency("io.insert-koin:koin-core:${Versions.Koin}")
         val Android = Dependency("io.insert-koin:koin-android:${Versions.Koin}")
+        val Compose = Dependency("io.insert-koin:koin-androidx-compose:3.4.5")
         val Annotations = Dependency("io.insert-koin:koin-annotations:${Versions.KoinAnnotations}")
         val Compiler = Dependency("io.insert-koin:koin-ksp-compiler:${Versions.KoinAnnotations}")
     }

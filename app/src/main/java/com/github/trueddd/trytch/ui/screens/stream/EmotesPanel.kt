@@ -1,18 +1,25 @@
 package com.github.trueddd.trytch.ui.screens.stream
 
+import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -35,18 +42,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.github.trueddd.trytch.LocalImageLoader
 import com.github.trueddd.trytch.R
+import com.github.trueddd.trytch.ui.buildImageRequest
+import com.github.trueddd.trytch.ui.screens.stream.chat.EmotesPanelState
 import com.github.trueddd.trytch.ui.theme.AppTheme
 import com.github.trueddd.twitch.data.Emote
 import com.github.trueddd.twitch.emotes.EmotesProvider
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 
 @Preview
 @Composable
 private fun EmotesPanelPreview() {
-    EmotesPanel()
+    EmotesPanel(
+        emotesPanelState = EmotesPanelState.test(),
+    )
 }
+
+@Preview
+@Composable
+private fun EmptyEmotesPanelPreview() {
+    EmotesPanel(
+        emotesPanelState = EmotesPanelState.test(),
+    )
+}
+
+private const val EmotesRows = 5
+private val EmotePreviewHeight = 24.dp
+private val EmotesSpacing = 4.dp
+private val EmotesSidePadding = 8.dp
 
 @Composable
 private fun EmoteProviderTabHeader(
@@ -72,20 +96,21 @@ private fun EmoteProviderTabHeader(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EmotesPanel(
+    emotesPanelState: EmotesPanelState,
     modifier: Modifier = Modifier,
-    providers: ImmutableList<Emote.Provider> = EmotesProvider.AllEmoteProviders.toImmutableList(),
+    onEmotesTabChanged: (Emote.Provider) -> Unit = {},
+    onSearchToggled: () -> Unit = {},
+    onSearchTextChanged: (String) -> Unit = {},
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .height(120.dp)
             .background(AppTheme.Primary, RoundedCornerShape(8.dp))
             .border(1.dp, AppTheme.PrimaryTextDark, RoundedCornerShape(8.dp))
     ) {
-        var selectedTab by remember { mutableStateOf(providers.first()) }
-        var searchEnabled by remember { mutableStateOf(false) }
         var emotesSearchText by remember { mutableStateOf("") }
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -93,10 +118,13 @@ fun EmotesPanel(
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
-            if (searchEnabled) {
+            if (emotesPanelState.searchEnabled) {
                 BasicTextField(
                     value = emotesSearchText,
-                    onValueChange = { emotesSearchText = it },
+                    onValueChange = {
+                        emotesSearchText = it
+                        onSearchTextChanged(it)
+                    },
                     singleLine = true,
                     textStyle = TextStyle.Default.copy(
                         fontSize = 14.sp,
@@ -131,11 +159,11 @@ fun EmotesPanel(
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    items(providers) { provider ->
+                    items(EmotesProvider.AllEmoteProviders) { provider ->
                         EmoteProviderTabHeader(
                             name = provider.value,
-                            selected = selectedTab == provider,
-                            onClick = { selectedTab = provider },
+                            selected = emotesPanelState.selectedProvider == provider,
+                            onClick = { onEmotesTabChanged(provider) },
                         )
                     }
                 }
@@ -143,16 +171,16 @@ fun EmotesPanel(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search emotes",
-                tint = if (searchEnabled) AppTheme.Primary else AppTheme.PrimaryText,
+                tint = if (emotesPanelState.searchEnabled) AppTheme.Primary else AppTheme.PrimaryText,
                 modifier = Modifier
                     .padding(start = 8.dp)
                     .size(26.dp)
                     .background(
-                        color = if (searchEnabled) AppTheme.Accent else Color.Transparent,
+                        color = if (emotesPanelState.searchEnabled) AppTheme.Accent else Color.Transparent,
                         shape = CircleShape,
                     )
                     .padding(2.dp)
-                    .clickable { searchEnabled = !searchEnabled }
+                    .clickable(onClick = onSearchToggled)
             )
         }
         Box(
@@ -162,5 +190,47 @@ fun EmotesPanel(
                 .height(1.dp)
                 .background(AppTheme.PrimaryTextDark)
         )
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(EmotesSpacing * (EmotesRows - 1) + EmotesSidePadding * 2 + EmotePreviewHeight * 5)
+        ) {
+            LazyHorizontalStaggeredGrid(
+                rows = StaggeredGridCells.Fixed(EmotesRows),
+                contentPadding = PaddingValues(EmotesSidePadding),
+                verticalArrangement = Arrangement.spacedBy(EmotesSpacing),
+                horizontalArrangement = Arrangement.spacedBy(EmotesSpacing),
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                items(emotesPanelState.emotes) {
+                    EmotePreview(it)
+                }
+            }
+            if (emotesPanelState.emotes.isEmpty()) {
+                Text(
+                    text = "No emotes found",
+                    color = AppTheme.PrimaryText,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp,
+                )
+            }
+        }
     }
+}
+
+@Preview
+@Composable
+private fun EmotePreview(
+    emote: Emote = Emote.test(),
+) {
+    AsyncImage(
+        model = buildImageRequest(emote.versions.first().url),
+        imageLoader = LocalImageLoader.current,
+        contentDescription = emote.name,
+        modifier = Modifier
+            .size(EmotePreviewHeight)
+            .clickable { Log.d("Emote", "Clicked on ${emote.name}") }
+    )
 }

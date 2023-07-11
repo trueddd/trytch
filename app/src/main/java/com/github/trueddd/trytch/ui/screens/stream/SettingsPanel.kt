@@ -34,6 +34,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.trueddd.trytch.R
+import com.github.trueddd.trytch.ui.screens.stream.chat.ChatOverlaySizes
+import com.github.trueddd.trytch.ui.screens.stream.chat.ChatOverlayStatus
+import com.github.trueddd.trytch.ui.screens.stream.chat.chatOverlaySizeFrom
 import com.github.trueddd.trytch.ui.theme.AppTheme
 import kotlin.math.roundToInt
 

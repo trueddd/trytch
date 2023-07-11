@@ -14,16 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import com.bumble.appyx.core.lifecycle.asFlow
@@ -32,7 +27,13 @@ import com.bumble.appyx.core.node.Node
 import com.github.trueddd.trytch.ui.isLandscape
 import com.github.trueddd.trytch.ui.isPortrait
 import com.github.trueddd.trytch.ui.modifyIf
+import com.github.trueddd.trytch.ui.screens.stream.chat.Chat
+import com.github.trueddd.trytch.ui.screens.stream.chat.ChatInput
+import com.github.trueddd.trytch.ui.screens.stream.chat.ChatOverlayStatus
+import com.github.trueddd.trytch.ui.screens.stream.chat.EmotesPanelState
+import com.github.trueddd.trytch.ui.screens.stream.chat.EmotesPanelViewModel
 import com.github.trueddd.trytch.ui.theme.AppTheme
+import com.github.trueddd.twitch.data.Emote
 import com.google.android.exoplayer2.ExoPlayer
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -41,6 +42,7 @@ import kotlinx.coroutines.flow.onEach
 
 class StreamScreen(
     private val streamViewModel: StreamViewModel,
+    private val emotesPanelViewModel: EmotesPanelViewModel,
     buildContext: BuildContext,
 ) : Node(buildContext) {
 
@@ -53,17 +55,23 @@ class StreamScreen(
                 .onEach { streamViewModel.player.pause() }
                 .launchIn(this)
         }
-        val state by streamViewModel.stateFlow.collectAsState()
+        val streamScreenState by streamViewModel.stateFlow.collectAsState()
+        val emotesPanelState by emotesPanelViewModel.stateFlow.collectAsState()
         StreamScreen(
-            state,
-            streamViewModel.player,
-            Modifier.fillMaxSize(),
+            state = streamScreenState,
+            emotesPanelState = emotesPanelState,
+            player = streamViewModel.player,
+            modifier = Modifier.fillMaxSize(),
             playerEvents = { streamViewModel.handlePlayerEvent(it) },
             chatOverlayChecked = { streamViewModel.updateChatOverlayVisibility(it) },
             chatOverlayOpacityChanged = { streamViewModel.updateChatOverlayOpacity(it) },
             onChatOverlayDragged = { streamViewModel.saveChatOverlayPosition(it.x, it.y) },
             chatOverlaySizeChanged = { streamViewModel.updateChatOverlaySize(it) },
             onSendMessageClicked = { streamViewModel.sendMessage(it) },
+            onEmotesPanelToggle = { emotesPanelViewModel.togglePanel() },
+            onEmotesPanelTabChanged = { emotesPanelViewModel.changeTab(it) },
+            onEmotesPanelSearchToggled = { emotesPanelViewModel.toggleSearch() },
+            onEmotesPanelSearchTextChanged = { emotesPanelViewModel.updateSearch(it) },
         )
     }
 }
@@ -73,15 +81,16 @@ class StreamScreen(
 private fun StreamScreenPreview() {
     StreamScreen(
         state = StreamScreenState.test(),
+        emotesPanelState = EmotesPanelState.test(),
         player = null,
     )
 }
 
 @Composable
 fun StreamScreen(
-    @PreviewParameter(provider = StreamScreenStateProvider::class)
     state: StreamScreenState,
     player: ExoPlayer?,
+    emotesPanelState: EmotesPanelState,
     modifier: Modifier = Modifier,
     onSendMessageClicked: (String) -> Unit = {},
     playerEvents: (PlayerEvent) -> Unit = {},
@@ -89,6 +98,10 @@ fun StreamScreen(
     chatOverlayOpacityChanged: (Float) -> Unit = {},
     chatOverlaySizeChanged: (ChatOverlayStatus.Size) -> Unit = {},
     onChatOverlayDragged: (Offset) -> Unit = {},
+    onEmotesPanelToggle: () -> Unit = {},
+    onEmotesPanelTabChanged: (Emote.Provider) -> Unit = {},
+    onEmotesPanelSearchToggled: () -> Unit = {},
+    onEmotesPanelSearchTextChanged: (String) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -124,7 +137,6 @@ fun StreamScreen(
             )
         }
         if (configuration.isPortrait) {
-            var emotesPanelOpen by remember { mutableStateOf(false) }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -140,7 +152,7 @@ fun StreamScreen(
                             .fillMaxSize()
                     )
                     this@chat.AnimatedVisibility(
-                        visible = emotesPanelOpen,
+                        visible = emotesPanelState.panelOpen,
                         enter = slideInVertically { it },
                         exit = slideOutVertically { it },
                         modifier = Modifier
@@ -148,21 +160,22 @@ fun StreamScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp)
                     ) {
-                        EmotesPanel()
+                        EmotesPanel(
+                            emotesPanelState = emotesPanelState,
+                            onEmotesTabChanged = onEmotesPanelTabChanged,
+                            onSearchToggled = onEmotesPanelSearchToggled,
+                            onSearchTextChanged = onEmotesPanelSearchTextChanged,
+                        )
                     }
                 }
                 ChatInput(
-                    emotesOpen = emotesPanelOpen,
+                    emotesOpen = emotesPanelState.panelOpen,
                     onSendMessageClicked = onSendMessageClicked,
-                    onEmoteButtonClicked = { emotesPanelOpen = !emotesPanelOpen },
+                    onEmoteButtonClicked = onEmotesPanelToggle,
                     modifier = Modifier
                         .fillMaxWidth(),
                 )
             }
         }
     }
-}
-
-class StreamScreenStateProvider : PreviewParameterProvider<StreamScreenState> {
-    override val values = sequenceOf(StreamScreenState.test())
 }

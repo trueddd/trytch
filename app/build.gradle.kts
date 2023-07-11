@@ -83,6 +83,7 @@ dependencies {
     androidTestImplementation(Dependencies.Compose.UiTestJunit4)
 
     implementation(Dependencies.Koin.Android)
+    implementation(Dependencies.Koin.Compose)
     implementation(Dependencies.Koin.Annotations)
     ksp(Dependencies.Koin.Compiler)
 

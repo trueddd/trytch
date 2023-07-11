@@ -8,6 +8,23 @@ data class Emote(
     val versions: List<Version>,
 ) {
 
+    companion object {
+
+        fun test() = Emote(
+            id = "12345",
+            name = "peepoCute",
+            provider = Provider.SevenTv,
+            global = false,
+            versions = listOf(
+                Version(
+                    width = 112,
+                    height = 112,
+                    url = "https://cdn.frankerfacez.com/emoticon/478103/4"
+                )
+            )
+        )
+    }
+
     data class Version(
         val width: Int,
         val height: Int,

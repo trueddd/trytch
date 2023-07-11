@@ -10,6 +10,7 @@ import com.github.trueddd.twitch.data.EmoteInfo
 import com.github.trueddd.twitch.data.EmoteVersion
 import com.github.trueddd.twitch.emotes.EmoteUpdateOption
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 @Dao
@@ -17,6 +18,9 @@ internal interface EmoteDao {
 
     @Query("select * from emote_info join emote_versions on (emote_info.id = emote_versions.id and emote_info.provider = emote_versions.provider) where name = :name and emote_info.provider in (:providers)")
     suspend fun getEmoteByName(name: String, providers: List<Emote.Provider>): Map<EmoteInfo, List<EmoteVersion>>
+
+    @Query("select * from emote_info join emote_versions on (emote_info.id = emote_versions.id and emote_info.provider = emote_versions.provider) where emote_info.provider = :provider")
+    fun getEmotesByProvider(provider: Emote.Provider): Flow<Map<EmoteInfo, List<EmoteVersion>>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEmoteInfo(emotesInfo: List<EmoteInfo>)

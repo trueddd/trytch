@@ -5,20 +5,19 @@ import kotlinx.parcelize.Parcelize
 
 sealed class Routing(val name: String) : Parcelable {
 
-    companion object {
-        object Keys {
-            const val MAIN = "main"
-            const val STREAM = "stream"
-            const val PROFILE = "profile"
-        }
+    object Keys {
+        const val Main = "main"
+        const val Stream = "stream"
+        const val EmotesPanel = "emotes_panel"
+        const val Profile = "profile"
     }
 
     @Parcelize
-    object Main : Routing(Keys.MAIN)
+    object Main : Routing(Keys.Main)
 
     @Parcelize
-    class Stream(val channel: String) : Routing(Keys.STREAM)
+    class Stream(val channel: String) : Routing(Keys.Stream)
 
     @Parcelize
-    object Profile : Routing(Keys.PROFILE)
+    object Profile : Routing(Keys.Profile)
 }

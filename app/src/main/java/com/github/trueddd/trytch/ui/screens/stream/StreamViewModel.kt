@@ -7,6 +7,7 @@ import com.github.trueddd.trytch.player.playbackStateFlow
 import com.github.trueddd.trytch.settings.SettingsManager
 import com.github.trueddd.trytch.settings.modifyStreamSettings
 import com.github.trueddd.trytch.ui.StatefulViewModel
+import com.github.trueddd.trytch.ui.screens.stream.chat.ChatOverlayStatus
 import com.github.trueddd.twitch.TwitchBadgesManager
 import com.github.trueddd.twitch.TwitchStreamsManager
 import com.github.trueddd.twitch.chat.ChatManager
