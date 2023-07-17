@@ -42,9 +42,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import com.github.trueddd.trytch.LocalImageLoader
 import com.github.trueddd.trytch.R
+import com.github.trueddd.trytch.ui.CoilImage
 import com.github.trueddd.trytch.ui.buildImageRequest
 import com.github.trueddd.trytch.ui.screens.stream.chat.EmotesPanelState
 import com.github.trueddd.trytch.ui.theme.AppTheme
@@ -225,9 +224,8 @@ fun EmotesPanel(
 private fun EmotePreview(
     emote: Emote = Emote.test(),
 ) {
-    AsyncImage(
+    CoilImage(
         model = buildImageRequest(emote.versions.first().url),
-        imageLoader = LocalImageLoader.current,
         contentDescription = emote.name,
         modifier = Modifier
             .size(EmotePreviewHeight)

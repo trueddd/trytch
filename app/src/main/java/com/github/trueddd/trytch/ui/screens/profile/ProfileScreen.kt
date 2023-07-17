@@ -36,10 +36,10 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
 import com.github.trueddd.trytch.R
+import com.github.trueddd.trytch.ui.CoilImage
 import com.github.trueddd.trytch.ui.buildImageRequest
 import com.github.trueddd.trytch.ui.theme.AppTheme
 
@@ -86,8 +86,8 @@ private fun ProfileScreen(
                 .fillMaxSize()
         ) {
             Box {
-                AsyncImage(
-                    model = screenState.user.offlineImageUrl,
+                CoilImage(
+                    model = buildImageRequest(screenState.user.offlineImageUrl),
                     contentDescription = "${screenState.user.displayName} offline image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -120,7 +120,7 @@ private fun ProfileScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    AsyncImage(
+                    CoilImage(
                         model = buildImageRequest(screenState.user.profileImageUrl),
                         contentDescription = "${screenState.user.displayName} avatar",
                         modifier = Modifier

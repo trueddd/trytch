@@ -21,8 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import coil.compose.AsyncImage
 import com.github.trueddd.trytch.R
+import com.github.trueddd.trytch.ui.CoilImage
 import com.github.trueddd.trytch.ui.buildImageRequest
 import com.github.trueddd.trytch.ui.detectPlayerZoom
 import com.github.trueddd.trytch.ui.isLandscape
@@ -214,7 +214,7 @@ private fun StreamInfo(
             .background(AppTheme.Primary)
             .padding(start = 8.dp)
     ) {
-        AsyncImage(
+        CoilImage(
             model = broadcaster?.profileImageUrl?.let { buildImageRequest(model = it) },
             contentDescription = "${stream.userName} avatar",
             modifier = Modifier

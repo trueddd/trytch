@@ -27,8 +27,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import com.github.trueddd.trytch.LocalImageLoader
+import com.github.trueddd.trytch.ui.CoilImage
 import com.github.trueddd.trytch.ui.buildImageRequest
 import com.github.trueddd.trytch.ui.parseHexColor
 import com.github.trueddd.trytch.ui.theme.AppTheme
@@ -102,9 +101,8 @@ fun MessageWord(
         )
         is MessageWord.Emote -> {
             val emoteVersion = word.emote.versions.last()
-            AsyncImage(
-                model = emoteVersion.url,
-                imageLoader = LocalImageLoader.current,
+            CoilImage(
+                model = buildImageRequest(emoteVersion.url),
                 contentDescription = word.content,
                 modifier = modifier
                     .height(16.sp.toDp())
@@ -112,9 +110,8 @@ fun MessageWord(
             )
         }
         is MessageWord.UnknownTwitchEmote -> {
-            AsyncImage(
-                model = word.url(),
-                imageLoader = LocalImageLoader.current,
+            CoilImage(
+                model = buildImageRequest(word.url()),
                 contentDescription = word.content,
                 modifier = modifier
                     .size(16.sp.toDp()),
@@ -155,7 +152,7 @@ private fun Message(
         crossAxisAlignment = FlowCrossAxisAlignment.Center,
     ) {
         message.badges.forEach { badgeUrl ->
-            AsyncImage(
+            CoilImage(
                 model = buildImageRequest(badgeUrl),
                 contentDescription = null,
                 modifier = Modifier
