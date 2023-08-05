@@ -1,6 +1,5 @@
 package com.github.trueddd.trytch.ui.screens.stream
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -66,9 +65,9 @@ private fun EmptyEmotesPanelPreview() {
     )
 }
 
-private const val EmotesRows = 5
-private val EmotePreviewHeight = 24.dp
-private val EmotesSpacing = 4.dp
+private const val EmotesRows = 3
+private val EmotePreviewSize = 36.dp
+private val EmotesSpacing = 8.dp
 private val EmotesSidePadding = 8.dp
 
 @Composable
@@ -103,6 +102,7 @@ fun EmotesPanel(
     onEmotesTabChanged: (Emote.Provider) -> Unit = {},
     onSearchToggled: () -> Unit = {},
     onSearchTextChanged: (String) -> Unit = {},
+    onEmoteClicked: (Emote) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -193,18 +193,20 @@ fun EmotesPanel(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(EmotesSpacing * (EmotesRows - 1) + EmotesSidePadding * 2 + EmotePreviewHeight * 5)
+                .height(EmotesSpacing * (EmotesRows - 1) + EmotesSidePadding * 2 + EmotePreviewSize * EmotesRows)
         ) {
             LazyHorizontalStaggeredGrid(
                 rows = StaggeredGridCells.Fixed(EmotesRows),
                 contentPadding = PaddingValues(EmotesSidePadding),
                 verticalArrangement = Arrangement.spacedBy(EmotesSpacing),
-                horizontalArrangement = Arrangement.spacedBy(EmotesSpacing),
+                horizontalItemSpacing = EmotesSpacing,
                 modifier = Modifier
                     .fillMaxSize()
             ) {
                 items(emotesPanelState.emotes) {
-                    EmotePreview(it)
+                    EmotePreview(it) {
+                        onEmoteClicked(it)
+                    }
                 }
             }
             if (emotesPanelState.emotes.isEmpty()) {
@@ -223,12 +225,13 @@ fun EmotesPanel(
 @Composable
 private fun EmotePreview(
     emote: Emote = Emote.test(),
+    onEmoteClicked: () -> Unit = {},
 ) {
     CoilImage(
         model = buildImageRequest(emote.versions.first().url),
         contentDescription = emote.name,
         modifier = Modifier
-            .size(EmotePreviewHeight)
-            .clickable { Log.d("Emote", "Clicked on ${emote.name}") }
+            .size(EmotePreviewSize)
+            .clickable(onClick = onEmoteClicked)
     )
 }

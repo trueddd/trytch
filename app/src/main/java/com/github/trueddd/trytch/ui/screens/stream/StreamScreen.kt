@@ -1,25 +1,22 @@
 package com.github.trueddd.trytch.ui.screens.stream
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import com.bumble.appyx.core.lifecycle.asFlow
 import com.bumble.appyx.core.modality.BuildContext
@@ -103,6 +100,7 @@ fun StreamScreen(
     onEmotesPanelSearchToggled: () -> Unit = {},
     onEmotesPanelSearchTextChanged: (String) -> Unit = {},
 ) {
+    var chatInputText by remember { mutableStateOf("") }
     Column(
         modifier = modifier
             .background(AppTheme.Primary)
@@ -140,36 +138,26 @@ fun StreamScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-            ) chat@{
-                Box(
+            ) {
+                Chat(
+                    chatStatus = state.chatStatus,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                ) {
-                    Chat(
-                        chatStatus = state.chatStatus,
-                        modifier = Modifier
-                            .fillMaxSize()
+                )
+                if (emotesPanelState.panelOpen) {
+                    EmotesPanel(
+                        emotesPanelState = emotesPanelState,
+                        onEmotesTabChanged = onEmotesPanelTabChanged,
+                        onSearchToggled = onEmotesPanelSearchToggled,
+                        onSearchTextChanged = onEmotesPanelSearchTextChanged,
+                        onEmoteClicked = { chatInputText = chatInputText.appendChatEmote(it) },
                     )
-                    this@chat.AnimatedVisibility(
-                        visible = emotesPanelState.panelOpen,
-                        enter = slideInVertically { it },
-                        exit = slideOutVertically { it },
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                    ) {
-                        EmotesPanel(
-                            emotesPanelState = emotesPanelState,
-                            onEmotesTabChanged = onEmotesPanelTabChanged,
-                            onSearchToggled = onEmotesPanelSearchToggled,
-                            onSearchTextChanged = onEmotesPanelSearchTextChanged,
-                        )
-                    }
                 }
                 ChatInput(
+                    text = chatInputText,
                     emotesOpen = emotesPanelState.panelOpen,
+                    onTextChanged = { chatInputText = it },
                     onSendMessageClicked = onSendMessageClicked,
                     onEmoteButtonClicked = onEmotesPanelToggle,
                     modifier = Modifier
@@ -177,5 +165,12 @@ fun StreamScreen(
                 )
             }
         }
+    }
+}
+
+private fun String.appendChatEmote(emote: Emote): String {
+    return when {
+        isEmpty() || endsWith(" ") -> "$this${emote.name}"
+        else -> "$this ${emote.name}"
     }
 }

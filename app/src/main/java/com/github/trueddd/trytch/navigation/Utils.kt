@@ -7,10 +7,15 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
+import com.bumble.appyx.navmodel.backstack.BackStack
 import com.github.trueddd.trytch.di.NodeViewModelStore
 import kotlinx.coroutines.flow.*
 
 typealias ActiveNodes = List<String>
+
+typealias AppBackStack = BackStack<Routing>
+
+typealias AppBackPressStrategy = BackPressHandlerStrategy<Routing>
 
 fun RootNode.activeNodesFlow(): StateFlow<ActiveNodes> {
     return backStack.elements

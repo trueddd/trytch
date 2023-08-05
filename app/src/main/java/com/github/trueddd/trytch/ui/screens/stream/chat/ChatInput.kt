@@ -37,7 +37,7 @@ import com.github.trueddd.trytch.ui.theme.AppTheme
 @Composable
 private fun ChatInput1() {
     ChatInput(
-        initialText = "test message 123",
+        text = "test message 123",
     )
 }
 
@@ -45,14 +45,16 @@ private fun ChatInput1() {
 @Composable
 private fun ChatInput2() {
     ChatInput(
+        text = "",
         emotesOpen = true,
     )
 }
 
 @Composable
 fun ChatInput(
+    text: String,
     modifier: Modifier = Modifier,
-    initialText: String = "",
+    onTextChanged: (String) -> Unit = {},
     emotesOpen: Boolean = false,
     onSendMessageClicked: (String) -> Unit = {},
     onEmoteButtonClicked: () -> Unit = {},
@@ -61,20 +63,22 @@ fun ChatInput(
         modifier = modifier
             .background(AppTheme.Primary)
     ) {
-        var text by remember(initialText) { mutableStateOf(initialText) }
         var isFocused by remember { mutableStateOf(false) }
         val focusManager = LocalFocusManager.current
         BasicTextField(
             value = text,
-            onValueChange = { text = it },
+            onValueChange = onTextChanged,
             keyboardOptions = KeyboardOptions(
                 imeAction = if (text.isEmpty()) ImeAction.Previous else ImeAction.Send,
             ),
             keyboardActions = KeyboardActions(
                 onSend = {
                     onSendMessageClicked(text)
-                    text = ""
+                    onTextChanged("")
                     focusManager.clearFocus()
+                    if (emotesOpen) {
+                        onEmoteButtonClicked()
+                    }
                 },
                 onPrevious = {
                     focusManager.clearFocus()

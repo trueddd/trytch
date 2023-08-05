@@ -1,6 +1,7 @@
 package com.github.trueddd.trytch.ui.screens.stream.chat
 
 import androidx.lifecycle.viewModelScope
+import com.github.trueddd.trytch.navigation.AppBackPressStrategy
 import com.github.trueddd.trytch.ui.StatefulViewModel
 import com.github.trueddd.twitch.data.Emote
 import com.github.trueddd.twitch.emotes.EmotesProvider
@@ -14,9 +15,24 @@ import kotlinx.coroutines.flow.onEach
 @OptIn(ExperimentalCoroutinesApi::class)
 class EmotesPanelViewModel(
     private val emotesProvider: EmotesProvider,
+    private val appBackPressStrategy: AppBackPressStrategy,
 ) : StatefulViewModel<EmotesPanelState>() {
 
     override fun initialState() = EmotesPanelState.default()
+
+    private val backStackInterceptor: () -> Boolean = {
+        when {
+            stateFlow.value.searchEnabled -> {
+                updateState { it.copy(searchEnabled = false) }
+                false
+            }
+            stateFlow.value.panelOpen -> {
+                updateState { it.copy(panelOpen = false) }
+                false
+            }
+            else -> true
+        }
+    }
 
     init {
         stateFlow.map { it.selectedProvider }
@@ -24,6 +40,7 @@ class EmotesPanelViewModel(
             .flatMapLatest { emotesProvider.getEmotesFlow(it) }
             .onEach { emotes -> updateState { it.copy(emotes = emotes) } }
             .launchIn(viewModelScope)
+        appBackPressStrategy.addInterceptor(backStackInterceptor)
     }
 
     fun togglePanel() {
@@ -48,5 +65,10 @@ class EmotesPanelViewModel(
         updateState {
             it.copy(searchEnabled = !it.searchEnabled)
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        appBackPressStrategy.removeInterceptor(backStackInterceptor)
     }
 }

@@ -13,11 +13,11 @@ sealed class Routing(val name: String) : Parcelable {
     }
 
     @Parcelize
-    object Main : Routing(Keys.Main)
+    data object Main : Routing(Keys.Main)
 
     @Parcelize
-    class Stream(val channel: String) : Routing(Keys.Stream)
+    data class Stream(val channel: String) : Routing(Keys.Stream)
 
     @Parcelize
-    object Profile : Routing(Keys.Profile)
+    data object Profile : Routing(Keys.Profile)
 }

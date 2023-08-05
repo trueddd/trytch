@@ -1,7 +1,7 @@
 package com.github.trueddd.trytch.di
 
-import com.bumble.appyx.navmodel.backstack.BackStack
-import com.github.trueddd.trytch.navigation.Routing
+import com.github.trueddd.trytch.navigation.AppBackPressStrategy
+import com.github.trueddd.trytch.navigation.AppBackStack
 import com.github.trueddd.trytch.settings.SettingsManager
 import com.github.trueddd.trytch.ui.StatelessViewModel
 import com.github.trueddd.trytch.ui.screens.main.MainViewModel
@@ -32,8 +32,9 @@ val appModule = module {
         settingsManager = get(),
     ) }
 
-    factory { EmotesPanelViewModel(
+    factory { (appBackStackHandlerStrategy: AppBackPressStrategy) -> EmotesPanelViewModel(
         emotesProvider = get(),
+        appBackPressStrategy = appBackStackHandlerStrategy,
     ) }
 
     single { SplashViewModel(
@@ -43,7 +44,7 @@ val appModule = module {
         emotesProvider = get(),
     ) }
 
-    factory { (backStack: BackStack<Routing>) -> ProfileViewModel(
+    factory { (backStack: AppBackStack) -> ProfileViewModel(
         twitchUserManager = get(),
         backStack = backStack,
     ) }

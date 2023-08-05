@@ -86,7 +86,7 @@ object Dependencies {
         val Gif = Dependency("io.coil-kt:coil-gif:${Versions.Coil}")
     }
     object Navigation {
-        val Appyx = Dependency("com.bumble.appyx:core:1.2.0")
+        val Appyx = Dependency("com.bumble.appyx:core:1.3.0")
     }
     object VideoPlayer {
         val Core = Dependency("com.google.android.exoplayer:exoplayer:${Versions.ExoPlayer}")
