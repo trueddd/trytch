@@ -1,12 +1,15 @@
 package com.github.trueddd.twitch.data
 
+import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import kotlinx.parcelize.Parcelize
 
 @Entity(
     tableName = "users",
     primaryKeys = ["id"],
 )
+@Parcelize
 data class User(
     val id: String,
     val login: String,
@@ -17,7 +20,7 @@ data class User(
     val broadcasterType: BroadcasterType,
     val description: String,
     val current: Boolean = false,
-) {
+) : Parcelable {
 
     companion object {
 

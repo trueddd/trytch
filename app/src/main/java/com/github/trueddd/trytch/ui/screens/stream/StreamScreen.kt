@@ -21,6 +21,9 @@ import androidx.lifecycle.Lifecycle
 import com.bumble.appyx.core.lifecycle.asFlow
 import com.bumble.appyx.core.modality.BuildContext
 import com.bumble.appyx.core.node.Node
+import com.bumble.appyx.navmodel.backstack.operation.push
+import com.github.trueddd.trytch.navigation.AppBackStack
+import com.github.trueddd.trytch.navigation.Routing
 import com.github.trueddd.trytch.ui.isLandscape
 import com.github.trueddd.trytch.ui.isPortrait
 import com.github.trueddd.trytch.ui.modifyIf
@@ -33,13 +36,14 @@ import com.github.trueddd.trytch.ui.theme.AppTheme
 import com.github.trueddd.twitch.data.Emote
 import com.google.android.exoplayer2.ExoPlayer
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
 class StreamScreen(
     private val streamViewModel: StreamViewModel,
     private val emotesPanelViewModel: EmotesPanelViewModel,
+    private val appBackStack: AppBackStack,
     buildContext: BuildContext,
 ) : Node(buildContext) {
 
@@ -47,9 +51,15 @@ class StreamScreen(
     override fun View(modifier: Modifier) {
         LaunchedEffect(Unit) {
             lifecycle.asFlow()
-                .filter { it != Lifecycle.State.RESUMED }
+                .map { it == Lifecycle.State.RESUMED }
                 .distinctUntilChanged()
-                .onEach { streamViewModel.player.pause() }
+                .onEach { screenActive ->
+                    if (screenActive)  {
+                        streamViewModel.player.resume()
+                    } else {
+                        streamViewModel.player.pause()
+                    }
+                }
                 .launchIn(this)
         }
         val streamScreenState by streamViewModel.stateFlow.collectAsState()
@@ -69,6 +79,10 @@ class StreamScreen(
             onEmotesPanelTabChanged = { emotesPanelViewModel.changeTab(it) },
             onEmotesPanelSearchToggled = { emotesPanelViewModel.toggleSearch() },
             onEmotesPanelSearchTextChanged = { emotesPanelViewModel.updateSearch(it) },
+            onStreamerClicked = {
+                val user = streamScreenState.broadcaster ?: return@StreamScreen
+                appBackStack.push(Routing.StreamerPage(user))
+            },
         )
     }
 }
@@ -99,6 +113,7 @@ fun StreamScreen(
     onEmotesPanelTabChanged: (Emote.Provider) -> Unit = {},
     onEmotesPanelSearchToggled: () -> Unit = {},
     onEmotesPanelSearchTextChanged: (String) -> Unit = {},
+    onStreamerClicked: () -> Unit = {},
 ) {
     var chatInputText by remember { mutableStateOf("") }
     Column(
@@ -130,6 +145,7 @@ fun StreamScreen(
                 chatOverlayOpacityChanged = chatOverlayOpacityChanged,
                 chatOverlaySizeChanged = chatOverlaySizeChanged,
                 onChatOverlayDragged = onChatOverlayDragged,
+                onStreamerClicked = onStreamerClicked,
                 modifier = Modifier
                     .fillMaxSize()
             )

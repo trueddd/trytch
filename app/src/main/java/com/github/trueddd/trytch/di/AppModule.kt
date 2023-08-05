@@ -9,6 +9,8 @@ import com.github.trueddd.trytch.ui.screens.profile.ProfileViewModel
 import com.github.trueddd.trytch.ui.screens.splash.SplashViewModel
 import com.github.trueddd.trytch.ui.screens.stream.StreamViewModel
 import com.github.trueddd.trytch.ui.screens.stream.chat.EmotesPanelViewModel
+import com.github.trueddd.trytch.ui.screens.stream.page.StreamerPageViewModel
+import com.github.trueddd.twitch.data.User
 import com.google.android.exoplayer2.ExoPlayer
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
@@ -47,6 +49,10 @@ val appModule = module {
     factory { (backStack: AppBackStack) -> ProfileViewModel(
         twitchUserManager = get(),
         backStack = backStack,
+    ) }
+
+    factory { (user: User) -> StreamerPageViewModel(
+        user = user,
     ) }
 
     single {
