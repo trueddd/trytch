@@ -57,7 +57,6 @@ class MainActivity : NodeActivity() {
             TrytchTheme {
                 CompositionLocalProvider(
                     LocalIntegrationPoint provides appyxIntegrationPoint,
-                    LocalImageLoader provides createImageLoader(),
                     LocalRippleTheme provides AppRippleTheme,
                 ) {
                     Surface(

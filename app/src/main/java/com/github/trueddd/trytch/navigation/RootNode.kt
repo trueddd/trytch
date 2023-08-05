@@ -21,16 +21,29 @@ import org.koin.core.parameter.parametersOf
 
 class RootNode(
     buildContext: BuildContext,
+    private val backPressHandler: BackPressHandlerStrategy<Routing> = BackPressHandlerStrategy(),
     val backStack: BackStack<Routing> = BackStack(
         initialElement = Routing.Main,
         savedStateMap = buildContext.savedStateMap,
+        backPressHandler = backPressHandler,
     ),
 ) : ParentNode<Routing>(backStack, buildContext), IntentHandler, KoinComponent {
 
     override fun resolve(navTarget: Routing, buildContext: BuildContext) = when (navTarget) {
-        is Routing.Main -> MainScreen(viewModel(Routing.Companion.Keys.MAIN), backStack, buildContext)
-        is Routing.Stream -> StreamScreen(viewModel(Routing.Companion.Keys.STREAM) { parametersOf(navTarget.channel) }, buildContext)
-        is Routing.Profile -> ProfileScreen(viewModel(Routing.Companion.Keys.PROFILE) { parametersOf(backStack) }, buildContext)
+        is Routing.Main -> MainScreen(
+            mainViewModel = viewModel(Routing.Keys.Main),
+            backStack = backStack,
+            buildContext = buildContext
+        )
+        is Routing.Stream -> StreamScreen(
+            streamViewModel = viewModel(Routing.Keys.Stream) { parametersOf(navTarget.channel) },
+            emotesPanelViewModel = viewModel(Routing.Keys.EmotesPanel) { parametersOf(backPressHandler) },
+            buildContext = buildContext,
+        )
+        is Routing.Profile -> ProfileScreen(
+            profileViewModel = viewModel(Routing.Keys.Profile) { parametersOf(backStack) },
+            buildContext = buildContext
+        )
     }
 
     @Composable

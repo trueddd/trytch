@@ -31,8 +31,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.github.trueddd.trytch.R
+import com.github.trueddd.trytch.ui.CoilImage
 import com.github.trueddd.trytch.ui.buildImageRequest
 import com.github.trueddd.trytch.ui.isLandscape
 import com.github.trueddd.trytch.ui.modifyIf
@@ -133,7 +133,7 @@ private fun StreamPreview(
     stream: Stream,
     rounded: Boolean = false,
 ) {
-    AsyncImage(
+    CoilImage(
         model = buildImageRequest(stream.getThumbnailUrl(width = 320, height = 180)),
         contentDescription = "${stream.userName} stream thumbnail",
         contentScale = ContentScale.Crop,

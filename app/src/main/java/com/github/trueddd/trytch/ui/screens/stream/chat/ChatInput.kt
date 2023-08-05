@@ -1,4 +1,4 @@
-package com.github.trueddd.trytch.ui.screens.stream
+package com.github.trueddd.trytch.ui.screens.stream.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,41 +38,52 @@ import com.github.trueddd.trytch.ui.theme.AppTheme
 @Composable
 private fun ChatInput1() {
     ChatInput(
-        initialText = "test message 123",
+        text = "test message 123",
     )
 }
 
 @Preview
 @Composable
 private fun ChatInput2() {
-    ChatInput()
+    ChatInput(
+        text = "",
+        emotesOpen = true,
+    )
 }
 
 @Composable
 fun ChatInput(
+    text: String,
     modifier: Modifier = Modifier,
-    initialText: String = "",
+    onTextChanged: (String) -> Unit = {},
+    emotesOpen: Boolean = false,
     onSendMessageClicked: (String) -> Unit = {},
+    onEmoteButtonClicked: () -> Unit = {},
 ) {
     Box(
         modifier = modifier
             .background(AppTheme.Primary)
     ) {
-        var text by remember(initialText) { mutableStateOf(initialText) }
         var isFocused by remember { mutableStateOf(false) }
         val focusManager = LocalFocusManager.current
+
+        fun sendMessage() {
+            onSendMessageClicked(text)
+            onTextChanged("")
+            focusManager.clearFocus()
+            if (emotesOpen) {
+                onEmoteButtonClicked()
+            }
+        }
+
         BasicTextField(
             value = text,
-            onValueChange = { text = it },
+            onValueChange = onTextChanged,
             keyboardOptions = KeyboardOptions(
                 imeAction = if (text.isEmpty()) ImeAction.Previous else ImeAction.Send,
             ),
             keyboardActions = KeyboardActions(
-                onSend = {
-                    onSendMessageClicked(text)
-                    text = ""
-                    focusManager.clearFocus()
-                },
+                onSend = { sendMessage() },
                 onPrevious = {
                     focusManager.clearFocus()
                 }
@@ -106,10 +118,20 @@ fun ChatInput(
                     Icon(
                         imageVector = Icons.Default.Face,
                         contentDescription = "Emotes",
-                        tint = if (isFocused) AppTheme.Accent else AppTheme.PrimaryTextDark,
+                        tint = if (emotesOpen) AppTheme.Accent else AppTheme.PrimaryTextDark,
                         modifier = Modifier
-                            .clickable {}
+                            .clickable(onClick = onEmoteButtonClicked)
                     )
+                    if (text.isNotEmpty()) {
+                        Icon(
+                            imageVector = Icons.Default.Send,
+                            contentDescription = "Send message",
+                            tint = AppTheme.Accent,
+                            modifier = Modifier
+                                .padding(start = 8.dp)
+                                .clickable(onClick = ::sendMessage)
+                        )
+                    }
                 }
             },
             modifier = Modifier

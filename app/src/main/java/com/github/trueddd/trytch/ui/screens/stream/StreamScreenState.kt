@@ -1,6 +1,9 @@
 package com.github.trueddd.trytch.ui.screens.stream
 
 import com.github.trueddd.trytch.settings.StreamSettings
+import com.github.trueddd.trytch.ui.screens.stream.chat.ChatOverlayStatus
+import com.github.trueddd.trytch.ui.screens.stream.chat.ChatStatus
+import com.github.trueddd.trytch.ui.screens.stream.chat.overlaySize
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.data.ConnectionStatus
 import com.github.trueddd.twitch.data.Stream

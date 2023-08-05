@@ -1,4 +1,4 @@
-package com.github.trueddd.trytch.ui.screens.stream
+package com.github.trueddd.trytch.ui.screens.stream.chat
 
 import androidx.compose.runtime.Stable
 import com.github.trueddd.trytch.settings.StreamSettings

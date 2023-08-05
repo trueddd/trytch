@@ -7,10 +7,15 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
+import com.bumble.appyx.navmodel.backstack.BackStack
 import com.github.trueddd.trytch.di.NodeViewModelStore
 import kotlinx.coroutines.flow.*
 
 typealias ActiveNodes = List<String>
+
+typealias AppBackStack = BackStack<Routing>
+
+typealias AppBackPressStrategy = BackPressHandlerStrategy<Routing>
 
 fun RootNode.activeNodesFlow(): StateFlow<ActiveNodes> {
     return backStack.elements
@@ -40,7 +45,7 @@ fun StateFlow<ActiveNodes>.disposeViewModels(viewModelStore: NodeViewModelStore)
 fun Flow<ActiveNodes>.handleWindowRotations(window: Window): Flow<ActiveNodes> {
     val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
     return onEach { nodes ->
-        if (nodes.any { it == Routing.Companion.Keys.STREAM }) {
+        if (nodes.any { it == Routing.Keys.Stream }) {
             windowInsetsController.systemBarsBehavior = when (window.context.resources.configuration.orientation) {
                 Configuration.ORIENTATION_LANDSCAPE -> {
                     windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())

@@ -30,8 +30,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.github.trueddd.trytch.R
+import com.github.trueddd.trytch.ui.CoilImage
 import com.github.trueddd.trytch.ui.TiltedRectangle
 import com.github.trueddd.trytch.ui.buildImageRequest
 import com.github.trueddd.trytch.ui.theme.AppTheme
@@ -109,7 +109,7 @@ fun Toolbar(
                         text = user.displayName,
                         color = AppTheme.AccentText,
                     )
-                    AsyncImage(
+                    CoilImage(
                         model = buildImageRequest(user.profileImageUrl),
                         contentDescription = user.displayName,
                         contentScale = ContentScale.Crop,
