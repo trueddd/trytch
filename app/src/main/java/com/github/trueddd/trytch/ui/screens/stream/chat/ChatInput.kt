@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -65,6 +66,16 @@ fun ChatInput(
     ) {
         var isFocused by remember { mutableStateOf(false) }
         val focusManager = LocalFocusManager.current
+
+        fun sendMessage() {
+            onSendMessageClicked(text)
+            onTextChanged("")
+            focusManager.clearFocus()
+            if (emotesOpen) {
+                onEmoteButtonClicked()
+            }
+        }
+
         BasicTextField(
             value = text,
             onValueChange = onTextChanged,
@@ -72,14 +83,7 @@ fun ChatInput(
                 imeAction = if (text.isEmpty()) ImeAction.Previous else ImeAction.Send,
             ),
             keyboardActions = KeyboardActions(
-                onSend = {
-                    onSendMessageClicked(text)
-                    onTextChanged("")
-                    focusManager.clearFocus()
-                    if (emotesOpen) {
-                        onEmoteButtonClicked()
-                    }
-                },
+                onSend = { sendMessage() },
                 onPrevious = {
                     focusManager.clearFocus()
                 }
@@ -118,6 +122,16 @@ fun ChatInput(
                         modifier = Modifier
                             .clickable(onClick = onEmoteButtonClicked)
                     )
+                    if (text.isNotEmpty()) {
+                        Icon(
+                            imageVector = Icons.Default.Send,
+                            contentDescription = "Send message",
+                            tint = AppTheme.Accent,
+                            modifier = Modifier
+                                .padding(start = 8.dp)
+                                .clickable(onClick = ::sendMessage)
+                        )
+                    }
                 }
             },
             modifier = Modifier

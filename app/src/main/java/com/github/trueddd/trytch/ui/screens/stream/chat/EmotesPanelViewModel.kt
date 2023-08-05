@@ -6,13 +6,16 @@ import com.github.trueddd.trytch.ui.StatefulViewModel
 import com.github.trueddd.twitch.data.Emote
 import com.github.trueddd.twitch.emotes.EmotesProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class EmotesPanelViewModel(
     private val emotesProvider: EmotesProvider,
     private val appBackPressStrategy: AppBackPressStrategy,
@@ -23,11 +26,11 @@ class EmotesPanelViewModel(
     private val backStackInterceptor: () -> Boolean = {
         when {
             stateFlow.value.searchEnabled -> {
-                updateState { it.copy(searchEnabled = false) }
+                updateState { it.withSearchDisabled() }
                 false
             }
             stateFlow.value.panelOpen -> {
-                updateState { it.copy(panelOpen = false) }
+                updateState { it.withPanelOpened(panelOpened = false) }
                 false
             }
             else -> true
@@ -35,9 +38,18 @@ class EmotesPanelViewModel(
     }
 
     init {
-        stateFlow.map { it.selectedProvider }
+        combine(
+            stateFlow.map { it.searchText }.debounce(200L),
+            stateFlow.map { it.selectedProvider },
+        ) { text, provider -> text to provider }
             .distinctUntilChanged()
-            .flatMapLatest { emotesProvider.getEmotesFlow(it) }
+            .flatMapLatest { (search, provider) ->
+                if (search.isNotEmpty()) {
+                    emotesProvider.getEmotesByNameFlow(search)
+                } else {
+                    emotesProvider.getEmotesFlow(provider)
+                }
+            }
             .onEach { emotes -> updateState { it.copy(emotes = emotes) } }
             .launchIn(viewModelScope)
         appBackPressStrategy.addInterceptor(backStackInterceptor)
@@ -45,7 +57,7 @@ class EmotesPanelViewModel(
 
     fun togglePanel() {
         updateState {
-            it.copy(panelOpen = !it.panelOpen)
+            it.withPanelOpened(!it.panelOpen)
         }
     }
 
@@ -63,7 +75,7 @@ class EmotesPanelViewModel(
 
     fun toggleSearch() {
         updateState {
-            it.copy(searchEnabled = !it.searchEnabled)
+            it.copy(searchEnabled = !it.searchEnabled, searchText = "")
         }
     }
 
@@ -71,4 +83,7 @@ class EmotesPanelViewModel(
         super.onCleared()
         appBackPressStrategy.removeInterceptor(backStackInterceptor)
     }
+
+    private fun EmotesPanelState.withSearchDisabled() = copy(searchEnabled = false, searchText = "")
+    private fun EmotesPanelState.withPanelOpened(panelOpened: Boolean) = withSearchDisabled().copy(panelOpen = panelOpened)
 }

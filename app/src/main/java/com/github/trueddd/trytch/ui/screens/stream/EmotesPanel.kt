@@ -150,7 +150,7 @@ fun EmotesPanel(
                     },
                     modifier = Modifier
                         .weight(1f)
-                        .background(AppTheme.SecondaryText, RoundedCornerShape(8.dp))
+                        .background(AppTheme.SecondaryText, RoundedCornerShape(4.dp))
                 )
             } else {
                 LazyRow(

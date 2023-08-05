@@ -22,6 +22,9 @@ internal interface EmoteDao {
     @Query("select * from emote_info join emote_versions on (emote_info.id = emote_versions.id and emote_info.provider = emote_versions.provider) where emote_info.provider = :provider")
     fun getEmotesByProvider(provider: Emote.Provider): Flow<Map<EmoteInfo, List<EmoteVersion>>>
 
+    @Query("select * from emote_info join emote_versions on (emote_info.id = emote_versions.id and emote_info.provider = emote_versions.provider) where emote_info.name like ('%' || :query || '%')")
+    fun getEmotesByQuery(query: String): Flow<Map<EmoteInfo, List<EmoteVersion>>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEmoteInfo(emotesInfo: List<EmoteInfo>)
 

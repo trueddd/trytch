@@ -23,15 +23,15 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.take
@@ -144,16 +144,15 @@ internal class ChatManagerImpl(
     }
 
     override fun connectChat(channel: String): Flow<ConnectionStatus> {
-        return channelFlow {
-            send(ConnectionStatus.Connecting)
-            val mainScope = resolveMainScope() ?: return@channelFlow
+        return flow {
+            emit(ConnectionStatus.Connecting)
+            val mainScope = resolveMainScope() ?: return@flow
             mainScope.getTwitchFlow()
                 .filterMessage<JoinMessage>()
                 .filter { it.channel.removePrefix("#").contentEquals(channel, ignoreCase = true) }
                 .take(1)
-                .onEach { send(ConnectionStatus.Connected) }
                 .onStart { mainScope.join(channel) }
-                .launchIn(this)
+                .collect { emit(ConnectionStatus.Connected) }
             mainScope.getTwitchFlow()
                 .filterMessage<TextMessage>()
                 .collect {
@@ -164,10 +163,11 @@ internal class ChatManagerImpl(
                     Log.d(TAG, "Formed message: $chatMessage")
                     chatMessagesFlow.emit(chatMessage)
                 }
-            awaitClose {
+        }
+            .flowOn(Dispatchers.IO)
+            .onCompletion {
                 Log.d(TAG, "Disconnecting")
-                mainScope.leave(channel)
+                mainScope?.leave(channel)
             }
-        }.flowOn(Dispatchers.IO)
     }
 }

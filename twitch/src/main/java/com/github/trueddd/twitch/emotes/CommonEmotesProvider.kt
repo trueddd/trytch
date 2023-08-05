@@ -56,6 +56,14 @@ internal class CommonEmotesProvider(
             .flowOn(Dispatchers.Default)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getEmotesByNameFlow(query: String): Flow<ImmutableList<Emote>> {
+        return emoteDao.getEmotesByQuery(query)
+            .flowOn(Dispatchers.IO)
+            .mapLatest { emotes -> emotes.map { it.toEmote() }.toImmutableList() }
+            .flowOn(Dispatchers.Default)
+    }
+
     override fun updateEmoteSets(emoteSetIds: List<String>) {
         providers[Emote.Provider.Twitch]?.updateEmoteSets(emoteSetIds)
     }

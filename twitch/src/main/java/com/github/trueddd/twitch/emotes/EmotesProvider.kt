@@ -13,4 +13,6 @@ interface EmotesProvider : EmoteStorage {
     suspend fun getEmote(word: String, providers: List<Emote.Provider> = AllEmoteProviders): Emote?
 
     fun getEmotesFlow(provider: Emote.Provider): Flow<ImmutableList<Emote>>
+
+    fun getEmotesByNameFlow(query: String): Flow<ImmutableList<Emote>>
 }
