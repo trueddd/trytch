@@ -33,6 +33,10 @@ interface TwitchClient : TwitchUserManager, TwitchStreamsManager, TwitchBadgesMa
                     database.twitchDao(),
                     database.emoteDao(),
                 ),
+                clipsManager = TwitchClipsManagerImpl(
+                    httpClient,
+                    database.twitchDao(),
+                ),
             )
         }
     }

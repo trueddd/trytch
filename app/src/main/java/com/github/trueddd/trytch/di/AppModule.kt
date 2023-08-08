@@ -53,6 +53,7 @@ val appModule = module {
 
     factory { (user: User) -> StreamerPageViewModel(
         user = user,
+        twitchClipsManager = get(),
     ) }
 
     single {

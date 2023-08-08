@@ -174,7 +174,7 @@ fun StreamScreen(
                     text = chatInputText,
                     emotesOpen = emotesPanelState.panelOpen,
                     onTextChanged = { chatInputText = it },
-                    onSendMessageClicked = onSendMessageClicked,
+                    onSendMessageClicked = { onSendMessageClicked(chatInputText) },
                     onEmoteButtonClicked = onEmotesPanelToggle,
                     modifier = Modifier
                         .fillMaxWidth(),

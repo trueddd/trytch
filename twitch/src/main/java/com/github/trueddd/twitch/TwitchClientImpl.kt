@@ -7,8 +7,10 @@ internal class TwitchClientImpl(
     streamsManager: TwitchStreamsManager,
     userManager: TwitchUserManager,
     emotesProvider: EmotesProvider,
+    clipsManager: TwitchClipsManager,
 ) : TwitchClient,
     TwitchStreamsManager by streamsManager,
     TwitchBadgesManager by badgesManager,
     TwitchUserManager by userManager,
-    EmotesProvider by emotesProvider
+    EmotesProvider by emotesProvider,
+    TwitchClipsManager by clipsManager
