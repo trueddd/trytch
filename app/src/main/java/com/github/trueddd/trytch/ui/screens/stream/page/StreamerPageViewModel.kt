@@ -20,7 +20,18 @@ class StreamerPageViewModel(
         viewModelScope.launch {
             updateState { state -> state.copy(clipsState = state.clipsState.copy(isLoading = true)) }
             val clips = twitchClipsManager.loadClips(options.user.id)
-            updateState { state -> state.copy(clipsState = state.clipsState.copy(isLoading = true, clips = clips)) }
+            updateState { state -> state.copy(clipsState = state.clipsState.copy(isLoading = false, clips = clips)) }
+        }
+    }
+
+    fun updateVideos(options: Videos.LoadOptions) {
+        if (stateFlow.value.videosState.isLoading) {
+            return
+        }
+        viewModelScope.launch {
+            updateState { state -> state.copy(videosState = state.videosState.copy(isLoading = true)) }
+            val videos = twitchClipsManager.loadVideos(options.user.id)
+            updateState { state -> state.copy(videosState = state.videosState.copy(isLoading = false, videos = videos)) }
         }
     }
 }

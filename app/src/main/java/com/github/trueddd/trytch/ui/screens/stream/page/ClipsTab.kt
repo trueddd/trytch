@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,41 +33,35 @@ import com.github.trueddd.trytch.R
 import com.github.trueddd.trytch.ui.CoilImage
 import com.github.trueddd.trytch.ui.buildImageRequest
 import com.github.trueddd.trytch.ui.theme.AppTheme
+import com.github.trueddd.trytch.ui.theme.HalfTransparentBlack
 import com.github.trueddd.twitch.data.User
 
-// TODO: replace with composable fun
-class Clips(
-    private val user: User,
-    private val clipsState: StreamerPageState.ClipsState,
-    private val loadCallback: (LoadOptions) -> Unit,
-) : PageTab(R.string.streamer_screen_clips_tab) {
+data object Clips : PageTab(R.string.streamer_screen_clips_tab) {
 
     data class LoadOptions(
         val user: User,
     )
-
-    @Composable
-    override fun Content() {
-        LaunchedEffect(Unit) {
-            loadCallback(LoadOptions(user))
-        }
-        ClipsContent(user, clipsState, loadCallback)
-    }
 }
 
 @Preview
 @Composable
-private fun ClipsContent(
+fun ClipsContent(
     user: User = User.test(),
     clipsState: StreamerPageState.ClipsState = StreamerPageState.ClipsState.test(),
     loadCallback: (Clips.LoadOptions) -> Unit = {},
 ) {
+    LaunchedEffect(Unit) {
+        loadCallback(Clips.LoadOptions(user))
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .background(AppTheme.Primary)
     ) {
-        LazyColumn {
+        LazyColumn(
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             items(clipsState.clips) { item ->
                 Box(modifier = Modifier) {
                     val interactionSource = remember { MutableInteractionSource() }
@@ -83,7 +79,6 @@ private fun ClipsContent(
                     ) {
                         Box(
                             modifier = Modifier
-                                .padding(start = 8.dp)
                                 .weight(2f)
                                 .aspectRatio(16 / 9f)
                         ) {
@@ -93,7 +88,18 @@ private fun ClipsContent(
                                 modifier = Modifier
                                     .background(AppTheme.Secondary)
                             )
-//                            StreamViewers(viewersCountText = stream.shortenedViewerCount)
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(4.dp)
+                                    .background(HalfTransparentBlack, RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 4.dp)
+                            ) {
+                                Text(
+                                    text = item.viewCount.toString(),
+                                    color = AppTheme.PrimaryText,
+                                    )
+                            }
                         }
                         Box(
                             modifier = Modifier
@@ -116,13 +122,6 @@ private fun ClipsContent(
                                 Text(
                                     text = item.creatorName,
                                     color = AppTheme.PrimaryText,
-                                    modifier = Modifier
-                                        .padding(horizontal = 8.dp)
-                                )
-                                Text(
-                                    text = item.gameId,
-                                    color = AppTheme.PrimaryTextDark,
-                                    fontSize = 14.sp,
                                     modifier = Modifier
                                         .padding(horizontal = 8.dp)
                                 )

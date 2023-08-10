@@ -3,6 +3,7 @@ package com.github.trueddd.twitch
 import com.github.trueddd.twitch.db.TwitchDao
 import com.github.trueddd.twitch.dto.twitch.PaginatedTwitchResponse
 import com.github.trueddd.twitch.dto.twitch.TwitchClip
+import com.github.trueddd.twitch.dto.twitch.TwitchVideo
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -20,7 +21,7 @@ internal class TwitchClipsManagerImpl(
 ) : TwitchClipsManager {
 
     sealed class LoadOption {
-        data class Clip(val clipId: String) : LoadOption()
+        data class Id(val value: String) : LoadOption()
         data class Game(val gameId: String) : LoadOption()
         data class Broadcaster(val broadcasterId: String) : LoadOption()
     }
@@ -30,7 +31,7 @@ internal class TwitchClipsManagerImpl(
         return try {
             httpClient.get(Url("https://api.twitch.tv/helix/clips")) {
                 when (loadOption) {
-                    is LoadOption.Clip -> parameter("id", loadOption.clipId)
+                    is LoadOption.Id -> parameter("id", loadOption.value)
                     is LoadOption.Broadcaster -> parameter("broadcaster_id", loadOption.broadcasterId)
                     is LoadOption.Game -> parameter("game_id", loadOption.gameId)
                 }
@@ -41,9 +42,31 @@ internal class TwitchClipsManagerImpl(
         }
     }
 
+    // TODO: pagination support
+    private suspend fun fetchVideos(loadOption: LoadOption): List<TwitchVideo>? {
+        return try {
+            httpClient.get(Url("https://api.twitch.tv/helix/videos")) {
+                when (loadOption) {
+                    is LoadOption.Id -> parameter("id", loadOption.value)
+                    is LoadOption.Broadcaster -> parameter("user_id", loadOption.broadcasterId)
+                    is LoadOption.Game -> parameter("game_id", loadOption.gameId)
+                }
+            }.body<PaginatedTwitchResponse<List<TwitchVideo>>>().data
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
     override suspend fun loadClips(channelId: String): ImmutableList<TwitchClip> {
         return withContext(Dispatchers.IO) {
             fetchClips(LoadOption.Broadcaster(channelId))?.toImmutableList() ?: persistentListOf()
+        }
+    }
+
+    override suspend fun loadVideos(channelId: String): ImmutableList<TwitchVideo> {
+        return withContext(Dispatchers.IO) {
+            fetchVideos(LoadOption.Broadcaster(channelId))?.toImmutableList() ?: persistentListOf()
         }
     }
 }

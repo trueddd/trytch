@@ -38,6 +38,7 @@ class StreamerPageScreen(
             state = state,
             onBackClicked = { appBackStack.pop() },
             clipsLoadCallback = { streamerPageViewModel.updateClips(it) },
+            videosLoadCallback = { streamerPageViewModel.updateVideos(it) },
         )
     }
 }
@@ -48,6 +49,7 @@ private fun StreamerPage(
     state: StreamerPageState = StreamerPageState.test(),
     onBackClicked: () -> Unit = {},
     clipsLoadCallback: (Clips.LoadOptions) -> Unit = {},
+    videosLoadCallback: (Videos.LoadOptions) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -59,13 +61,7 @@ private fun StreamerPage(
             onBackButtonClicked = onBackClicked,
         )
         var selectedTab by remember { mutableStateOf(0) }
-        val tabs = remember(state) {
-            listOf(
-                About(state.streamerUser),
-                Clips(state.streamerUser, state.clipsState, clipsLoadCallback),
-                Videos(state.streamerUser),
-            )
-        }
+        val tabs = remember(state) { listOf(About, Clips, Videos) }
         TabRow(
             selectedTabIndex = selectedTab,
             containerColor = AppTheme.Primary,
@@ -87,7 +83,11 @@ private fun StreamerPage(
                 }
             }
         }
-        tabs[selectedTab].Content()
+        when (tabs[selectedTab]) {
+            is About -> AboutContent(state.streamerUser)
+            is Clips -> ClipsContent(state.streamerUser, state.clipsState, clipsLoadCallback)
+            is Videos -> VideosContent(state.streamerUser, state.videosState, videosLoadCallback)
+        }
     }
 }
 

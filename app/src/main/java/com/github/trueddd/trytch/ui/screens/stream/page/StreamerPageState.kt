@@ -2,6 +2,7 @@ package com.github.trueddd.trytch.ui.screens.stream.page
 
 import com.github.trueddd.twitch.data.User
 import com.github.trueddd.twitch.dto.twitch.TwitchClip
+import com.github.trueddd.twitch.dto.twitch.TwitchVideo
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -30,8 +31,20 @@ data class StreamerPageState(
 
     data class VideosState(
         val isLoading: Boolean,
-        val videos: ImmutableList<TwitchClip>,
-    )
+        val videos: ImmutableList<TwitchVideo>,
+    ) {
+        companion object {
+            fun test() = VideosState(
+                isLoading = false,
+                videos = persistentListOf(
+                    TwitchVideo.test(),
+                    TwitchVideo.test(),
+                    TwitchVideo.test()
+                )
+            )
+            fun default() = VideosState(isLoading = false, videos = persistentListOf())
+        }
+    }
 
     companion object {
 

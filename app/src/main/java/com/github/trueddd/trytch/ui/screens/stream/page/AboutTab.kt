@@ -15,17 +15,11 @@ import com.github.trueddd.trytch.R
 import com.github.trueddd.trytch.ui.theme.AppTheme
 import com.github.trueddd.twitch.data.User
 
-class About(val user: User) : PageTab(R.string.streamer_screen_about_tab) {
-
-    @Composable
-    override fun Content() {
-        AboutContent(user)
-    }
-}
+data object About : PageTab(R.string.streamer_screen_about_tab)
 
 @Preview
 @Composable
-private fun AboutContent(user: User = User.test()) {
+fun AboutContent(user: User = User.test()) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
