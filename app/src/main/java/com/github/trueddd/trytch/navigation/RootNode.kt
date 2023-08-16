@@ -15,6 +15,7 @@ import com.bumble.appyx.navmodel.backstack.transitionhandler.rememberBackstackSl
 import com.github.trueddd.trytch.ui.screens.main.MainScreen
 import com.github.trueddd.trytch.ui.screens.profile.ProfileScreen
 import com.github.trueddd.trytch.ui.screens.stream.StreamScreen
+import com.github.trueddd.trytch.ui.screens.stream.page.StreamerPageScreen
 import com.github.trueddd.trytch.ui.screens.viewModel
 import org.koin.core.component.KoinComponent
 import org.koin.core.parameter.parametersOf
@@ -33,16 +34,22 @@ class RootNode(
         is Routing.Main -> MainScreen(
             mainViewModel = viewModel(Routing.Keys.Main),
             backStack = backStack,
-            buildContext = buildContext
+            buildContext = buildContext,
         )
         is Routing.Stream -> StreamScreen(
             streamViewModel = viewModel(Routing.Keys.Stream) { parametersOf(navTarget.channel) },
             emotesPanelViewModel = viewModel(Routing.Keys.EmotesPanel) { parametersOf(backPressHandler) },
+            appBackStack = backStack,
             buildContext = buildContext,
         )
         is Routing.Profile -> ProfileScreen(
             profileViewModel = viewModel(Routing.Keys.Profile) { parametersOf(backStack) },
-            buildContext = buildContext
+            buildContext = buildContext,
+        )
+        is Routing.StreamerPage -> StreamerPageScreen(
+            streamerPageViewModel = viewModel(Routing.Keys.StreamerPage) { parametersOf(navTarget.user) },
+            appBackStack = backStack,
+            buildContext = buildContext,
         )
     }
 

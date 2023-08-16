@@ -13,6 +13,11 @@
     <string name="stream_chat_overlay_opacity">Opacity</string>
     <string name="stream_chat_overlay_size">Size</string>
 
+    <!-- streamer screen -->
+    <string name="streamer_screen_about_tab">About</string>
+    <string name="streamer_screen_clips_tab">Clips</string>
+    <string name="streamer_screen_videos_tab">Videos</string>
+
     <!-- chat -->
     <string name="chat_send_message">Send a message</string>
     <string name="chat_search_emote">Search emotes</string>

@@ -36,6 +36,7 @@ import com.github.trueddd.trytch.ui.widgets.StreamTags
 import com.github.trueddd.twitch.data.Stream
 import com.github.trueddd.twitch.data.User
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.delay
@@ -86,6 +87,7 @@ fun PlayerContainer(
     chatOverlaySizeChanged: (ChatOverlayStatus.Size) -> Unit = {},
     onChatOverlayDragged: (Offset) -> Unit = {},
     playerEvents: (PlayerEvent) -> Unit = {},
+    onStreamerClicked: () -> Unit = {},
     defaultControlsVisibility: Boolean = false,
     defaultSettingsVisibility: Boolean = false,
 ) {
@@ -150,8 +152,7 @@ fun PlayerContainer(
                     if (playerStatus.isPlaying) {
                         player?.pause()
                     } else {
-                        player?.seekToDefaultPosition()
-                        player?.play()
+                        player?.resume()
                     }
                 },
                 settingsClicked = { settingsVisible = !settingsVisible },
@@ -175,7 +176,13 @@ fun PlayerContainer(
                 .fillMaxHeight(0.25f)
                 .align(Alignment.BottomCenter)
         ) {
-            stream?.let { StreamInfo(stream = it, broadcaster = broadcaster) }
+            stream?.let {
+                StreamInfo(
+                    stream = it,
+                    broadcaster = broadcaster,
+                    onStreamerClicked = onStreamerClicked,
+                )
+            }
         }
         AnimatedVisibility(
             visible = settingsVisible,
@@ -205,6 +212,7 @@ fun PlayerContainer(
 private fun StreamInfo(
     stream: Stream,
     broadcaster: User?,
+    onStreamerClicked: () -> Unit = {},
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -221,6 +229,7 @@ private fun StreamInfo(
                 .size(36.dp)
                 .clip(CircleShape)
                 .background(AppTheme.SecondaryText)
+                .clickable(onClick = onStreamerClicked)
         )
         Column(
             verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -231,6 +240,8 @@ private fun StreamInfo(
                     text = stream.userName,
                     fontSize = 16.sp,
                     color = AppTheme.AccentText,
+                    modifier = Modifier
+                        .clickable(onClick = onStreamerClicked)
                 )
                 TextBullet()
                 Text(
@@ -342,4 +353,9 @@ fun PlayerControls(
                 .padding(8.dp)
         )
     }
+}
+
+fun Player.resume() {
+    play()
+    seekTo(duration)
 }

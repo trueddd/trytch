@@ -57,7 +57,7 @@ fun ChatInput(
     modifier: Modifier = Modifier,
     onTextChanged: (String) -> Unit = {},
     emotesOpen: Boolean = false,
-    onSendMessageClicked: (String) -> Unit = {},
+    onSendMessageClicked: () -> Unit = {},
     onEmoteButtonClicked: () -> Unit = {},
 ) {
     Box(
@@ -68,7 +68,7 @@ fun ChatInput(
         val focusManager = LocalFocusManager.current
 
         fun sendMessage() {
-            onSendMessageClicked(text)
+            onSendMessageClicked()
             onTextChanged("")
             focusManager.clearFocus()
             if (emotesOpen) {

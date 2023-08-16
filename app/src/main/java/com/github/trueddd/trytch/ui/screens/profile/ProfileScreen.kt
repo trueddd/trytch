@@ -42,6 +42,7 @@ import com.github.trueddd.trytch.R
 import com.github.trueddd.trytch.ui.CoilImage
 import com.github.trueddd.trytch.ui.buildImageRequest
 import com.github.trueddd.trytch.ui.theme.AppTheme
+import com.github.trueddd.twitch.data.User
 
 class ProfileScreen(
     private val profileViewModel: ProfileViewModel,
@@ -68,6 +69,75 @@ class ProfileScreenStateProvider : PreviewParameterProvider<ProfileScreenState> 
     override val values = sequenceOf(ProfileScreenState.test())
 }
 
+@Composable
+fun UserProfile(
+    user: User,
+    modifier: Modifier = Modifier,
+    onBackButtonClicked: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+    ) {
+        CoilImage(
+            model = buildImageRequest(user.offlineImageUrl),
+            contentDescription = "${user.displayName} offline image",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(2f)
+                .align(Alignment.TopCenter)
+                .background(Color.Gray)
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp)
+                .clip(CircleShape)
+                .clickable { onBackButtonClicked() }
+                .background(AppTheme.Primary)
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                tint = AppTheme.Accent,
+                contentDescription = "Back",
+                modifier = Modifier
+                    .size(36.dp)
+                    .padding(4.dp)
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            CoilImage(
+                model = buildImageRequest(user.profileImageUrl),
+                contentDescription = "${user.displayName} avatar",
+                modifier = Modifier
+                    .size(96.dp)
+                    .clip(CircleShape)
+                    .background(Color.Gray)
+                    .border(2.dp, AppTheme.Primary, CircleShape)
+            )
+            Box(
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .background(AppTheme.Primary, RoundedCornerShape(8.dp))
+            ) {
+                Text(
+                    text = user.displayName,
+                    fontSize = 24.sp,
+                    color = AppTheme.AccentText,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+        }
+    }
+}
+
 @Preview(showSystemUi = true)
 @Composable
 private fun ProfileScreen(
@@ -85,65 +155,10 @@ private fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            Box {
-                CoilImage(
-                    model = buildImageRequest(screenState.user.offlineImageUrl),
-                    contentDescription = "${screenState.user.displayName} offline image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(2f)
-                        .align(Alignment.TopCenter)
-                        .background(Color.Gray)
-                )
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(16.dp)
-                        .clip(CircleShape)
-                        .clickable { onBackButtonClicked() }
-                        .background(AppTheme.Primary)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        tint = AppTheme.Accent,
-                        contentDescription = "Back",
-                        modifier = Modifier
-                            .size(36.dp)
-                            .padding(4.dp)
-                    )
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    CoilImage(
-                        model = buildImageRequest(screenState.user.profileImageUrl),
-                        contentDescription = "${screenState.user.displayName} avatar",
-                        modifier = Modifier
-                            .size(96.dp)
-                            .clip(CircleShape)
-                            .background(Color.Gray)
-                            .border(2.dp, AppTheme.Primary, CircleShape)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .background(AppTheme.Primary, RoundedCornerShape(8.dp))
-                    ) {
-                        Text(
-                            text = screenState.user.displayName,
-                            fontSize = 24.sp,
-                            color = AppTheme.AccentText,
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                    }
-                }
-            }
+            UserProfile(
+                user = screenState.user,
+                onBackButtonClicked = onBackButtonClicked
+            )
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
