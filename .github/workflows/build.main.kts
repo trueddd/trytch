@@ -24,7 +24,7 @@ workflow(
     job(
         id = "build",
         runsOn = RunnerType.UbuntuLatest,
-        `if` = expr { "!" + contains(github.eventPush.head_commit.message, "skip_ci") },
+        `if` = expr { "!" + contains(github.eventPush.head_commit.message, "'skip_ci'") },
     ) {
         uses(
             name = "Checkout source",
