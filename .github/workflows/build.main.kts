@@ -50,10 +50,37 @@ workflow(
                 actionVersion = "v1",
                 inputs = mapOf(
                     "file-name" to "twitch.properties",
-                    "ENV_client_id" to "\${{ secrets.CLIENT_ID }}",
-                    "ENV_client_secret" to "\${{ secrets.CLIENT_SECRET }}",
+                    "ENV_client_id" to expr { secrets.getValue("CLIENT_ID") },
+                    "ENV_client_secret" to expr { secrets.getValue("CLIENT_SECRET") },
                 ),
             ),
+        )
+        uses(
+            name = "Load Keystore config",
+            action = CustomAction(
+                actionOwner = "ozaytsev86",
+                actionName = "create-env-file",
+                actionVersion = "v1",
+                inputs = mapOf(
+                    "file-name" to "keystore.properties",
+                    "ENV_keystore_password" to expr { secrets.getValue("KEYSTORE_PASSWORD") },
+                    "ENV_keystore_key_alias" to expr { secrets.getValue("KEYSTORE_KEY_ALIAS") },
+                    "ENV_keystore_key_password" to expr { secrets.getValue("KEYSTORE_KEY_PASSWORD") },
+                ),
+            ),
+        )
+        uses(
+            name = "Decode Keystore",
+            action = CustomAction(
+                actionOwner = "timheuer",
+                actionName = "base64-to-file",
+                actionVersion = "v1.2",
+                inputs = mapOf(
+                    "fileDir" to "./app",
+                    "fileName" to "keystore.jks",
+                    "encodedString" to expr { secrets.getValue("ENCODED_KEYSTORE") },
+                ),
+            )
         )
         run(
             name = "Build with Gradle",
