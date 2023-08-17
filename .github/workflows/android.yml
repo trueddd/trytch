@@ -35,11 +35,10 @@ jobs:
           ENV_keystore_key_password: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
           ENV_keystore_key_alias: ${{ secrets.KEYSTORE_KEY_ALIAS }}
       - name: Decode Keystore
-        uses: timheuer/base64-to-file@v1.2
-        with:
-          fileDir: './app'
-          fileName: 'keystore.jks'
-          encodedString: ${{ secrets.ENCODED_KEYSTORE }}
+        env:
+          ENCODED_STRING: ${{ secrets.ENCODED_KEYSTORE }}
+        run: |
+          echo $ENCODED_STRING | base64 -di > ./app/keystore.jks
       - name: Build with Gradle
         run: ./gradlew lint assembleRelease
       - name: Upload a build artifact
