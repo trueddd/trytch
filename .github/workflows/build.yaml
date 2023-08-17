@@ -1,0 +1,38 @@
+# This file was generated using Kotlin DSL (.github/workflows/build).
+# If you want to modify the workflow, please change the Kotlin file and regenerate this YAML file.
+# Generated with https://github.com/typesafegithub/github-workflows-kt
+
+name: 'Android CI (Kotlin script)'
+on:
+  push: {}
+  pull_request:
+    branches:
+    - 'main'
+jobs:
+  build:
+    runs-on: 'ubuntu-latest'
+    if: '${{ !contains(github.event.head_commit.message, skip_ci) }}'
+    steps:
+    - id: 'step-0'
+      name: 'Checkout source'
+      uses: 'actions/checkout@v3'
+    - id: 'step-1'
+      name: 'Set up JDK 17'
+      uses: 'actions/setup-java@v3'
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: 'gradle'
+    - id: 'step-2'
+      name: 'Grant execute permission for gradlew'
+      run: 'chmod +x gradlew'
+    - id: 'step-3'
+      name: 'Load Twitch secrets'
+      uses: 'ozaytsev86/create-env-file@v1'
+      with:
+        file-name: 'twitch.properties'
+        ENV_client_id: '${{ secrets.CLIENT_ID }}'
+        ENV_client_secret: '${{ secrets.CLIENT_SECRET }}'
+    - id: 'step-4'
+      name: 'Build with Gradle'
+      run: './gradlew lint assembleRelease'
