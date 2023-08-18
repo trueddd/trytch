@@ -27,26 +27,22 @@ jobs:
           file-name: 'twitch.properties'
           ENV_client_id: ${{ secrets.CLIENT_ID }}
           ENV_client_secret: ${{ secrets.CLIENT_SECRET }}
-      - name: Load Keystore config
-        uses: ozaytsev86/create-env-file@v1
-        with:
-          file-name: 'keystore.properties'
-          ENV_keystore_password: ${{ secrets.KEYSTORE_PASSWORD }}
-          ENV_keystore_key_password: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
-          ENV_keystore_key_alias: ${{ secrets.KEYSTORE_KEY_ALIAS }}
-      - name: Decode Keystore
-        env:
-          ENCODED_STRING: ${{ secrets.ENCODED_KEYSTORE }}
-        run: |
-          echo $ENCODED_STRING > ./app/encoded_keystore
-          base64 -d ./app/encoded_keystore > ./app/keystore.jks
       - name: Build with Gradle
         run: ./gradlew lint assembleRelease
+      - name: Sign app APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.ENCODED_KEYSTORE }}
+          alias: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
       - name: Upload a build artifact
         uses: actions/upload-artifact@v3.1.2
         with:
           name: 'releaseApk'
-          path: './app/build/outputs/apk/release/*.apk'
+          path: ${{ steps.sign_app.outputs.signedReleaseFile }}
       - name: Upload a lint report
         uses: actions/upload-artifact@v3.1.2
         with:
