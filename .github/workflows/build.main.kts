@@ -16,10 +16,30 @@ import io.github.typesafegithub.workflows.yaml.writeToFile
 import java.io.File
 
 workflow(
+    name = "Check",
+    on = listOf(
+        PullRequest(branches = listOf("main")),
+    ),
+    sourceFile = File("check").toPath(),
+) {
+    job(
+        id = "lint",
+        runsOn = RunnerType.UbuntuLatest,
+        `if` = expr { "!" + contains(github.eventPush.head_commit.message, "'skip_ci'") },
+    ) {
+        checkout()
+        setupJava()
+        setupGradlew()
+        loadTwitchSecrets()
+        runLint()
+        uploadLintReport()
+    }
+}.writeToFile(addConsistencyCheck = false)
+
+workflow(
     name = "Build",
     on = listOf(
         Push(branches = listOf("main")),
-        PullRequest(branches = listOf("main")),
     ),
     sourceFile = File("build").toPath(),
 ) {
@@ -34,7 +54,6 @@ workflow(
         loadTwitchSecrets()
         buildApk()
         uploadApk()
-        uploadLintReport()
     }
 }.writeToFile(addConsistencyCheck = false)
 
@@ -73,7 +92,12 @@ fun JobBuilder<*>.loadTwitchSecrets() = uses(
 
 fun JobBuilder<*>.buildApk() = run(
     name = "Build with Gradle",
-    command = "./gradlew lint assembleRelease",
+    command = "./gradlew assembleRelease",
+)
+
+fun JobBuilder<*>.runLint() = run(
+    name = "Build with Gradle",
+    command = "./gradlew lint",
 )
 
 fun JobBuilder<*>.createGithubRelease() = uses(
