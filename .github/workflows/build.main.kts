@@ -1,22 +1,24 @@
 #!/usr/bin/env kotlin
 
-@file:DependsOn("io.github.typesafegithub:github-workflows-kt:0.49.0")
+@file:DependsOn("io.github.typesafegithub:github-workflows-kt:0.50.0")
 
 import io.github.typesafegithub.workflows.actions.actions.CheckoutV3
 import io.github.typesafegithub.workflows.actions.actions.SetupJavaV3
+import io.github.typesafegithub.workflows.actions.actions.UploadArtifactV3
 import io.github.typesafegithub.workflows.domain.RunnerType
 import io.github.typesafegithub.workflows.domain.actions.CustomAction
 import io.github.typesafegithub.workflows.domain.triggers.PullRequest
 import io.github.typesafegithub.workflows.domain.triggers.Push
+import io.github.typesafegithub.workflows.dsl.JobBuilder
 import io.github.typesafegithub.workflows.dsl.expressions.expr
 import io.github.typesafegithub.workflows.dsl.workflow
 import io.github.typesafegithub.workflows.yaml.writeToFile
 import java.io.File
 
 workflow(
-    name = "Android CI (Kotlin script)",
+    name = "Build",
     on = listOf(
-        Push(), // todo: add `branches = listOf("main")`
+        Push(branches = listOf("main")),
         PullRequest(branches = listOf("main")),
     ),
     sourceFile = File("build").toPath(),
@@ -26,65 +28,82 @@ workflow(
         runsOn = RunnerType.UbuntuLatest,
         `if` = expr { "!" + contains(github.eventPush.head_commit.message, "'skip_ci'") },
     ) {
-        uses(
-            name = "Checkout source",
-            action = CheckoutV3(),
-        )
-        uses(
-            name = "Set up JDK 17",
-            action = SetupJavaV3(
-                javaVersion = "17",
-                distribution = SetupJavaV3.Distribution.Temurin,
-                cache = SetupJavaV3.BuildPlatform.Gradle,
-            ),
-        )
-        run(
-            name = "Grant execute permission for gradlew",
-            command = "chmod +x gradlew",
-        )
-        uses(
-            name = "Load Twitch secrets",
-            action = CustomAction(
-                actionOwner = "ozaytsev86",
-                actionName = "create-env-file",
-                actionVersion = "v1",
-                inputs = mapOf(
-                    "file-name" to "twitch.properties",
-                    "ENV_client_id" to expr { secrets.getValue("CLIENT_ID") },
-                    "ENV_client_secret" to expr { secrets.getValue("CLIENT_SECRET") },
-                ),
-            ),
-        )
-        uses(
-            name = "Load Keystore config",
-            action = CustomAction(
-                actionOwner = "ozaytsev86",
-                actionName = "create-env-file",
-                actionVersion = "v1",
-                inputs = mapOf(
-                    "file-name" to "keystore.properties",
-                    "ENV_keystore_password" to expr { secrets.getValue("KEYSTORE_PASSWORD") },
-                    "ENV_keystore_key_alias" to expr { secrets.getValue("KEYSTORE_KEY_ALIAS") },
-                    "ENV_keystore_key_password" to expr { secrets.getValue("KEYSTORE_KEY_PASSWORD") },
-                ),
-            ),
-        )
-        uses(
-            name = "Decode Keystore",
-            action = CustomAction(
-                actionOwner = "timheuer",
-                actionName = "base64-to-file",
-                actionVersion = "v1.2",
-                inputs = mapOf(
-                    "fileDir" to "./app",
-                    "fileName" to "keystore.jks",
-                    "encodedString" to expr { secrets.getValue("ENCODED_KEYSTORE") },
-                ),
-            )
-        )
-        run(
-            name = "Build with Gradle",
-            command = "./gradlew lint assembleRelease",
-        )
+        checkout()
+        setupJava()
+        setupGradlew()
+        loadTwitchSecrets()
+        buildApk()
+        uploadApk()
+        uploadLintReport()
     }
 }.writeToFile(addConsistencyCheck = false)
+
+fun JobBuilder<*>.checkout() = uses(
+    name = "Checkout source",
+    action = CheckoutV3(),
+)
+
+fun JobBuilder<*>.setupJava() = uses(
+    name = "Set up JDK 17",
+    action = SetupJavaV3(
+        javaVersion = "17",
+        distribution = SetupJavaV3.Distribution.Temurin,
+        cache = SetupJavaV3.BuildPlatform.Gradle,
+    ),
+)
+
+fun JobBuilder<*>.setupGradlew() = run(
+    name = "Grant execute permission for gradlew",
+    command = "chmod +x gradlew",
+)
+
+fun JobBuilder<*>.loadTwitchSecrets() = uses(
+    name = "Load Twitch secrets",
+    action = CustomAction(
+        actionOwner = "ozaytsev86",
+        actionName = "create-env-file",
+        actionVersion = "v1",
+        inputs = mapOf(
+            "file-name" to "twitch.properties",
+            "ENV_client_id" to expr { secrets.getValue("CLIENT_ID") },
+            "ENV_client_secret" to expr { secrets.getValue("CLIENT_SECRET") },
+        ),
+    ),
+)
+
+fun JobBuilder<*>.buildApk() = run(
+    name = "Build with Gradle",
+    command = "./gradlew lint assembleRelease",
+)
+
+fun JobBuilder<*>.createGithubRelease() = uses(
+    name = "Create release",
+    `if` = expr { github.ref_name + " == " + "'main'" },
+    action = CustomAction(
+        actionOwner = "ncipollo",
+        actionName = "release-action",
+        actionVersion = "v1",
+        inputs = mapOf(
+            "artifacts" to "./app/build/outputs/apk/release/*.apk",
+            "allowUpdates" to "true",
+            "draft" to "true",
+            "tag" to "0.1.0",
+        ),
+    )
+)
+
+fun JobBuilder<*>.uploadApk() = uses(
+    name = "Upload a build artifact",
+    action = UploadArtifactV3(
+        name = "releaseApk",
+        path = listOf("./app/build/outputs/apk/release/*.apk"),
+    )
+)
+
+fun JobBuilder<*>.uploadLintReport() = uses(
+    name = "Upload a lint report",
+    action = UploadArtifactV3(
+        name = "lintReport",
+        path = listOf("./app/build/reports/lint-results-*.html"),
+    )
+)

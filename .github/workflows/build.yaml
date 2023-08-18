@@ -2,9 +2,11 @@
 # If you want to modify the workflow, please change the Kotlin file and regenerate this YAML file.
 # Generated with https://github.com/typesafegithub/github-workflows-kt
 
-name: 'Android CI (Kotlin script)'
+name: 'Build'
 on:
-  push: {}
+  push:
+    branches:
+    - 'main'
   pull_request:
     branches:
     - 'main'
@@ -34,20 +36,17 @@ jobs:
         ENV_client_id: '${{ secrets.CLIENT_ID }}'
         ENV_client_secret: '${{ secrets.CLIENT_SECRET }}'
     - id: 'step-4'
-      name: 'Load Keystore config'
-      uses: 'ozaytsev86/create-env-file@v1'
-      with:
-        file-name: 'keystore.properties'
-        ENV_keystore_password: '${{ secrets.KEYSTORE_PASSWORD }}'
-        ENV_keystore_key_alias: '${{ secrets.KEYSTORE_KEY_ALIAS }}'
-        ENV_keystore_key_password: '${{ secrets.KEYSTORE_KEY_PASSWORD }}'
-    - id: 'step-5'
-      name: 'Decode Keystore'
-      uses: 'timheuer/base64-to-file@v1.2'
-      with:
-        fileDir: './app'
-        fileName: 'keystore.jks'
-        encodedString: '${{ secrets.ENCODED_KEYSTORE }}'
-    - id: 'step-6'
       name: 'Build with Gradle'
       run: './gradlew lint assembleRelease'
+    - id: 'step-5'
+      name: 'Upload a build artifact'
+      uses: 'actions/upload-artifact@v3'
+      with:
+        name: 'releaseApk'
+        path: './app/build/outputs/apk/release/*.apk'
+    - id: 'step-6'
+      name: 'Upload a lint report'
+      uses: 'actions/upload-artifact@v3'
+      with:
+        name: 'lintReport'
+        path: './app/build/reports/lint-results-*.html'
