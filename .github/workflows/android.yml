@@ -39,21 +39,6 @@ jobs:
         with:
           name: 'lintReport'
           path: './app/build/reports/lint-results-*.html'
-      - name: Load Keystore config
-        if: github.ref_name == 'main'
-        uses: ozaytsev86/create-env-file@v1
-        with:
-          file-name: 'keystore.properties'
-          ENV_keystore_password: ${{ secrets.KEYSTORE_PASSWORD }}
-          ENV_keystore_key_password: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
-          ENV_keystore_key_alias: ${{ secrets.KEYSTORE_KEY_ALIAS }}
-      - name: Decode Keystore
-        if: github.ref_name == 'main'
-        uses: timheuer/base64-to-file@v1.2
-        with:
-          fileDir: './app'
-          fileName: 'keystore.jks'
-          encodedString: ${{ secrets.ENCODED_KEYSTORE }}
       - name: Create release
         uses: ncipollo/release-action@v1
         if: github.ref_name == 'main'
@@ -61,3 +46,4 @@ jobs:
           artifacts: "./app/build/outputs/apk/release/*.apk"
           allowUpdates: true
           draft: true
+          tag: '0.1.0'
