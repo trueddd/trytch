@@ -46,3 +46,4 @@ jobs:
           artifacts: "./app/build/outputs/apk/release/*.apk"
           allowUpdates: true
           draft: true
+          tag: '0.1.0'
