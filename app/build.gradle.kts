@@ -1,6 +1,3 @@
-import java.util.Properties
-import java.io.FileInputStream
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -22,16 +19,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
-        }
-    }
-
-    signingConfigs {
-        create("release") {
-            val config = getKeystoreConfig()
-            storeFile = file("./keystore.jks")
-            storePassword = config.password
-            keyAlias = config.keyAlias
-            keyPassword = config.keyPassword
         }
     }
 
@@ -107,14 +94,4 @@ dependencies {
 
     implementation(Dependencies.VideoPlayer.Core)
     implementation(Dependencies.VideoPlayer.Hls)
-}
-
-fun getKeystoreConfig(): KeystoreConfig {
-    val propertiesFile = rootProject.file("keystore.properties")
-    val properties = Properties().apply { load(FileInputStream(propertiesFile)) }
-    return KeystoreConfig(
-        password = properties["keystore_password"].toString(),
-        keyAlias = properties["keystore_key_alias"].toString(),
-        keyPassword = properties["keystore_key_password"].toString(),
-    )
 }
