@@ -1,5 +1,8 @@
 package com.github.trueddd.trytch.ui.screens.stream.chat
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -8,16 +11,25 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -38,6 +50,7 @@ import com.github.trueddd.twitch.data.MessageWord
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.launch
 
 @Preview
 @Composable
@@ -50,16 +63,39 @@ fun Chat(
     chatStatus: ChatStatus,
     modifier: Modifier = Modifier,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val scrollState = rememberLazyListState()
+    val arrowVisible = scrollState.canScrollBackward
     Box(
         modifier = modifier
             .background(AppTheme.Primary)
     ) {
         ChatMessages(
             messages = chatStatus.messages,
+            scrollState = scrollState,
             fontSize = 14.sp,
             modifier = Modifier
                 .fillMaxSize()
         )
+        AnimatedVisibility(
+            visible = arrowVisible,
+            enter = slideInVertically { it },
+            exit = slideOutHorizontally { it },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = "Scroll down",
+                tint = AppTheme.Primary,
+                modifier = Modifier
+                    .rotate(90f)
+                    .background(AppTheme.Accent, CircleShape)
+                    .clickable { coroutineScope.launch { scrollState.scrollToItem(0) } }
+                    .padding(4.dp)
+            )
+        }
         if (chatStatus.connectionStatus is ConnectionStatus.Connecting) {
             CircularProgressIndicator(
                 color = AppTheme.Accent,
@@ -102,7 +138,7 @@ fun MessageWord(
         is MessageWord.Emote -> {
             val emoteVersion = word.emote.versions.last()
             CoilImage(
-                model = buildImageRequest(emoteVersion.url),
+                model = buildImageRequest(emoteVersion.url, crossfade = false),
                 contentDescription = word.content,
                 modifier = modifier
                     .height(16.sp.toDp())
@@ -111,7 +147,7 @@ fun MessageWord(
         }
         is MessageWord.UnknownTwitchEmote -> {
             CoilImage(
-                model = buildImageRequest(word.url()),
+                model = buildImageRequest(word.url(), crossfade = false),
                 contentDescription = word.content,
                 modifier = modifier
                     .size(16.sp.toDp()),
@@ -153,7 +189,7 @@ private fun Message(
     ) {
         message.badges.forEach { badgeUrl ->
             CoilImage(
-                model = buildImageRequest(badgeUrl),
+                model = buildImageRequest(badgeUrl, crossfade = false),
                 contentDescription = null,
                 modifier = Modifier
                     .size(fontSize.toDp()),
@@ -181,9 +217,11 @@ fun ChatMessages(
     modifier: Modifier = Modifier,
     fontSize: TextUnit = 16.sp,
     scrollEnabled: Boolean = true,
+    scrollState: LazyListState = rememberLazyListState(),
 ) {
     LazyColumn(
         reverseLayout = true,
+        state = scrollState,
         contentPadding = PaddingValues(horizontal = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.Bottom),
         userScrollEnabled = scrollEnabled,

@@ -240,6 +240,7 @@ private fun StreamInfo(
                     text = stream.userName,
                     fontSize = 16.sp,
                     color = AppTheme.AccentText,
+                    maxLines = 1,
                     modifier = Modifier
                         .clickable(onClick = onStreamerClicked)
                 )
@@ -248,6 +249,7 @@ private fun StreamInfo(
                     text = stream.gameName,
                     fontSize = 16.sp,
                     color = AppTheme.PrimaryText,
+                    maxLines = 1,
                 )
             }
             Row {

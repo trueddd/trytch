@@ -65,6 +65,7 @@ object AppTheme {
     val Primary = Color(0xFF1D1C1D)
     val Secondary = Color(0xFF633B48)
     val Accent = Color(0xFFC4A57C)
+    val AccentSecondary = Color(0xFF5B8375)
     val AccentText = Color(0xFFC4C2C0)
     val PrimaryText = Color(0xFFACA9A5)
     val PrimaryTextDark = Color(0xFF837F7C)

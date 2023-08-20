@@ -14,7 +14,6 @@ import com.github.trueddd.twitch.chat.ChatManager
 import com.github.trueddd.twitch.data.ChatMessage
 import com.github.trueddd.twitch.emotes.EmoteUpdateOption
 import com.github.trueddd.twitch.emotes.EmotesProvider
-import com.github.trueddd.twitch.onEachWithLock
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
@@ -22,8 +21,6 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
-import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -33,6 +30,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.launch
 
 class StreamViewModel(
@@ -121,30 +119,13 @@ class StreamViewModel(
     }
 
     private fun collectChatMessages() {
-        val cachedMessages = MutableList<ChatMessage?>(200) { null }
         chatManager.getMessagesFlow(channel)
             .onStart { Log.d(TAG, "Collecting chat messages") }
             .onEach { Log.d(TAG, "New message: $it") }
-            .buffer(UNLIMITED)
-            .onEachWithLock { message ->
-                if (cachedMessages.lastOrNull() != null) {
-                    cachedMessages.removeLastOrNull()
-                }
-                cachedMessages.add(0, message)
-                val messages = persistentListOf<ChatMessage>()
-                    .builder()
-                    .apply {
-                        cachedMessages.forEach {
-                            if (it != null) {
-                                add(it)
-                            } else {
-                                return@apply
-                            }
-                        }
-                    }
-                    .build()
-                updateState { it.copy(chatStatus = it.chatStatus.copy(messages = messages)) }
+            .runningFold(initial = persistentListOf<ChatMessage>()) { accumulator, value ->
+                accumulator.add(0, value)
             }
+            .onEach { messages -> updateState { it.copy(chatStatus = it.chatStatus.copy(messages = messages)) } }
             .onCompletion { Log.d(TAG, "Stop collecting chat messages") }
             .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
